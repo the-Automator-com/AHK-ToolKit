@@ -1,7 +1,8 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>		
 Script Name:    AHK-ToolKit
-Script Version: 0.1.1
+Script Version: 0.1.2
+Homepage:       
 
 Creation Date: July 11, 2010 | Modification Date: July 18, 2010
 
@@ -27,15 +28,15 @@ SetWorkingDir %A_ScriptDir%
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AHK-ToolKit"            ; Script Name
-s_version   := "0.1.1"                  ; Script Version
+s_version   := "0.1.2"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
 
 ;+--> ; ---------[General Variables]---------
 sec         :=  1000                    ; 1 second
-min         :=  sec * 60	            ; 1 minute
-hour        :=  min * 60	            ; 1 hour
+min         :=  sec * 60                ; 1 minute
+hour        :=  min * 60                ; 1 hour
 ; --
 SysGet, mon, Monitor                    ; Get the boundaries of the current screen
 SysGet, wa_, MonitorWorkArea            ; Get the working area of the current screen
@@ -69,21 +70,24 @@ Gui, 99: Show, Hide
 
 ; Send To PasteBin GUI
 Gui, 98: Font, s8, Courier New
-Gui, 98: add, Edit, w400 h400 vahk_code,
+Gui, 98: add, Edit, w620 h400 vahk_code,
 Gui, 98: Font
-Gui, 98: add, Text, w430 x0 0x10
-Gui, 98: add, GroupBox, w400 h120 x10 yp+5, Options
-Gui, 98: add, Text, xp+10 yp+20, % "Upload  to:`t`t`tPost Expiration`t`t`tPublic:"
-Gui, 98: add, DropDownList, gDDL_Pastebin vddl_pastebin, AutoHotkey.net||Pastebin.com
-Gui, 98: add, DropDownList, w125 x180 y455 vpb_expiration Disabled, Never|10 Minutes||1 Hour|1 Day|1 Month
-Gui, 98: add, DropDownList, w50 x340 y455 vpb_privacy Disabled, Yes||No
-Gui, 98: add, Text, x20 yp+30, % "Subdomain:`t`t`tPost Name / Title:"
-Gui, 98: add, Edit, w125 x20 yp+20 vpb_subdomain Disabled
-Gui, 98: add, Edit, w210 x+35 vpb_name Disabled
-Gui, 98: add, Text, w430 x0 0x10
-Gui, 98: add, Button, w100 h25 x10, % "Upload"
-Gui, 98: add, Button, w100 h25 x+20, % "Save to File"
-Gui, 98: add, Button, w100 h25 x+80, % "Cancel"
+Gui, 98: add, Text, w650 x0 0x10
+Gui, 98: add, GroupBox, w620 h80 x10 yp+5, Options
+Gui, 98: add, Text, xp+10 yp+20, % "Upload  to:"
+Gui, 98: add, Text, x+83, % "Post Name / Title:"
+Gui, 98: add, Text, x+48, % "Subdomain:"
+Gui, 98: add, Text, x+80, % "Privacy:"
+Gui, 98: add, Text, x+42, % "Expiration:"
+Gui, 98: add, DropDownList, w125 x20 y+10 gDDL_Pastebin vddl_pastebin, AutoHotkey.net||Pastebin.com
+Gui, 98: add, Edit, w125 x+10 vpb_name Disabled
+Gui, 98: add, Edit, w125 x+10 vpb_subdomain Disabled
+Gui, 98: add, DropDownList, w70 x+10 vpb_exposure Disabled, Public||Private
+Gui, 98: add, DropDownList, w115 x+10 vpb_expiration Disabled, Never|10 Minutes||1 Hour|1 Day|1 Month
+Gui, 98: add, Text, w650 x0 0x10
+Gui, 98: add, Button, w100 h25 x300 yp+10, % "Upload"
+Gui, 98: add, Button, w100 h25 x405 yp, % "Save to File"
+Gui, 98: add, Button, w100 h25 x530 yp, % "Cancel"
 Gui, 98: Show, Hide
 ;-
 
@@ -115,20 +119,54 @@ Gui, 99: Submit, NoHide
         pop_Right -= 99Width/5
         WinMove, ahk_id %99Hwnd%,,% pop_Right
     }
+ sleep, 3 * sec
+ Gui, 99: Hide
  }
 return
 
-99ButtonYes:
- Gui, Hide                                      ; Hide Popup
+99ButtonYes:                                                        ; Popup YES
+ Gui, Hide                                                          ; Hide Popup
  GuiControl, 98:, ahk_code, %clipboard%
- Gui, 98: Show, w420 h600, Send To Pastebin
+ Gui, 98: Show, w640 h550, Send To Pastebin
+ Gui, 98: Submit, NoHide
 return 
 
-99ButtonNo:
+99ButtonNo:                                                         ; Popup No
  Gui, Hide
 return
 
-98ButtonCancel:
+98ButtonUpload:
+return
+
+98ButtonSavetoFile:
+ Gui, 98: +OwnDialogs
+ FileSelectFile, f_saved, S24, %a_desktop%, Save script as..., AutoHotkey (*.ahk)
+ if !f_saved
+    return
+ ;***
+ ; The following piece of code fixes the issue with saving a file without adding the extension while the file
+ ; existed as "file.ahk", which caused the file to be saved as "file.ahk.ahk" and added a msgbox if the user
+ ; is overwriting an existing file
+ ;*
+ if f_saved contains .ahk               ; Check whether the user added the file extension or not
+ {
+    if FileExist(f_saved)
+        FileDelete, %f_saved%
+    FileAppend, %ahk_code%, %f_saved%   ; if added just save the file as the user specified
+ }
+ else
+ {
+    if FileExist(f_saved . ".ahk")      
+        Msgbox, 4, Replace file...?,  % f_saved . " already exist.`nDo you want to replace it?"
+    ifMsgbox, No
+        return
+    FileDelete, %f_saved%.ahk
+    FileAppend, %ahk_code%, %f_saved%.ahk
+ }
+ Gui, Hide
+return
+
+98ButtonCancel:                                                     ; Send to Pastebin Cancel
  Gui, Hide
 return
 
@@ -138,6 +176,18 @@ Msgbox, % "You have chosen to disable the Pastebin Alert, to enable it again go 
 return
 
 DDL_Pastebin:
+ Gui, 98: Submit, NoHide
+ ctrl_list := "pb_name|pb_subdomain|pb_exposure|pb_expiration"
+ if ddl_pastebin = AutoHotkey.net
+ {
+    Loop, parse, ctrl_list,|
+        GuiControl, 98: Disable, %a_loopfield%
+ }
+ else if ddl_pastebin = Pastebin.com
+ {
+    Loop, parse, ctrl_list,|
+        GuiControl, 98: Enable, %a_loopfield%
+ }
 return
 ;-
 
