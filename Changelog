@@ -1,0 +1,37 @@
+commit fe5934128b3f5d52d33e4e5fe6ad43611c6c4d33
+Author: RaptorX <graptorx@gmail.com>
+Date:   Mon Jul 19 02:14:15 2010 +0200
+
+    AHK-TK v0.1.2
+    
+    Changed:
+    * Added funcionality to save files from the "Send To Pastebin" GUI
+    * Added AutoHotkey.net & Pastebin.com options
+      - Disable specific options depending on which one is selected
+    * Fixed issues on saving files
+    * Updated "Send to Pastebin" Gui
+    
+    ToDo:
+    * Add Upload button functionality
+
+commit 7c82c486e442d7e9e25bbfab8cfef291395e017e
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sun Jul 18 21:08:48 2010 +0200
+
+    AHK-TK v0.1.1
+    
+    Changed:
+    * Implemented ahk code recognition
+    * Added pastebin popup
+      - Functionality is complete, added option to disable popup
+    * Added "Send to Pastebin" GUI
+    
+    ToDo:
+    * Add functionality to the "Send to Pastebin" GUI
+    * Small modifications to the same GUI
+
+commit 06747225d4db1aea7fff4467a1a3ad958f861e67
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sun Jul 18 21:07:31 2010 +0200
+
+    Initial Commit
