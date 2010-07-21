@@ -1,3 +1,32 @@
+commit 8093a804468617da34cb41a9de06f82f87ab826c
+Author: RaptorX <graptorx@gmail.com>
+Date:   Wed Jul 21 22:28:51 2010 +0200
+
+    AHK-TK v0.1.4
+    
+    Changes:
+    
+    * Added logging abilities to the upload function
+    * Added Paste2.org to the pastebin services
+    * Added replacement of & and + signs while uploading and saving
+    * Fixed minor problems
+    
+    TODO:
+    * Finish preparing next stage
+      - Program Launcher
+
+commit b560458a027a0224baa840a70135707ecb673ba9
+Author: RaptorX <graptorx@gmail.com>
+Date:   Wed Jul 21 08:57:10 2010 +0200
+
+    Added Paste2.org
+
+commit 516d1019be7782e8ea077020e483f476160afb6c
+Author: RaptorX <graptorx@gmail.com>
+Date:   Wed Jul 21 03:06:59 2010 +0200
+
+    Updated Changelog
+
 commit 1217806f5b927b39b108bd005ec66dc2a221b6eb
 Author: RaptorX <graptorx@gmail.com>
 Date:   Wed Jul 21 03:00:06 2010 +0200
