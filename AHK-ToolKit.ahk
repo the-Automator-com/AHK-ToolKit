@@ -1,10 +1,10 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>		
 Script Name:    AHK-ToolKit
-Script Version: 0.1.3
+Script Version: 0.1.4
 Homepage:       
 
-Creation Date: July 11, 2010 | Modification Date: July 18, 2010
+Creation Date: July 11, 2010 | Modification Date: July 21, 2010
 
 [GUI Number Index]
 
@@ -12,11 +12,6 @@ GUI 01 - Main []
 GUI 99 - PasteBin Popup
 GUI 98 - Send to PasteBin
 */
-
-;+--> ; ---------[Includes]---------
-#Include *i C:\Documents and Settings\RaptorX\My Documents\AutoHotkey ; Current Library
-#include lib/httpquery.ahk
-;-
 
 ;+--> ; ---------[Directives]---------
 #NoEnv
@@ -29,7 +24,7 @@ SetWorkingDir %A_ScriptDir%
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AHK-ToolKit"            ; Script Name
-s_version   := "0.1.3"                  ; Script Version
+s_version   := "0.1.4"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -95,10 +90,12 @@ Gui, 98: Show, Hide
 ;+--> ; ---------[Labels]---------
 OnClipboardChange:
  kword_count:=
- StringReplace, clipboard, clipboard, &, `%26, 1    ; This prevents issues when using httpquery since &
-                                                    ; has a special meaning in an url... this converts it to 
-                                                    ; hex value which will be converted back to & by httpquery.
- Loop, Parse, ahk_keywords, `n, `r
+/*
+* This checks if the clipboard contains keywords from ahk scripting
+* if it contains more than x ammount of keywords it will fire up the pastebin
+* routines. You can change this to suit you better.
+*/
+ Loop, parse, ahk_keywords, `n, `r
  {
     if clipboard contains %a_loopfield%
         kword_count++
@@ -107,12 +104,12 @@ OnClipboardChange:
  {
     kword_count := 
     Goto, Pastebin
- }
+ } ; Finish ahk code detection
 return
 
 PasteBin:
-Gui, 99: Show, NoActivate w250 h150 x%monRight% y%monBottom%
-Gui, 99: Submit, NoHide
+ Gui, 99: Show, NoActivate w250 h150 x%monRight% y%monBottom%
+ Gui, 99: Submit, NoHide
  if pastepop_ena
  {
     WinGetPos,,,99Width,99Height,ahk_id %99Hwnd%                    ; Get Window width and Height
@@ -123,13 +120,39 @@ Gui, 99: Submit, NoHide
         pop_Right -= 99Width/5
         WinMove, ahk_id %99Hwnd%,,% pop_Right
     }
- sleep, 3 * sec
+ Sleep, 3 * sec
  Gui, 99: Hide
  }
 return
 
 99ButtonYes:                                                        ; Popup YES
  Gui, Hide                                                          ; Hide Popup
+ /* 
+ * This will replace the includes for the actual files to avoid 
+ * the issues of missing includes on pasted code
+ */
+ Loop, parse, clipboard, `n, `r
+ {
+    if a_loopfield contains #Include
+    {
+        inc_file := RegexReplace(a_loopfield, "i)^#include\s|\*i\s|\s;.*")
+        if inc_file contains .ahk
+            FileRead, inc_%a_index%, %inc_file%
+        else
+            SetWorkingDir, %inc_file%
+        Stringreplace, clipboard, clipboard, %a_loopfield%, % inc_%a_index%
+    }
+ } ; Finish Replacing
+ SetWorkingDir %A_ScriptDir%
+ /*
+ * The following code replaces signs that might provoke issues
+ * when sending the httpQUERY. They are automatically converted back
+ * by the HTTP request, so no need to worry there.
+ */
+ StringReplace, clipboard, clipboard, &, `%26, 1 
+ StringReplace, clipboard, clipboard, +, `%2B, 1
+ ; Finish Replacing
+ 
  GuiControl, 98:, ahk_code, %clipboard%
  Gui, 98: Show, w640 h550, Send To Pastebin
  Gui, 98: Submit, NoHide
@@ -153,13 +176,18 @@ return
         . "&irc=" . irc_stat
         . "&ircnick=" . pb_subdomain
         . "&ircdescr=" . pb_name
+        . "&MAX_FILE_SIZE="
         . "&submit=submit"
     
     httpquery(paste_url := "", URL, POST)
     VarSetCapacity(paste_url, -1)
-    uid := RegexMatch(paste_url, "Paste\s(#(.*)<)", Match)
-    uid := RegexMatch(Match2, "^\w+", Match)
-    paste_url := "http://www.autohotkey.net/paste/" . Match
+    RegexMatch(paste_url, "Paste\s(#(.*?)<)", Match)
+    if !Match2
+    {
+        Msgbox, % "Your code is probably too long (max ~110 lines), try again or pick another pastebin service"
+        return
+    }
+    paste_url := "http://www.autohotkey.net/paste/" . Match2
     pasted()
  } 
  else if ddl_pastebin = Pastebin.com 
@@ -185,7 +213,7 @@ return
     POST := "paste_code=" . ahk_code
         . "&paste_name=" . pb_name
         . "&paste_subdomain=" . pb_subdomain
-        . "&paste_exposure=" . pb_exposure
+        . "&paste_private=" . pb_exposure
         . "&paste_expire_date=" . pb_expiration
 
 
@@ -215,6 +243,14 @@ return
  FileSelectFile, f_saved, S24, %a_desktop%, Save script as..., AutoHotkey (*.ahk)
  if !f_saved
     return
+ /*
+ * The following fixes back the code replacement done earlier to prevent
+ * issues with httpQUERY.
+ */
+ StringReplace, ahk_code, ahk_code, `%26, &, 1 
+ StringReplace, ahk_code, ahk_code, `%2B, +, 1
+ ; Finish Replacing
+ 
  ;***
  ; The following piece of code fixes the issue with saving a file without adding the extension while the file
  ; existed as "file.ahk", which caused the file to be saved as "file.ahk.ahk" and added a msgbox if the user
@@ -274,6 +310,7 @@ ena_control(name = "", subdomain = "", exposure = "", expiration = ""){
 pasted(){
     global paste_url
     global ahk_code
+    FormatTime,cur_time,,[MMM/dd/yyyy - HH:mm:ss]
     clipboard := paste_url
     Loop, parse, ahk_code, `n, `r
     {
@@ -283,7 +320,7 @@ pasted(){
     }
     FileAppend, 
     (
-;--> %paste_url% :
+;--> %cur_time% %paste_url% :
 ----------------------------------------------------------------------
 %code_preview%
 ----------------------------------------------------------------------`n`n
@@ -319,6 +356,11 @@ return
 #IfWinActive
 ;-
 ;- 
+
+;+--> ; ---------[Includes]---------
+#Include *i C:\Documents and Settings\RaptorX\My Documents\AutoHotkey ; Current Library
+#include lib/httpquery.ahk
+;-
 
 /*
  *==================================================================================
