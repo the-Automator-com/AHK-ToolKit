@@ -1,3 +1,19 @@
+commit da0f4fbeb2cf17aa65aa55fa7dcfc5f3976a3ce7
+Author: RaptorX <graptorx@gmail.com>
+Date:   Wed Jul 21 23:47:57 2010 +0200
+
+    AHK-TK v0.1.5
+    
+    Changed:
+    * Added pastebin upload confirmation
+    * Fixed minor problems
+
+commit 8fb76da5e3a66c1b74be63645270dcecb5b2724e
+Author: RaptorX <graptorx@gmail.com>
+Date:   Wed Jul 21 22:37:23 2010 +0200
+
+    Updated Changelog
+
 commit 8093a804468617da34cb41a9de06f82f87ab826c
 Author: RaptorX <graptorx@gmail.com>
 Date:   Wed Jul 21 22:28:51 2010 +0200
