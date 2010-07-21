@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>		
 Script Name:    AHK-ToolKit
-Script Version: 0.1.4
+Script Version: 0.1.5
 Homepage:       
 
 Creation Date: July 11, 2010 | Modification Date: July 21, 2010
@@ -11,6 +11,7 @@ Creation Date: July 11, 2010 | Modification Date: July 21, 2010
 GUI 01 - Main []
 GUI 99 - PasteBin Popup
 GUI 98 - Send to PasteBin
+GUI 97 - Pastebin Success Popup
 */
 
 ;+--> ; ---------[Directives]---------
@@ -24,7 +25,7 @@ SetWorkingDir %A_ScriptDir%
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AHK-ToolKit"            ; Script Name
-s_version   := "0.1.4"                  ; Script Version
+s_version   := "0.1.5"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -85,6 +86,18 @@ Gui, 98: add, Button, w100 h25 x300 yp+10, % "Upload"
 Gui, 98: add, Button, w100 h25 x405 yp, % "Save to File"
 Gui, 98: add, Button, w100 h25 x530 yp, % "Cancel"
 Gui, 98: Show, Hide
+
+; PasteBin Success Popup GUI
+Gui, 97: -Caption +Border +AlwaysOnTop +ToolWindow
+Gui, 97: Font, s10 w600, Verdana
+Gui, 97: add, Text, w250 x0 Center,Code Uploaded Succesfully
+Gui, 97: add, Text, w260 x0 0x10
+Gui, 97: Font, s8 normal
+Gui, 97: add, Text, w250 x5 yp+5, % "The code has been uploaded correctly.`nThe link has been copied to the clipboard"
+Gui, 97: add, Text, w260 x0 0x10
+Gui, 97: Show, NoActivate w250 h90 x1024 y768
+WinGet, 97Hwnd, ID,,Code Uploaded Succesfully
+Gui, 97: Show, Hide
 ;-
 
 ;+--> ; ---------[Labels]---------
@@ -172,11 +185,10 @@ return
         irc_stat = 0
         
     URL  := "http://www.autohotkey.net/paste/"
-    POST := "text=" . ahk_code
-        . "&irc=" . irc_stat
-        . "&ircnick=" . pb_subdomain
-        . "&ircdescr=" . pb_name
-        . "&MAX_FILE_SIZE="
+    POST := "text="             . ahk_code
+        . "&irc="               . irc_stat
+        . "&ircnick="           . pb_subdomain
+        . "&ircdescr="          . pb_name
         . "&submit=submit"
     
     httpquery(paste_url := "", URL, POST)
@@ -210,11 +222,11 @@ return
         pb_expiration = 1M
     
     URL  := "http://pastebin.com/api_public.php"
-    POST := "paste_code=" . ahk_code
-        . "&paste_name=" . pb_name
-        . "&paste_subdomain=" . pb_subdomain
-        . "&paste_private=" . pb_exposure
-        . "&paste_expire_date=" . pb_expiration
+    POST := "paste_code="           . ahk_code
+        . "&paste_name="            . pb_name
+        . "&paste_subdomain="       . pb_subdomain
+        . "&paste_private="         . pb_exposure
+        . "&paste_expire_date="     . pb_expiration
 
 
     httpquery(paste_url := "", URL, POST)
@@ -225,8 +237,8 @@ return
  {
     URL  := "http://paste2.org/new-paste"
     POST := "lang=text"
-        . "&description=" . pb_name
-        . "&code=" . ahk_code
+        . "&description="   . pb_name
+        . "&code="          . ahk_code
         . "&parent=0"
     
     httpquery(paste_url := "", URL, POST)
@@ -310,8 +322,14 @@ ena_control(name = "", subdomain = "", exposure = "", expiration = ""){
 pasted(){
     global paste_url
     global ahk_code
+    global wa_Right
+    global wa_Bottom
+    global sec
     FormatTime,cur_time,,[MMM/dd/yyyy - HH:mm:ss]
+    xpos := wa_Right - 250 - 5 
+    ypos := wa_Bottom - 90
     clipboard := paste_url
+    Gui, 97: Show, x%xpos% y%ypos%
     Loop, parse, ahk_code, `n, `r
     {
         if a_index = 20
@@ -325,6 +343,8 @@ pasted(){
 %code_preview%
 ----------------------------------------------------------------------`n`n
     ), pastebin-log.dat ; TODO change location to folder
+    Sleep, 3 * sec
+    Gui, 97: Hide
 }
 ;-
 
