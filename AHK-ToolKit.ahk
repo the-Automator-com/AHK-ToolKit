@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>		
 Script Name:    AHK-ToolKit
-Script Version: 0.1.2
+Script Version: 0.1.3
 Homepage:       
 
 Creation Date: July 11, 2010 | Modification Date: July 18, 2010
@@ -15,6 +15,7 @@ GUI 98 - Send to PasteBin
 
 ;+--> ; ---------[Includes]---------
 #Include *i C:\Documents and Settings\RaptorX\My Documents\AutoHotkey ; Current Library
+#include lib/httpquery.ahk
 ;-
 
 ;+--> ; ---------[Directives]---------
@@ -28,7 +29,7 @@ SetWorkingDir %A_ScriptDir%
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AHK-ToolKit"            ; Script Name
-s_version   := "0.1.2"                  ; Script Version
+s_version   := "0.1.3"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -59,7 +60,7 @@ Gui, 99: Font, s10 w600, Verdana
 Gui, 99: add, Text, w250 x0 Center,AHK Code Detected
 Gui, 99: add, Text, w260 x0 0x10
 Gui, 99: Font, s8 normal
-Gui, 99: add, Text, w250 x5 yp+5, % "You have copied text that contains some AutoHotkey Keywords. `n`nDo you want to upload them to a pastebin service?"
+Gui, 99: add, Text, w250 x5 yp+5, % "You have copied text that contains some AutoHotkey Keywords. `n`nDo you want to upload it to a pastebin service?"
 Gui, 99: add, Text, w260 x0 0x10
 Gui, 99: add, Button, w60 h25 x10 yp+10, Yes
 Gui, 99: add, Button, w60 h25 x+10, No
@@ -75,13 +76,13 @@ Gui, 98: Font
 Gui, 98: add, Text, w650 x0 0x10
 Gui, 98: add, GroupBox, w620 h80 x10 yp+5, Options
 Gui, 98: add, Text, xp+10 yp+20, % "Upload  to:"
-Gui, 98: add, Text, x+83, % "Post Name / Title:"
-Gui, 98: add, Text, x+48, % "Subdomain:"
-Gui, 98: add, Text, x+80, % "Privacy:"
+Gui, 98: add, Text, x+83, % "Description / Post Title:"
+Gui, 98: add, Text, x+25, % "Nick / Subdomain:"
+Gui, 98: add, Text, x+45, % "Privacy:"
 Gui, 98: add, Text, x+42, % "Expiration:"
 Gui, 98: add, DropDownList, w125 x20 y+10 gDDL_Pastebin vddl_pastebin, AutoHotkey.net||Pastebin.com
-Gui, 98: add, Edit, w125 x+10 vpb_name Disabled
-Gui, 98: add, Edit, w125 x+10 vpb_subdomain Disabled
+Gui, 98: add, Edit, w125 x+10 vpb_name
+Gui, 98: add, Edit, w125 x+10 vpb_subdomain
 Gui, 98: add, DropDownList, w70 x+10 vpb_exposure Disabled, Public||Private
 Gui, 98: add, DropDownList, w115 x+10 vpb_expiration Disabled, Never|10 Minutes||1 Hour|1 Day|1 Month
 Gui, 98: add, Text, w650 x0 0x10
@@ -93,13 +94,16 @@ Gui, 98: Show, Hide
 
 ;+--> ; ---------[Labels]---------
 OnClipboardChange:
-kword_count:=
+ kword_count:=
+ StringReplace, clipboard, clipboard, &, `%26, 1    ; This prevents issues when using httpquery since &
+                                                    ; has a special meaning in an url... this converts it to 
+                                                    ; hex value which will be converted back to & by httpquery.
  Loop, Parse, ahk_keywords, `n, `r
  {
     if clipboard contains %a_loopfield%
         kword_count++
  }
- if kword_count > 3
+ if kword_count >= 3
  {
     kword_count := 
     Goto, Pastebin
@@ -136,6 +140,59 @@ return
 return
 
 98ButtonUpload:
+ Gui, 98: Submit
+ if ddl_pastebin = Autohotkey.net
+ {
+    if pb_subdomain
+        irc_stat = 1
+    else
+        irc_stat = 0
+        
+    URL  := "http://www.autohotkey.net/paste/"
+    POST := "text=" . ahk_code
+        . "&irc=" . irc_stat
+        . "&ircnick=" . pb_subdomain
+        . "&ircdescr=" . pb_name
+        . "&submit=submit"
+    
+    httpquery(paste_url := "", URL, POST)
+    VarSetCapacity(paste_url, -1)
+    uid := RegexMatch(paste_url, "Paste\s(#(.*)<)", Match)
+    uid := RegexMatch(Match2, "^\w+", Match)
+    paste_url := "http://www.autohotkey.net/paste/" . Match
+    pasted()
+ } 
+ else if ddl_pastebin = Pastebin.com 
+ {
+    Gui, 98: Submit
+    if pb_exposure = Public
+        pb_exposure = 0
+    else if pb_exposure = Private
+        pb_exposure = 1
+    
+    if pb_expiration = Never
+        pb_expiration = N
+    else if pb_expiration = 10 Minutes
+        pb_expiration = 10M
+    else if pb_expiration = 1 Hour
+        pb_expiration = 1H
+    else if pb_expiration = 1 Day
+        pb_expiration = 1D
+    else if pb_expiration = 1 Month
+        pb_expiration = 1M
+    
+    URL  := "http://pastebin.com/api_public.php"
+    POST := "paste_code=" . ahk_code
+        . "&paste_name=" . pb_name
+        . "&paste_subdomain=" . pb_subdomain
+        . "&paste_exposure=" . pb_exposure
+        . "&paste_expire_date=" . pb_expiration
+
+
+    httpquery(paste_url := "", URL, POST)
+    VarSetCapacity(paste_url, -1)
+    pasted()
+ }
 return
 
 98ButtonSavetoFile:
@@ -152,7 +209,7 @@ return
  {
     if FileExist(f_saved)
         FileDelete, %f_saved%
-    FileAppend, %ahk_code%, %f_saved%   ; if added just save the file as the user specified
+    FileAppend, %ahk_code%, %f_saved%   ; If added just save the file as the user specified
  }
  else
  {
@@ -171,27 +228,50 @@ return
 return
 
 DisablePopup:
-Msgbox, % "You have chosen to disable the Pastebin Alert, to enable it again go to the program options"
+Msgbox, % "You have chosen to disable the Pastebin Alert, to enable it again go to the program settings"
 ; Write to xml file here
 return
 
 DDL_Pastebin:
  Gui, 98: Submit, NoHide
- ctrl_list := "pb_name|pb_subdomain|pb_exposure|pb_expiration"
- if ddl_pastebin = AutoHotkey.net
- {
-    Loop, parse, ctrl_list,|
-        GuiControl, 98: Disable, %a_loopfield%
- }
- else if ddl_pastebin = Pastebin.com
- {
-    Loop, parse, ctrl_list,|
-        GuiControl, 98: Enable, %a_loopfield%
- }
+ if ddl_pastebin = AutoHotkey.net 
+    ena_control(1,1,0,0)
+ else if ddl_pastebin = Pastebin.com 
+     ena_control(1,1,1,1)
 return
 ;-
 
 ;+--> ; ---------[Functions]---------
+ena_control(name = "", subdomain = "", exposure = "", expiration = ""){
+    _var_list  := "name|subdomain|exposure|expiration"
+    
+    Loop, parse, _var_list, |
+    {
+        if %a_loopfield% = 1
+            GuiControl, 98:  Enable, pb_%a_loopfield%
+        else if %a_loopfield% = 0
+            GuiControl, 98: Disable, pb_%a_loopfield%
+    }
+}
+
+pasted(){
+    global paste_url
+    global ahk_code
+    clipboard := paste_url
+    Loop, parse, ahk_code, `n, `r
+    {
+        if a_index = 20
+            break
+        code_preview := code_preview . "`n" . a_loopfield
+    }
+    FileAppend, 
+    (
+;--> %paste_url% :
+----------------------------------------------------------------------
+%code_preview%
+----------------------------------------------------------------------`n`n
+    ), pastebin-log.dat ; TODO change location to folder
+}
 ;-
 
 ;+--> ; ---------[Hotkeys/Hotstrings]---------
