@@ -80,7 +80,7 @@ Gui, 98: add, Text, x+83, % "Description / Post Title:"
 Gui, 98: add, Text, x+25, % "Nick / Subdomain:"
 Gui, 98: add, Text, x+45, % "Privacy:"
 Gui, 98: add, Text, x+42, % "Expiration:"
-Gui, 98: add, DropDownList, w125 x20 y+10 gDDL_Pastebin vddl_pastebin, AutoHotkey.net||Pastebin.com
+Gui, 98: add, DropDownList, w125 x20 y+10 gDDL_Pastebin vddl_pastebin, AutoHotkey.net||Pastebin.com|Paste2.org
 Gui, 98: add, Edit, w125 x+10 vpb_name
 Gui, 98: add, Edit, w125 x+10 vpb_subdomain
 Gui, 98: add, DropDownList, w70 x+10 vpb_exposure Disabled, Public||Private
@@ -193,6 +193,21 @@ return
     VarSetCapacity(paste_url, -1)
     pasted()
  }
+ else if ddl_pastebin = Paste2.org
+ {
+    URL  := "http://paste2.org/new-paste"
+    POST := "lang=text"
+        . "&description=" . pb_name
+        . "&code=" . ahk_code
+        . "&parent=0"
+    
+    httpquery(paste_url := "", URL, POST)
+    VarSetCapacity(paste_url, -1)
+    
+    RegexMatch(paste_url, "Paste\s(\b\d+)", Match)
+    paste_url := "http://paste2.org/p/" . Match1
+    pasted()
+ }
 return
 
 98ButtonSavetoFile:
@@ -237,7 +252,9 @@ DDL_Pastebin:
  if ddl_pastebin = AutoHotkey.net 
     ena_control(1,1,0,0)
  else if ddl_pastebin = Pastebin.com 
-     ena_control(1,1,1,1)
+    ena_control(1,1,1,1)
+ else if ddl_pastebin = Paste2.org
+    ena_control(1,0,0,0)
 return
 ;-
 
