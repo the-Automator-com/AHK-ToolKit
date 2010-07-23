@@ -51,6 +51,7 @@ FileRead, ahk_keywords, res/key.lst     ; Used for the PasteBin routines
 
 ;+--> ; ---------[Main]---------
 ; PasteBin Popup GUI
+;{
 Gui, 99: -Caption +Border +AlwaysOnTop +ToolWindow
 Gui, 99: Font, s10 w600, Verdana
 Gui, 99: add, Text, w250 x0 Center,AHK Code Detected
@@ -64,8 +65,10 @@ Gui, 99: add, CheckBox, x+10 yp+6 Checked gDisablePopup vpastepop_ena, % "Enable
 Gui, 99: Show, NoActivate w250 h150 x%monRight% y%monBottom%
 WinGet, 99Hwnd, ID,,AHK Code Detected
 Gui, 99: Show, Hide
+;}
 
 ; Send To PasteBin GUI
+;{
 Gui, 98: Font, s8, Courier New
 Gui, 98: add, Edit, w620 h400 vahk_code,
 Gui, 98: Font
@@ -86,8 +89,10 @@ Gui, 98: add, Button, w100 h25 x300 yp+10, % "Upload"
 Gui, 98: add, Button, w100 h25 x405 yp, % "Save to File"
 Gui, 98: add, Button, w100 h25 x530 yp, % "Cancel"
 Gui, 98: Show, Hide
+;}
 
 ; PasteBin Success Popup GUI
+;{
 Gui, 97: -Caption +Border +AlwaysOnTop +ToolWindow
 Gui, 97: Font, s10 w600, Verdana
 Gui, 97: add, Text, w250 x0 Center,Code Uploaded Succesfully
@@ -98,10 +103,12 @@ Gui, 97: add, Text, w260 x0 0x10
 Gui, 97: Show, NoActivate w250 h90 x1024 y768
 WinGet, 97Hwnd, ID,,Code Uploaded Succesfully
 Gui, 97: Show, Hide
+;}
 ;-
 
 ;+--> ; ---------[Labels]---------
 OnClipboardChange:
+;{
  kword_count:=
 /*
 * This checks if the clipboard contains keywords from ahk scripting
@@ -116,11 +123,13 @@ OnClipboardChange:
  if kword_count >= 3
  {
     kword_count := 
-    Goto, Pastebin
+    Gosub, Pastebin
  } ; Finish ahk code detection
 return
+;}
 
 PasteBin:
+;{
  Gui, 99: Show, NoActivate w250 h150 x%monRight% y%monBottom%
  Gui, 99: Submit, NoHide
  if pastepop_ena
@@ -137,8 +146,10 @@ PasteBin:
  Gui, 99: Hide
  }
 return
+;}
 
 99ButtonYes:                                                        ; Popup YES
+;{
  Gui, Hide                                                          ; Hide Popup
  /* 
  * This will replace the includes for the actual files to avoid 
@@ -170,12 +181,16 @@ return
  Gui, 98: Show, w640 h550, Send To Pastebin
  Gui, 98: Submit, NoHide
 return 
+;}
 
 99ButtonNo:                                                         ; Popup No
+;{
  Gui, Hide
 return
+;}
 
 98ButtonUpload:
+;{
  Gui, 98: Submit
  if ddl_pastebin = Autohotkey.net
  {
@@ -249,8 +264,10 @@ return
     pasted()
  }
 return
+;}
 
 98ButtonSavetoFile:
+;{
  Gui, 98: +OwnDialogs
  FileSelectFile, f_saved, S24, %a_desktop%, Save script as..., AutoHotkey (*.ahk)
  if !f_saved
@@ -285,17 +302,23 @@ return
  }
  Gui, Hide
 return
+;}
 
 98ButtonCancel:                                                     ; Send to Pastebin Cancel
+;{
  Gui, Hide
 return
+;}
 
 DisablePopup:
+;{
 Msgbox, % "You have chosen to disable the Pastebin Alert, to enable it again go to the program settings"
 ; Write to xml file here
 return
+;}
 
 DDL_Pastebin:
+;{
  Gui, 98: Submit, NoHide
  if ddl_pastebin = AutoHotkey.net 
     ena_control(1,1,0,0)
@@ -304,6 +327,7 @@ DDL_Pastebin:
  else if ddl_pastebin = Paste2.org
     ena_control(1,0,0,0)
 return
+;}
 ;-
 
 ;+--> ; ---------[Functions]---------
