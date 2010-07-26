@@ -1,17 +1,19 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>		
 Script Name:    AHK-ToolKit
-Script Version: 0.1.5
+Script Version: 0.1.6
 Homepage:       
 
-Creation Date: July 11, 2010 | Modification Date: July 21, 2010
+Creation Date: July 11, 2010 | Modification Date: July 26, 2010
 
 [GUI Number Index]
 
-GUI 01 - Main []
+GUI 01 - First Run / Splash [Killed to be used later]
+GUI 01 - Main [AHK-ToolKit]
 GUI 99 - PasteBin Popup
 GUI 98 - Send to PasteBin
 GUI 97 - Pastebin Success Popup
+GUI 96 - Add Hotkey
 */
 
 ;+--> ; ---------[Directives]---------
@@ -25,7 +27,7 @@ SetWorkingDir %A_ScriptDir%
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AHK-ToolKit"            ; Script Name
-s_version   := "0.1.5"                  ; Script Version
+s_version   := "0.1.6"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -46,63 +48,94 @@ s_xml       := ; Optional xml file
 
 ;+--> ; ---------[User Configuration]---------
 Clipboard :=
-FileRead, ahk_keywords, res/key.lst     ; Used for the PasteBin routines
+FileRead, ahk_keywords, res\key.lst     ; Used for the PasteBin routines
 ;-
 
 ;+--> ; ---------[Main]---------
+; Hotkey Maker GUI[Main]
+;{
+Gui, add, Tab2, w620 h340 x0 y0, % "Hotkeys|Hotstrings|Live Code|Configure"
+Gui, add, StatusBar,, % "Add new hotkeys / hotstrings"
+Gui, add, ListView,w600 r15 Sort Grid AltSubmit vlv_hklist, % "Type|Program Name|Hotkey|Program Path"
+Gui, add, Text, w630 x0 y+10 0x10
+Gui, add, Button, w100 h25 x400 yp+10, % "Add"
+Gui, add, Button, w100 h25 x510 yp, % "Cancel"
+Gui, Show, Hide ;w619 h341
+;}
+
 ; PasteBin Popup GUI
 ;{
 Gui, 99: -Caption +Border +AlwaysOnTop +ToolWindow
 Gui, 99: Font, s10 w600, Verdana
-Gui, 99: add, Text, w250 x0 Center,AHK Code Detected
+Gui, 99: add, Text, w250 x0 Center, % "AHK Code Detected"
 Gui, 99: add, Text, w260 x0 0x10
 Gui, 99: Font, s8 normal
-Gui, 99: add, Text, w250 x5 yp+5, % "You have copied text that contains some AutoHotkey Keywords. `n`nDo you want to upload it to a pastebin service?"
+Gui, 99: add, Text, w250 x5 yp+5, % "You have copied text that contains some AutoHotkey Keywords. `n`nDo you want to upload it to a" 
+                                    . " pastebin service?"
 Gui, 99: add, Text, w260 x0 0x10
-Gui, 99: add, Button, w60 h25 x10 yp+10, Yes
-Gui, 99: add, Button, w60 h25 x+10, No
+Gui, 99: add, Button, w60 h25 x10 yp+10     , % "Yes"
+Gui, 99: add, Button, w60 h25 x+10          , % "No"
 Gui, 99: add, CheckBox, x+10 yp+6 Checked gDisablePopup vpastepop_ena, % "Enable Popup"
 Gui, 99: Show, NoActivate w250 h150 x%monRight% y%monBottom%
-WinGet, 99Hwnd, ID,,AHK Code Detected
-Gui, 99: Show, Hide
+WinGet, 99Hwnd, ID,, % "AHK Code Detected"
+Gui, 99: Show, Hide ; w250 h150
 ;}
 
 ; Send To PasteBin GUI
 ;{
 Gui, 98: Font, s8, Courier New
-Gui, 98: add, Edit, w620 h400 vahk_code,
+Gui, 98: add, Edit, w620 h400 vahk_code
 Gui, 98: Font
 Gui, 98: add, Text, w650 x0 0x10
-Gui, 98: add, GroupBox, w620 h80 x10 yp+5, Options
+Gui, 98: add, GroupBox, w620 h80 x10 yp+5, % "Options"
 Gui, 98: add, Text, xp+10 yp+20, % "Upload  to:"
 Gui, 98: add, Text, x+83, % "Description / Post Title:"
 Gui, 98: add, Text, x+25, % "Nick / Subdomain:"
 Gui, 98: add, Text, x+45, % "Privacy:"
 Gui, 98: add, Text, x+42, % "Expiration:"
-Gui, 98: add, DropDownList, w125 x20 y+10 gDDL_Pastebin vddl_pastebin, AutoHotkey.net||Pastebin.com|Paste2.org
+Gui, 98: add, DropDownList, w125 x20 y+10 gDDL_Pastebin vddl_pastebin, % "AutoHotkey.net||Pastebin.com|Paste2.org"
 Gui, 98: add, Edit, w125 x+10 vpb_name
 Gui, 98: add, Edit, w125 x+10 vpb_subdomain
-Gui, 98: add, DropDownList, w70 x+10 vpb_exposure Disabled, Public||Private
-Gui, 98: add, DropDownList, w115 x+10 vpb_expiration Disabled, Never|10 Minutes||1 Hour|1 Day|1 Month
+Gui, 98: add, DropDownList, w70 x+10 vpb_exposure Disabled, % "Public||Private"
+Gui, 98: add, DropDownList, w115 x+10 vpb_expiration Disabled, % "Never|10 Minutes||1 Hour|1 Day|1 Month"
 Gui, 98: add, Text, w650 x0 0x10
-Gui, 98: add, Button, w100 h25 x300 yp+10, % "Upload"
-Gui, 98: add, Button, w100 h25 x405 yp, % "Save to File"
-Gui, 98: add, Button, w100 h25 x530 yp, % "Cancel"
-Gui, 98: Show, Hide
+Gui, 98: add, Button, w100 h25 x300 yp+10   , % "Upload"
+Gui, 98: add, Button, w100 h25 x405 yp      , % "Save to File"
+Gui, 98: add, Button, w100 h25 x530 yp      , % "Cancel"
+Gui, 98: Show, Hide ; w640 h550
 ;}
 
 ; PasteBin Success Popup GUI
 ;{
 Gui, 97: -Caption +Border +AlwaysOnTop +ToolWindow
 Gui, 97: Font, s10 w600, Verdana
-Gui, 97: add, Text, w250 x0 Center,Code Uploaded Succesfully
+Gui, 97: add, Text, w250 x0 Center, % "Code Uploaded Succesfully"
 Gui, 97: add, Text, w260 x0 0x10
 Gui, 97: Font, s8 normal
 Gui, 97: add, Text, w250 x5 yp+5, % "The code has been uploaded correctly.`nThe link has been copied to the clipboard"
 Gui, 97: add, Text, w260 x0 0x10
 Gui, 97: Show, NoActivate w250 h90 x1024 y768
-WinGet, 97Hwnd, ID,,Code Uploaded Succesfully
-Gui, 97: Show, Hide
+WinGet, 97Hwnd, ID,, % "Code Uploaded Succesfully"
+Gui, 97: Show, Hide ; w250 h90
+;}
+
+; Add Hotkey GUI
+;{
+Gui, 96: add, GroupBox, w400 h70, % "Select Program"
+Gui, 96: add, Edit, w270 xp+10 yp+20, %a_programfiles%
+Gui, 96: add, Button, w100 x+10, % "Browse..."
+Gui, 96: add, Radio, x110 y+5 vr_selprog, % "Select a File"
+Gui, 96: add, Radio,x+10, % "Select a Folder"
+Gui, 96: add, GroupBox, w400 h70 x10, % "Select Hotkey"
+Gui, 96: add, DropDownList, w200 xp+10 yp+30 vddl_key  ; % add klist
+Gui, 96: add, CheckBox, x+10 yp+3, % "Ctrl"
+Gui, 96: add, CheckBox, x+10, % "Alt"
+Gui, 96: add, CheckBox, x+10, % "Shift"
+Gui, 96: add, CheckBox, x+10, % "Win"
+Gui, 96: add, Text, w425 x0 y+35 0x10
+Gui, 96: add, Button, w100 h25 x200 yp+10, % "Add"
+Gui, 96: add, Button, w100 h25 x+10 yp, % "Cancel"
+Gui, 96: Show, Hide ; w420 h210
 ;}
 ;-
 
@@ -142,7 +175,7 @@ PasteBin:
         pop_Right -= 99Width/5
         WinMove, ahk_id %99Hwnd%,,% pop_Right
     }
- Sleep, 3 * sec
+ Sleep, 5 * sec
  Gui, 99: Hide
  }
 return
@@ -178,7 +211,7 @@ return
  ; Finish Replacing
  
  GuiControl, 98:, ahk_code, %clipboard%
- Gui, 98: Show, w640 h550, Send To Pastebin
+ Gui, 98: Show, w640 h550, % "Send To Pastebin"
  Gui, 98: Submit, NoHide
 return 
 ;}
@@ -312,7 +345,7 @@ return
 
 DisablePopup:
 ;{
-Msgbox, % "You have chosen to disable the Pastebin Alert, to enable it again go to the program settings"
+Msgbox, % "You have chosen to disable the Pastebin Alert, to enable it again go to the configure tab"
 ; Write to xml file here
 return
 ;}
@@ -403,7 +436,7 @@ return
 
 ;+--> ; ---------[Includes]---------
 #Include *i C:\Documents and Settings\RaptorX\My Documents\AutoHotkey ; Current Library
-#include lib/httpquery.ahk
+#include lib\httpQuery.ahk
 ;-
 
 /*
