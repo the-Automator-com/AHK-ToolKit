@@ -8,12 +8,12 @@ Creation Date: July 11, 2010 | Modification Date: July 26, 2010
 
 [GUI Number Index]
 
-GUI 01 - First Run / Splash [Killed to be used later]
 GUI 01 - Main [AHK-ToolKit]
 GUI 99 - PasteBin Popup
 GUI 98 - Send to PasteBin
 GUI 97 - Pastebin Success Popup
 GUI 96 - Add Hotkey
+GUI 50 - First Run / Splash
 */
 
 ;+--> ; ---------[Directives]---------
@@ -43,12 +43,45 @@ mid_scrw    :=  a_screenwidth / 2       ; Middle of the screen (width)
 mid_scrh    :=  a_screenheight / 2      ; Middle of the screen (heigth)
 ; --
 s_ini       := ; Optional ini file
-s_xml       := ; Optional xml file
+s_xml       := "ahk_tk.xml"             ; Optional xml file
 ;-
 
 ;+--> ; ---------[User Configuration]---------
 Clipboard :=
 FileRead, ahk_keywords, res\key.lst     ; Used for the PasteBin routines
+exc := "ScrollLock|CapsLock|NumLock|NumpadIns|NumpadEnd|NumpadDown|NumpadPgDn|NumpadLeft"
+. "|NumpadClear|NumpadRight|NumpadHome|NumpadUp|NumpadPgUp|NumpadDel|LWin|RWin|LControl"
+. "|RControl|LShift|RShift|LAlt|RAlt|CtrlBreak"
+keylist := "None||" . klist(1,0,1, exc)
+
+if !xpath_load(xml, "res\" . s_xml)
+{
+    ; First Run GUI
+    ;{
+    Gui, 50: add, Text,x10, % "This is the first time that you run AHK-Toolkit.`n"
+                            . "Please Take a few seconds to setup some initial options.`n"
+    Gui, 50: Font, cBlue
+    Gui, 50: add, Text,x10, % "Startup Options"
+    Gui, 50: add, Text, w265 x+10 yp+7 0x10
+    Gui, 50: Font
+    Gui, 50: add, CheckBox, x10 Checked, % "Start with Windows"
+    Gui, 50: add, CheckBox, x10 Checked, % "Show Splash Gui"
+    Gui, 50: Font, cBlue
+    Gui, 50: add, Text,x10 y+10, % "Main Gui Hotkey"
+    Gui, 50: add, Text, w260 x+10 yp+7 0x10
+    Gui, 50: Font
+    Gui, 50: add, DropDownList, w160 x10 vddl_mainhkey,  % keylist
+    Gui, 50: add, CheckBox, x+10 yp+3 vcb_mainctrl, % "Ctrl"
+    Gui, 50: add, CheckBox, x+10 vcb_mainalt, % "Alt"
+    Gui, 50: add, CheckBox, x+10 vcb_mainshift, % "Shift"
+    Gui, 50: add, CheckBox, x+10 vcb_mainwin, % "Win"
+    Gui, 50: Font, s7
+    Gui, 50: add, Text,x10, % "If no hotkey is selected the default `nwill be Win + `` (accent)"
+    Gui, 50: add, Text, w370 x0 y+20 0x10
+    Gui, 50: add, Button, w100 x260 yp+10, Save
+    Gui, 50: Show, w365, % "First Run"
+    ;}
+}
 ;-
 
 ;+--> ; ---------[Main]---------
@@ -70,8 +103,8 @@ Gui, 99: Font, s10 w600, Verdana
 Gui, 99: add, Text, w250 x0 Center, % "AHK Code Detected"
 Gui, 99: add, Text, w260 x0 0x10
 Gui, 99: Font, s8 normal
-Gui, 99: add, Text, w250 x5 yp+5, % "You have copied text that contains some AutoHotkey Keywords. `n`nDo you want to upload it to a" 
-                                    . " pastebin service?"
+Gui, 99: add, Text, w250 x5 yp+5, % "You have copied text that contains some AutoHotkey Keywords. `n`n"
+                                  . "Do you want to upload it to a pastebin service?"
 Gui, 99: add, Text, w260 x0 0x10
 Gui, 99: add, Button, w60 h25 x10 yp+10     , % "Yes"
 Gui, 99: add, Button, w60 h25 x+10          , % "No"
@@ -112,7 +145,8 @@ Gui, 97: Font, s10 w600, Verdana
 Gui, 97: add, Text, w250 x0 Center, % "Code Uploaded Succesfully"
 Gui, 97: add, Text, w260 x0 0x10
 Gui, 97: Font, s8 normal
-Gui, 97: add, Text, w250 x5 yp+5, % "The code has been uploaded correctly.`nThe link has been copied to the clipboard"
+Gui, 97: add, Text, w250 x5 yp+5, % "The code has been uploaded correctly.`n"
+                                  . "The link has been copied to the clipboard"
 Gui, 97: add, Text, w260 x0 0x10
 Gui, 97: Show, NoActivate w250 h90 x1024 y768
 WinGet, 97Hwnd, ID,, % "Code Uploaded Succesfully"
@@ -234,10 +268,10 @@ return
         
     URL  := "http://www.autohotkey.net/paste/"
     POST := "text="             . ahk_code
-        . "&irc="               . irc_stat
-        . "&ircnick="           . pb_subdomain
-        . "&ircdescr="          . pb_name
-        . "&submit=submit"
+         . "&irc="              . irc_stat
+         . "&ircnick="          . pb_subdomain
+         . "&ircdescr="         . pb_name
+         . "&submit=submit"
     
     httpquery(paste_url := "", URL, POST)
     VarSetCapacity(paste_url, -1)
@@ -271,10 +305,10 @@ return
     
     URL  := "http://pastebin.com/api_public.php"
     POST := "paste_code="           . ahk_code
-        . "&paste_name="            . pb_name
-        . "&paste_subdomain="       . pb_subdomain
-        . "&paste_private="         . pb_exposure
-        . "&paste_expire_date="     . pb_expiration
+         . "&paste_name="           . pb_name
+         . "&paste_subdomain="      . pb_subdomain
+         . "&paste_private="        . pb_exposure
+         . "&paste_expire_date="    . pb_expiration
 
 
     httpquery(paste_url := "", URL, POST)
@@ -285,9 +319,9 @@ return
  {
     URL  := "http://paste2.org/new-paste"
     POST := "lang=text"
-        . "&description="   . pb_name
-        . "&code="          . ahk_code
-        . "&parent=0"
+         . "&description="   . pb_name
+         . "&code="          . ahk_code
+         . "&parent=0"
     
     httpquery(paste_url := "", URL, POST)
     VarSetCapacity(paste_url, -1)
@@ -408,7 +442,7 @@ pasted(){
 ;+--> ; ---------[Hotkeys/Hotstrings]---------
 !Esc::ExitApp
 Pause::Reload
-F3::Pause
+; F3::Pause
 ;+> ; [Ctrl + F5] Send Current Date
 ^F5::Send, % a_mmmm " "a_dd ", " a_yyyy
 ;-
@@ -436,7 +470,9 @@ return
 
 ;+--> ; ---------[Includes]---------
 #Include *i C:\Documents and Settings\RaptorX\My Documents\AutoHotkey ; Current Library
-#include lib\httpQuery.ahk
+#Include lib\httpQuery.ahk
+#Include lib\klist.ahk
+#Include lib\xpath.ahk
 ;-
 
 /*
