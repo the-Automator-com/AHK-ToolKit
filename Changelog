@@ -1,3 +1,46 @@
+commit 0b0f9e6ef29f9c2d6883a53d67795a1da56f5471
+Author: RaptorX <graptorx@gmail.com>
+Date:   Wed Jul 28 17:44:09 2010 +0200
+
+    AHK-TK v0.1.6
+    
+    Changed:
+    
+    * Add functionality to First Run GUI
+    * Add Run on Startup functionality
+    * Add Splash Gui functionality
+    * Add xml file with basic options
+    
+    ToDo:
+    
+    * Link Add hotkey button to Add Hotkey GUI
+    * Hotkey Functionality
+
+commit e67c9abf8ef2832e79820e361d76027bdcacb02c
+Author: RaptorX <graptorx@gmail.com>
+Date:   Mon Jul 26 18:13:55 2010 +0200
+
+    * Add First Run GUI and fixed some formatting
+
+commit f09eeb1faadb2e90b69b11aaafa28e85bc62ac2c
+Author: RaptorX <graptorx@gmail.com>
+Date:   Mon Jul 26 12:13:41 2010 +0200
+
+    Add gui code for Main and add hotkey
+
+commit 9d63cf36f2f9dca51f3619216be53596a800c060
+Author: RaptorX <graptorx@gmail.com>
+Date:   Fri Jul 23 23:25:32 2010 +0200
+
+    * Formatting fix
+    * Goto --> Gosub
+
+commit 29762a7ed57fa4d83e46d1982e83542c9a6964bd
+Author: RaptorX <graptorx@gmail.com>
+Date:   Wed Jul 21 23:51:13 2010 +0200
+
+    Updated Changelog
+
 commit da0f4fbeb2cf17aa65aa55fa7dcfc5f3976a3ce7
 Author: RaptorX <graptorx@gmail.com>
 Date:   Wed Jul 21 23:47:57 2010 +0200

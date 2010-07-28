@@ -4,7 +4,7 @@ Script Name:    AHK-ToolKit
 Script Version: 0.1.6
 Homepage:       
 
-Creation Date: July 11, 2010 | Modification Date: July 26, 2010
+Creation Date: July 11, 2010 | Modification Date: July 28, 2010
 
 [GUI Number Index]
 
@@ -26,7 +26,7 @@ SetWorkingDir %A_ScriptDir%
 ;-
 
 ;+--> ; ---------[Basic Info]---------
-s_name      := "AHK-ToolKit"            ; Script Name
+s_name      := "AutoHotkey ToolKit"            ; Script Name
 s_version   := "0.1.6"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
@@ -49,23 +49,24 @@ s_xml       := "ahk_tk.xml"             ; Optional xml file
 ;+--> ; ---------[User Configuration]---------
 Clipboard :=
 FileRead, ahk_keywords, res\key.lst     ; Used for the PasteBin routines
+reg_run := "Software\Microsoft\Windows\CurrentVersion\Run"
 exc := "ScrollLock|CapsLock|NumLock|NumpadIns|NumpadEnd|NumpadDown|NumpadPgDn|NumpadLeft"
 . "|NumpadClear|NumpadRight|NumpadHome|NumpadUp|NumpadPgUp|NumpadDel|LWin|RWin|LControl"
 . "|RControl|LShift|RShift|LAlt|RAlt|CtrlBreak"
 keylist := "None||" . klist(1,0,1, exc)
+xpath_load := xpath_load(xml, "res\" . s_xml)
 
-if !xpath_load(xml, "res\" . s_xml)
+; First Run GUI
+if !xpath_load
 {
-    ; First Run GUI
-    ;{
     Gui, 50: add, Text,x10, % "This is the first time that you run AHK-Toolkit.`n"
                             . "Please Take a few seconds to setup some initial options.`n"
     Gui, 50: Font, cBlue
     Gui, 50: add, Text,x10, % "Startup Options"
     Gui, 50: add, Text, w265 x+10 yp+7 0x10
     Gui, 50: Font
-    Gui, 50: add, CheckBox, x10 Checked, % "Start with Windows"
-    Gui, 50: add, CheckBox, x10 Checked, % "Show Splash Gui"
+    Gui, 50: add, CheckBox, x10 Checked vsww, % "Start with Windows"
+    Gui, 50: add, CheckBox, x10 Checked vssg, % "Show Splash Gui"
     Gui, 50: Font, cBlue
     Gui, 50: add, Text,x10 y+10, % "Main Gui Hotkey"
     Gui, 50: add, Text, w260 x+10 yp+7 0x10
@@ -76,18 +77,20 @@ if !xpath_load(xml, "res\" . s_xml)
     Gui, 50: add, CheckBox, x+10 vcb_mainshift, % "Shift"
     Gui, 50: add, CheckBox, x+10 vcb_mainwin, % "Win"
     Gui, 50: Font, s7
-    Gui, 50: add, Text,x10, % "If no hotkey is selected the default `nwill be Win + `` (accent)"
+    Gui, 50: add, Text,x10, % "If no hotkey is selected the default `nwill be Win + ``  (accent)"
     Gui, 50: add, Text, w370 x0 y+20 0x10
-    Gui, 50: add, Button, w100 x260 yp+10, Save
+    Gui, 50: add, Button, w100 x260 yp+10 gFR_Save, Save
     Gui, 50: Show, w365, % "First Run"
-    ;}
+    Pause
 }
 ;-
 
 ;+--> ; ---------[Main]---------
+Gosub, XMLREAD
+
 ; Hotkey Maker GUI[Main]
 ;{
-Gui, add, Tab2, w620 h340 x0 y0, % "Hotkeys|Hotstrings|Live Code|Configure"
+Gui, add, Tab2, w620 h340 x0 y0, % "Hotkeys|Hotstrings|Live Code|Options"
 Gui, add, StatusBar,, % "Add new hotkeys / hotstrings"
 Gui, add, ListView,w600 r15 Sort Grid AltSubmit vlv_hklist, % "Type|Program Name|Hotkey|Program Path"
 Gui, add, Text, w630 x0 y+10 0x10
@@ -106,9 +109,9 @@ Gui, 99: Font, s8 normal
 Gui, 99: add, Text, w250 x5 yp+5, % "You have copied text that contains some AutoHotkey Keywords. `n`n"
                                   . "Do you want to upload it to a pastebin service?"
 Gui, 99: add, Text, w260 x0 0x10
-Gui, 99: add, Button, w60 h25 x10 yp+10     , % "Yes"
-Gui, 99: add, Button, w60 h25 x+10          , % "No"
-Gui, 99: add, CheckBox, x+10 yp+6 Checked gDisablePopup vpastepop_ena, % "Enable Popup"
+Gui, 99: add, Button, w60 h25 x10 yp+10, % "Yes"
+Gui, 99: add, Button, w60 h25 x+10, % "No"
+Gui, 99: add, CheckBox, x+10 yp+6 Checked%pastepop_ena% gDisablePopup vpastepop_ena, % "Enable Popup"
 Gui, 99: Show, NoActivate w250 h150 x%monRight% y%monBottom%
 WinGet, 99Hwnd, ID,, % "AHK Code Detected"
 Gui, 99: Show, Hide ; w250 h150
@@ -132,9 +135,9 @@ Gui, 98: add, Edit, w125 x+10 vpb_subdomain
 Gui, 98: add, DropDownList, w70 x+10 vpb_exposure Disabled, % "Public||Private"
 Gui, 98: add, DropDownList, w115 x+10 vpb_expiration Disabled, % "Never|10 Minutes||1 Hour|1 Day|1 Month"
 Gui, 98: add, Text, w650 x0 0x10
-Gui, 98: add, Button, w100 h25 x300 yp+10   , % "Upload"
-Gui, 98: add, Button, w100 h25 x405 yp      , % "Save to File"
-Gui, 98: add, Button, w100 h25 x530 yp      , % "Cancel"
+Gui, 98: add, Button, w100 h25 x300 yp+10, % "Upload"
+Gui, 98: add, Button, w100 h25 x405 yp, % "Save to File"
+Gui, 98: add, Button, w100 h25 x530 yp, % "Cancel"
 Gui, 98: Show, Hide ; w640 h550
 ;}
 
@@ -171,9 +174,86 @@ Gui, 96: add, Button, w100 h25 x200 yp+10, % "Add"
 Gui, 96: add, Button, w100 h25 x+10 yp, % "Cancel"
 Gui, 96: Show, Hide ; w420 h210
 ;}
+
+if ssg
+    Gosub, SplashGui
+Return ; End of autoexecute area
 ;-
 
 ;+--> ; ---------[Labels]---------
+FR_Save:
+;{
+ Gui, 50: Submit
+ 
+ if cb_mainctrl
+    mainctrl := "^"
+ if cb_mainalt
+    mainalt := "!"
+ if cb_mainshift
+    mainshift := "+"
+ if cb_mainwin
+    mainwin := "#"
+ else if ddl_mainhkey = None
+ {
+    ddl_mainhkey := "``"
+    mainwin := "#"
+ }
+    
+ xpath(xml, "/root[+1]/@FirstRun/text()", "1")
+ xpath(xml, "/root/hotkeys[+1]")
+ xpath(xml, "/root/hotstrings[+1]")
+ xpath(xml, "/root/options[+1]")
+ xpath(xml, "/root/options/STPP[+1]/@value/text()", "1")
+ xpath(xml, "/root/options/SSG[+1]/@value/text()", ssg)
+ xpath(xml, "/root/options/MHK[+1]/@value/text()", mainctrl . mainalt . mainshift . mainwin . ddl_mainhkey)
+ xpath_save(xml, "res\" . s_xml)
+ Pause 
+ Gosub, SWW
+ 
+ Gui, 50: Destroy
+return
+;}
+
+SWW:                                                                ; Start With Windows subroutine.
+;{
+ if sww
+    RegWrite, REG_SZ, HKCU, %reg_run%, ahk-tk, %a_scriptfullpath%
+ else
+ {
+    RegRead, sww_exist, HKCU, %reg_run%, ahk-tk
+    if sww_exist
+        RegDelete, HKCU, %reg_run%, ahk-tk
+ }
+return
+;}
+
+XMLREAD:
+;{
+ ssg := xpath(xml, "/root/options/SSG/@value/text()")
+ mhk := xpath(xml, "/root/options/MHK/@value/text()")
+ pastepop_ena := xpath(xml, "/root/options/STPP/@value/text()")
+ Hotkey, %mhk%, MasterHotkey
+return
+;}
+
+SplashGui:
+;{
+ mhk := hkSwap(mhk, "long")
+ Gui, 50: -Caption +Toolwindow +Border +AlwaysOnTop
+ Gui, 50: Font, s12 w600, Verdana
+ Gui, 50: add, Text, w580 Center, % "Welcome to " . s_name "`nVersion " . s_version
+ Gui, 50: add, Text, w610 x0 0x10
+ Gui, 50: Font, s11 w400
+ Gui, 50: add, Text, x10 yp+10, % "AHK-ToolKit has been activated."
+ Gui, 50: add, Text, y+5, % "The current hotkey for the main window is: "
+ Gui, 50: Font,w600 
+ Gui, 50: add, Text, x+5 yp, % mhk
+ Gui, 50: Show, w600
+ Sleep, 5 * sec
+ Gui, 50: Destroy
+return
+;}
+
 OnClipboardChange:
 ;{
  kword_count:=
@@ -256,7 +336,7 @@ return
 return
 ;}
 
-98ButtonUpload:
+98ButtonUpload:                                                     ; Send to Pastebin Upload
 ;{
  Gui, 98: Submit
  if ddl_pastebin = Autohotkey.net
@@ -333,7 +413,7 @@ return
 return
 ;}
 
-98ButtonSavetoFile:
+98ButtonSavetoFile:                                                 ; Send to Pastebin Save To File
 ;{
  Gui, 98: +OwnDialogs
  FileSelectFile, f_saved, S24, %a_desktop%, Save script as..., AutoHotkey (*.ahk)
@@ -379,8 +459,11 @@ return
 
 DisablePopup:
 ;{
-Msgbox, % "You have chosen to disable the Pastebin Alert, to enable it again go to the configure tab"
-; Write to xml file here
+ Gui, 99: Submit, NoHide
+ msgbox % pastepop_ena
+ Msgbox, % "You have chosen to disable the Pastebin Alert, to enable it again go to the options tab"
+ xpath(xml, "/root/options/STPP/@value/text()", pastepop_ena)
+ xpath_save(xml, "res\" . s_xml)
 return
 ;}
 
@@ -393,6 +476,17 @@ DDL_Pastebin:
     ena_control(1,1,1,1)
  else if ddl_pastebin = Paste2.org
     ena_control(1,0,0,0)
+return
+;}
+
+MasterHotkey:
+ButtonCancel:
+;{
+ main_toggle := !main_toggle
+ if main_toggle
+    Gui, Show, w619 h341, AutoHotkey ToolKit
+ else
+    Gui, Hide
 return
 ;}
 ;-
@@ -433,7 +527,7 @@ pasted(){
 ----------------------------------------------------------------------
 %code_preview%
 ----------------------------------------------------------------------`n`n
-    ), pastebin-log.dat ; TODO change location to folder
+    ), res\pastebin-log.dat
     Sleep, 3 * sec
     Gui, 97: Hide
 }
@@ -442,7 +536,7 @@ pasted(){
 ;+--> ; ---------[Hotkeys/Hotstrings]---------
 !Esc::ExitApp
 Pause::Reload
-; F3::Pause
+F3::Pause
 ;+> ; [Ctrl + F5] Send Current Date
 ^F5::Send, % a_mmmm " "a_dd ", " a_yyyy
 ;-
@@ -473,6 +567,7 @@ return
 #Include lib\httpQuery.ahk
 #Include lib\klist.ahk
 #Include lib\xpath.ahk
+#Include lib\hkSwap.ahk
 ;-
 
 /*
