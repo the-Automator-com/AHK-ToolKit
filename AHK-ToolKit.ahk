@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>		
 Script Name:    AHK-ToolKit
-Script Version: 0.1.6
+Script Version: 0.1.7
 Homepage:       
 
 Creation Date: July 11, 2010 | Modification Date: July 28, 2010
@@ -26,8 +26,8 @@ SetWorkingDir %A_ScriptDir%
 ;-
 
 ;+--> ; ---------[Basic Info]---------
-s_name      := "AutoHotkey ToolKit"            ; Script Name
-s_version   := "0.1.6"                  ; Script Version
+s_name      := "AutoHotkey ToolKit"     ; Script Name
+s_version   := "0.1.7"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -50,9 +50,10 @@ s_xml       := "ahk_tk.xml"             ; Optional xml file
 Clipboard :=
 FileRead, ahk_keywords, res\key.lst     ; Used for the PasteBin routines
 reg_run := "Software\Microsoft\Windows\CurrentVersion\Run"
+mod_list := "mod_ctrl|mod_alt|mod_shift|mod_win"
 exc := "ScrollLock|CapsLock|NumLock|NumpadIns|NumpadEnd|NumpadDown|NumpadPgDn|NumpadLeft"
 . "|NumpadClear|NumpadRight|NumpadHome|NumpadUp|NumpadPgUp|NumpadDel|LWin|RWin|LControl"
-. "|RControl|LShift|RShift|LAlt|RAlt|CtrlBreak"
+. "|RControl|LShift|RShift|LAlt|RAlt|CtrlBreak|Control|Alt|Shift|AppsKey"
 keylist := "None||" . klist(1,0,1, exc)
 xpath_load := xpath_load(xml, "res\" . s_xml)
 
@@ -94,7 +95,7 @@ Gui, add, Tab2, w620 h340 x0 y0, % "Hotkeys|Hotstrings|Live Code|Options"
 Gui, add, StatusBar,, % "Add new hotkeys / hotstrings"
 Gui, add, ListView,w600 r15 Sort Grid AltSubmit vlv_hklist, % "Type|Program Name|Hotkey|Program Path"
 Gui, add, Text, w630 x0 y+10 0x10
-Gui, add, Button, w100 h25 x400 yp+10, % "Add"
+Gui, add, Button, w100 h25 x400 yp+10 gAddHotkey, % "Add"
 Gui, add, Button, w100 h25 x510 yp, % "Cancel"
 Gui, Show, Hide ;w619 h341
 ;}
@@ -109,8 +110,8 @@ Gui, 99: Font, s8 normal
 Gui, 99: add, Text, w250 x5 yp+5, % "You have copied text that contains some AutoHotkey Keywords. `n`n"
                                   . "Do you want to upload it to a pastebin service?"
 Gui, 99: add, Text, w260 x0 0x10
-Gui, 99: add, Button, w60 h25 x10 yp+10, % "Yes"
-Gui, 99: add, Button, w60 h25 x+10, % "No"
+Gui, 99: add, Button, w60 h25 x10 yp+10 gPopYes, % "Yes"
+Gui, 99: add, Button, w60 h25 x+10 gPopNo, % "No"
 Gui, 99: add, CheckBox, x+10 yp+6 Checked%pastepop_ena% gDisablePopup vpastepop_ena, % "Enable Popup"
 Gui, 99: Show, NoActivate w250 h150 x%monRight% y%monBottom%
 WinGet, 99Hwnd, ID,, % "AHK Code Detected"
@@ -135,9 +136,9 @@ Gui, 98: add, Edit, w125 x+10 vpb_subdomain
 Gui, 98: add, DropDownList, w70 x+10 vpb_exposure Disabled, % "Public||Private"
 Gui, 98: add, DropDownList, w115 x+10 vpb_expiration Disabled, % "Never|10 Minutes||1 Hour|1 Day|1 Month"
 Gui, 98: add, Text, w650 x0 0x10
-Gui, 98: add, Button, w100 h25 x300 yp+10, % "Upload"
-Gui, 98: add, Button, w100 h25 x405 yp, % "Save to File"
-Gui, 98: add, Button, w100 h25 x530 yp, % "Cancel"
+Gui, 98: add, Button, w100 h25 x300 yp+10 gPasteUpload, % "Upload"
+Gui, 98: add, Button, w100 h25 x405 yp gPasteSavetoFile, % "Save to File"
+Gui, 98: add, Button, w100 h25 x530 yp gGuiCancel, % "Cancel"
 Gui, 98: Show, Hide ; w640 h550
 ;}
 
@@ -159,19 +160,19 @@ Gui, 97: Show, Hide ; w250 h90
 ; Add Hotkey GUI
 ;{
 Gui, 96: add, GroupBox, w400 h70, % "Select Program"
-Gui, 96: add, Edit, w270 xp+10 yp+20, %a_programfiles%
-Gui, 96: add, Button, w100 x+10, % "Browse..."
-Gui, 96: add, Radio, x110 y+5 vr_selprog, % "Select a File"
+Gui, 96: add, Edit, w270 xp+10 yp+20 ve_progpath, %a_programfiles%
+Gui, 96: add, Button, w100 x+10 gProgBrowse, % "Browse..."
+Gui, 96: add, Radio, x110 y+5 Checked vr_selfof, % "Select a File"
 Gui, 96: add, Radio,x+10, % "Select a Folder"
 Gui, 96: add, GroupBox, w400 h70 x10, % "Select Hotkey"
-Gui, 96: add, DropDownList, w200 xp+10 yp+30 vddl_key  ; % add klist
-Gui, 96: add, CheckBox, x+10 yp+3, % "Ctrl"
-Gui, 96: add, CheckBox, x+10, % "Alt"
-Gui, 96: add, CheckBox, x+10, % "Shift"
-Gui, 96: add, CheckBox, x+10, % "Win"
+Gui, 96: add, DropDownList, w200 xp+10 yp+30 vddl_key , % keylist
+Gui, 96: add, CheckBox, x+10 yp+3 vmod_ctrl, % "Ctrl"
+Gui, 96: add, CheckBox, x+10 vmod_alt, % "Alt"
+Gui, 96: add, CheckBox, x+10 vmod_shift, % "Shift"
+Gui, 96: add, CheckBox, x+10 vmod_win, % "Win"
 Gui, 96: add, Text, w425 x0 y+35 0x10
-Gui, 96: add, Button, w100 h25 x200 yp+10, % "Add"
-Gui, 96: add, Button, w100 h25 x+10 yp, % "Cancel"
+Gui, 96: add, Button, w100 h25 x200 yp+10 gAddHotkey, % "Add"
+Gui, 96: add, Button, w100 h25 x+10 yp gGuiCancel, % "Cancel"
 Gui, 96: Show, Hide ; w420 h210
 ;}
 
@@ -203,7 +204,7 @@ FR_Save:
  xpath(xml, "/root/hotkeys[+1]")
  xpath(xml, "/root/hotstrings[+1]")
  xpath(xml, "/root/options[+1]")
- xpath(xml, "/root/options/STPP[+1]/@value/text()", "1")
+ xpath(xml, "/root/options/STPP[+1]/@value/text()", "1") ; Send to Pastebin Popup
  xpath(xml, "/root/options/SSG[+1]/@value/text()", ssg)
  xpath(xml, "/root/options/MHK[+1]/@value/text()", mainctrl . mainalt . mainshift . mainwin . ddl_mainhkey)
  xpath_save(xml, "res\" . s_xml)
@@ -248,7 +249,7 @@ SplashGui:
  Gui, 50: add, Text, y+5, % "The current hotkey for the main window is: "
  Gui, 50: Font,w600 
  Gui, 50: add, Text, x+5 yp, % mhk
- Gui, 50: Show, w600
+ Gui, 50: Show, NoActivate w600
  Sleep, 5 * sec
  Gui, 50: Destroy
 return
@@ -264,7 +265,7 @@ OnClipboardChange:
 */
  Loop, parse, ahk_keywords, `n, `r
  {
-    if clipboard contains %a_loopfield%
+    if RegexMatch(clipboard, "i)\b" . a_loopfield . "\b\(?")
         kword_count++
  }
  if kword_count >= 3
@@ -295,7 +296,36 @@ PasteBin:
 return
 ;}
 
-99ButtonYes:                                                        ; Popup YES
+AddHotkey:
+;{
+ if a_gui = 1
+    Gui, 96: Show, w420 h210
+ if a_gui = 96
+    msgbox 96
+return
+;}
+
+ProgBrowse:
+;{
+ Gui, 96: +OwnDialogs
+ Gui, 96: Submit, NoHide
+ 
+ ; File or Folder?
+ if r_selfof = 1
+    FileSelectFile, sel_prog, 3, %a_programfiles%, % "Select the program to be launched"
+    , Executable files (*.exe)
+ else if r_selfof = 2
+    FileSelectFolder, sel_prog, *%a_programfiles%, 3, % "Select the folder to be launched"
+ 
+ SplitPath, sel_prog,,prog_dir,,prog_name
+ if !sel_prog
+    GuiReset(96)
+ else
+    GuiControl, 96:, e_progpath, %sel_prog%
+return
+;}
+
+PopYes:                                                             ; Popup YES
 ;{
  Gui, Hide                                                          ; Hide Popup
  /* 
@@ -330,13 +360,13 @@ return
 return 
 ;}
 
-99ButtonNo:                                                         ; Popup No
+PopNo:                                                              ; Popup No
 ;{
  Gui, Hide
 return
 ;}
 
-98ButtonUpload:                                                     ; Send to Pastebin Upload
+PasteUpload:                                                        ; Send to Pastebin Upload
 ;{
  Gui, 98: Submit
  if ddl_pastebin = Autohotkey.net
@@ -413,7 +443,7 @@ return
 return
 ;}
 
-98ButtonSavetoFile:                                                 ; Send to Pastebin Save To File
+PasteSavetoFile:                                                    ; Send to Pastebin Save To File
 ;{
  Gui, 98: +OwnDialogs
  FileSelectFile, f_saved, S24, %a_desktop%, Save script as..., AutoHotkey (*.ahk)
@@ -451,9 +481,11 @@ return
 return
 ;}
 
-98ButtonCancel:                                                     ; Send to Pastebin Cancel
+GuiCancel:
 ;{
  Gui, Hide
+ if a_gui = 96
+    GuiReset(96)
 return
 ;}
 
@@ -530,6 +562,18 @@ pasted(){
     ), res\pastebin-log.dat
     Sleep, 3 * sec
     Gui, 97: Hide
+}
+
+GuiReset(guinum){
+    global
+    if guinum = 96
+    {
+        GuiControl, 96:, e_progpath, %a_programfiles%
+        GuiControl, 96:, ddl_key,|%keylist%
+        GuiControl, 96:, r_selfof, 1
+        Loop, Parse, mod_list, |
+            GuiControl, 96:, %a_loopfield%, 0
+    }
 }
 ;-
 

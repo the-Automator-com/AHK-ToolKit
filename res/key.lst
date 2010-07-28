@@ -20,7 +20,6 @@ ifwinnotexist
 onexit
 setbatchlines
 settimer
-sleep
 suspend
 static
 global
@@ -100,7 +99,6 @@ keywait
 listhotkeys
 listlines
 listvars
-menu
 mouseclick
 mouseclickdrag
 mousegetpos
@@ -112,15 +110,11 @@ outputdebug
 pixelgetcolor
 pixelsearch
 postmessage
-process
-progress
-random
 regdelete
 registercallback
 regread
 regwrite
 reload
-run
 runas
 runwait
 send
@@ -143,8 +137,6 @@ setstorecapslockmode
 settitlematchmode
 setwindelay
 setworkingdir
-shutdown
-sort
 soundbeep
 soundget
 soundgetwavevolume
