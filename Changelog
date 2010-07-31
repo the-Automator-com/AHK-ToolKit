@@ -1,4 +1,46 @@
-commit 0b0f9e6ef29f9c2d6883a53d67795a1da56f5471
+commit d531b39c1b339bb71a39d0a8325009d3cc75da4e
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Jul 31 11:09:35 2010 +0200
+
+    AHK-TK v0.2.0
+    
+    Changed:
+    
+    * Hotkey functionality working
+    * Add FileInstall for creating res folder
+    * Add ahk executable for use in Live Code
+    * Add rehash for miscellaneous functionality
+    * Add xml functionality 90%
+    * Fixed bugs
+    
+    ToDo:
+    
+    * Drag & Drop hotkey add
+    * Delete hotkey
+    * Work on Splash Gui
+
+commit e30337ca0db55fd290decea91c84daade4594e3e
+Author: RaptorX <graptorx@gmail.com>
+Date:   Wed Jul 28 23:28:57 2010 +0200
+
+    AHK-TK v0.1.7
+    
+    Changed:
+    
+    * Add "Add Hotkey" Button functionality <--
+    * Format fix
+    * Better way to match keylist on clipboard
+    
+    --key.lst--
+    
+    * Deleted ambiguous words
+    
+    ToDo:
+    
+    * Save and read/create hotkeys from/to the xml files <--
+    * Preparations for Hotstrings.
+
+commit c06df512ec0934f9f361f1d213a6e163ee3bd0e0
 Author: RaptorX <graptorx@gmail.com>
 Date:   Wed Jul 28 17:44:09 2010 +0200
 
