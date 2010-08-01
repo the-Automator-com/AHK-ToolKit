@@ -1,10 +1,10 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>		
 Script Name:    AHK-ToolKit
-Script Version: 0.2
+Script Version: 0.2.1
 Homepage:       
 
-Creation Date: July 11, 2010 | Modification Date: July 28, 2010
+Creation Date: July 11, 2010 | Modification Date: August 01, 2010
 
 [GUI Number Index]
 
@@ -13,7 +13,7 @@ GUI 99 - PasteBin Popup
 GUI 98 - Send to PasteBin
 GUI 97 - Pastebin Success Popup
 GUI 96 - Add Hotkey
-GUI 50 - First Run / Splash
+GUI 50 - First Run
 */
 
 ;+--> ; ---------[Directives]---------
@@ -27,7 +27,7 @@ SetWorkingDir %A_ScriptDir%
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.2"                    ; Script Version
+s_version   := "0.2.1"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -43,7 +43,7 @@ mid_scrw    :=  a_screenwidth / 2       ; Middle of the screen (width)
 mid_scrh    :=  a_screenheight / 2      ; Middle of the screen (heigth)
 ; --
 s_ini       := ; Optional ini file
-s_xml       := "res\ahk_tk.xml"             ; Optional xml file
+s_xml       := "res\ahk_tk.xml"         ; Optional xml file
 ;-
 
 ;+--> ; ---------[User Configuration]---------
@@ -67,6 +67,7 @@ if !FileExist("res")
     FileInstall, res\ahk\ahk.exe, res\ahk\ahk.exe, 1
     FileInstall, res\tools\rh.exe, res\tools\rh.exe, 1
 }
+
 ;First Run GUI
 if !load := xpath_load(xml, s_xml)
 {
@@ -77,7 +78,7 @@ if !load := xpath_load(xml, s_xml)
     Gui, 50: add, Text, w265 x+10 yp+7 0x10
     Gui, 50: Font
     Gui, 50: add, CheckBox, x10 Checked vsww, % "Start with Windows"
-    Gui, 50: add, CheckBox, x10 Checked vaus, % "AutoUpload copied scripts to:"
+    Gui, 50: add, CheckBox, x10 vaus, % "AutoUpload copied scripts to:"
     Gui, 50: add, DropDownList, x+20 yp-2 vdef_aus, % "AutoHotkey.net||Pastebin.com|Paste2.org"
     Gui, 50: Font, cBlue
     Gui, 50: add, Text,x10 y+10, % "Main Gui Hotkey"
@@ -100,16 +101,32 @@ if !load := xpath_load(xml, s_xml)
 ;-
 
 ;+--> ; ---------[Main]---------
-Gosub, XMLREAD
+Gosub, ReadXML
 
 ; Hotkey Maker GUI[Main]
 ;{
 Gui, add, Tab2, w620 h340 x0 y0, % "Hotkeys|Hotstrings|Live Code|Options"
 Gui, add, StatusBar,, % "Add new hotkeys / hotstrings"
-Gui, add, ListView,w600 r15 Sort Grid AltSubmit vLV_hklist, % "Type|Program Name|Hotkey|Program Path"
+Gui, add, ListView,w600 r15 Sort Grid AltSubmit gLV_Sub vLV_hklist, % "Type|Program Name|Hotkey|Program Path"
 Gui, add, Text, w630 x0 y+10 0x10
 Gui, add, Button, w100 h25 x400 yp+10 Default gAddHotkey, % "&Add"
 Gui, add, Button, w100 h25 x510 yp, % "&Close"
+
+Gui, Tab, Hotstrings
+Gui, add, ListView, w600 r9 Grid AltSubmit gLV_Sub vLV_hslist, % "Options|Abreviation|Expand To"
+Gui, add, Text, y+10, % "Expand:"
+Gui, add, Edit, w150 x+10 yp-3 vhs_expand
+Gui, add, Text, x+10 yp+3, % "To:"
+Gui, add, Edit, w250 x+10 yp-3 vhs_expandto
+Gui, add, Button, w100 x510 yp, % "Browse..."
+Gui, add, CheckBox, x12 y+10 vhs_autoexpand, % "AutoExpand"
+Gui, add, CheckBox, x250 yp vhs_dnd, % "Do not delete typed abreviation"
+Gui, add, CheckBox, x12 y+10 vhs_trigger, % "Trigger inside other words"
+Gui, add, CheckBox, x250 yp vhs_raw, % "Send Raw (do not translate {Enter} or {key})"
+Gui, add, Text, w630 x0 y272 0x10
+Gui, add, Button, w100 x400 yp+10 gAddHotstring, % "&Add"
+Gui, add, Button, w100 x+10 yp, % "&Close"
+
 Gui, Show, Hide ;w619 h341
 SB_SetParts(150,150)
 SB_SetText("`t" . hka . " Hotkeys currently active")
@@ -197,6 +214,7 @@ Return ; End of autoexecute area
 ;-
 
 ;+--> ; ---------[Labels]---------
+
 FR_Save:
 ;{
  Gui, 50: Submit
@@ -214,20 +232,64 @@ FR_Save:
     ddl_mainhkey := "``"
     mainwin := "#"
  }
-    
- xpath(xml, "/root[+1]/@FirstRun/text()", "1")
+ 
+ Gosub, SWW                 ; Start with windows
+ Gosub, AUInfo              ; Auto upload default info
+ xpath(xml, "/root[+1]")
  xpath(xml, "/root/hotkeys[+1]")
  xpath(xml, "/root/hotstrings[+1]")
  xpath(xml, "/root/options[+1]")
- xpath(xml, "/root/options/STPP[+1]/@value/text()", "1") ; Send to Pastebin Popup
  xpath(xml, "/root/options/AUS[+1]/@value/text()", aus)
- xpath(xml, "/root/options/AUS[+1]/@default/text()", def_aus)
+ xpath(xml, "/root/options/AUS/@default/text()", def_aus)
  xpath(xml, "/root/options/MHK[+1]/@value/text()", mainctrl . mainalt . mainshift . mainwin . ddl_mainhkey)
+ 
+ if def_aus = AutoHotkey.net
+ {
+    xpath(xml, "/root/options/AUS/AutoHotkey[+1]/@autoirc/text()", airc)
+    xpath(xml, "/root/options/AUS/AutoHotkey/@nick/text()", def_ircnick)
+ }
+ else if def_aus = Pastebin.com
+ {
+    Loop, Parse, optionlst, |
+    {
+        if a_index = 1
+            xpath(xml, "/root/options/AUS/Pastebin[+1]/@" . a_loopfield . "/text()", option%a_index%)
+        else
+            xpath(xml, "/root/options/AUS/Pastebin/@" . a_loopfield . "/text()", option%a_index%)
+    }
+ }
  xpath_save(xml, s_xml)
- Pause 
- Gosub, SWW
+ Pause                                                      ; Unpause Script
  
  Gui, 50: Destroy
+return
+;}
+
+AUInfo:
+;{
+ airc := 0
+ if (aus && def_aus = "AutoHotkey.net")
+ {
+    Msgbox, 4, Auto announce options, % "Do you want your code to be auto announced on the AHK IRC Channel?"
+    IfMsgbox, Yes
+    {
+        airc := 1
+        InputBox, def_ircnick, % "Default Nick", % "Please enter your default nickname for AutoHotkey's IRC Channel"
+                             ,, 230, 140
+    }
+ }
+ else if (aus && def_aus = "Pastebin.com")
+ {
+    optionlst := "name|subdomain|exposure|expiration"
+    InputBox, defaus_P_lst, % "Pastebin Default Options"
+                          , % "Please enter a Paste Title, Subdomain, Exposure and Expiration separated by comas.`n"
+                            . "You can omit a parameter by leaving its space blank.`n`n"
+                            . "Examples: PasteName,,0,1D`n"
+                            . "`t    PasteName,mysubdomain,0,N`n`n"
+                            . "N = Never, 10M = 10 Minutes, 1H = 1 Hour, 1D = 1 Day, 1M = 1 Month"
+                          ,, 520, 220
+    StringSplit, option, defaus_P_lst,`,
+ }
 return
 ;}
 
@@ -244,12 +306,14 @@ SWW:                                                                ; Start With
 return
 ;}
 
-XMLREAD:
+ReadXML:
 ;{
+ if !load := xpath_load(xml, s_xml)
+    return
  aus := xpath(xml, "/root/options/AUS/@value/text()")               ; AutoUpload copied scripts
+ pastepop_ena := !aus                                               ; Pastebin Popup if Autoupload is off
  ddl_pastebin := xpath(xml, "/root/options/AUS/@default/text()")    ; Default upload site
  mhk := xpath(xml, "/root/options/MHK/@value/text()")               ; Main Hotkey
- pastepop_ena := xpath(xml, "/root/options/STPP/@value/text()")     ; Pastebin Popup
  hkcount := xpath(xml, "/root/hotkeys/hk/count()")                  ; Hotkey Count
  Hotkey, %mhk%, MasterHotkey
 return
@@ -303,26 +367,53 @@ Hotkeyit:
 return
 ;}
 
-SplashGui:
+GuiDropFiles:
 ;{
- mhk := hkSwap(mhk, "long")
- Gui, 50: -Caption +Toolwindow +Border +AlwaysOnTop
- Gui, 50: Font, s12 w600, Verdana
- Gui, 50: add, Text, w580 Center, % "Welcome to " . s_name "`nVersion " . s_version
- Gui, 50: add, Text, w610 x0 0x10
- Gui, 50: Font, s11 w400
- Gui, 50: add, Text, x10 yp+10, % "AHK-ToolKit has been activated."
- Gui, 50: add, Text, y+5, % "The current hotkey for the main window is: "
- Gui, 50: Font,w600 
- Gui, 50: add, Text, x+5 yp, % mhk
- Gui, 50: Show, NoActivate w600
- Sleep, 5 * sec
- Gui, 50: Destroy
+ if a_guicontrol = LV_hklist
+ {
+    dropped := 1
+    GuiControl, 96:, e_progpath, %a_guievent%
+    SplitPath, a_guievent,,prog_dir,,prog_name
+     ; if r_selfof = 2
+        ; prog_dir := prog_dir . "\" . prog_name      ; Needed to have the complete dir since prog_dir would not have
+                                                    ; the last folder name included in this case.
+     StringUpper, prog_name, prog_name, T
+ }
+ Gosub, AddHotkey
+return
+;}
+
+LV_Sub:
+;{
+ if a_guicontrol = LV_hklist
+ {
+    Gui, 1: Default
+    Gui, ListView, LV_hklist    
+    if a_guievent = Normal
+        sel_row := a_eventinfo                      ; Currently selected Row
+    if (a_guievent = "K" && a_eventinfo = 46)
+    {
+        
+        Loop, % LV_GetCount("S")
+        {
+            if !next := LV_GetNext("F")
+                break
+            LV_GetText(prog_name, next, 2)
+            LV_GetText(prog_hkL, next, 3)
+            LV_GetText(prog_dir, next, 4)
+            DelxmlInstance()
+            CleanXML()
+            LV_Delete(next)
+        }
+        LV_Organize()
+    }
+ }
 return
 ;}
 
 OnClipboardChange:
 ;{
+ Gosub, ReadXML
  kword_count:=
 /*
 * This checks if the clipboard contains keywords from ahk scripting
@@ -336,8 +427,11 @@ OnClipboardChange:
  }
  if kword_count >= 3
  {
-    kword_count := 
-    Gosub, Pastebin
+    kword_count :=
+    if aus
+        Goto, AUS
+    else
+        Gosub, Pastebin
  } ; Finish ahk code detection
 return
 ;}
@@ -364,7 +458,7 @@ return
 
 AddHotkey:
 ;{
- if a_gui = 1
+ if (dropped || a_gui = 1)
  {
     ActiveHwnd := WinExist("A")
     Gui, 01: +Disabled
@@ -377,6 +471,7 @@ AddHotkey:
     Gui, -Disabled
     Gui, ListView, lV_hklist
     Gosub, VarSwap
+    dropped :=
     prog_hkL := mod_ctrl . mod_alt . mod_shift . mod_win . ddl_key
     prog_hkS := hkSwap(prog_hkL, "short") ; convert to short for creating hotkey
     if CheckLV("LV_hklist")
@@ -384,19 +479,7 @@ AddHotkey:
         row := LV_Add("", r_selfof, prog_name, prog_hkL, prog_dir)
         if !row
             Msgbox, % "There was an error adding the hotkey to the List"
-        hka := LV_GetCount()
-        Loop, 4
-        {
-            if a_index = 4
-                LV_ModifyCol(a_index, "AutoHdr")
-            else
-                LV_ModifyCol(a_index, "Center AutoHdr")
-        }
-        if hka = 1
-            SB_SetText("`t" . hka . " Hotkey currently active")
-        else
-            SB_SetText("`t" . hka . " Hotkeys currently active")
-
+        LV_Organize()           ; Sort the LV and set the status messages
         xpath(xml, "/root/hotkeys/hk[+1]/@type/text()", r_selfof)
         xpath(xml, "/root/hotkeys/hk[last()]/@name/text()", prog_name)
         xpath(xml, "/root/hotkeys/hk[last()]/@key/text()", prog_hkL)
@@ -404,13 +487,16 @@ AddHotkey:
         Sleep, 100              ; give it little time before saving since we are using SetBatchLines -1
                                 ; this fixes some problems of xpath appending instead of overwriting the file
         xpath_save(xml,s_xml)
-        FileRead, rxml, %s_xml%         ; Read xml file
-        FileDelete, %s_xml%             ; Delete the file because we dont want to append
-        FileAppend, % rxml := RegexReplace(rxml, "\s+\/", "/"), %s_xml% ; Clean and save
+        CleanXML()
         Hotkey, %prog_hkS%, Hotkeyit
         GuiReset(96)   
     }
  }
+return
+;}
+
+AddHotstring:
+;{
 return
 ;}
 
@@ -473,7 +559,24 @@ AUS:
  StringReplace, clipboard, clipboard, +, `%2B, 1
  ; Finish Replacing
  if aus
+{
+    ; Some default values
+    xpath_load(xml, s_xml)
+    autoirc  := xpath(xml, "/root/options/AUS/AutoHotkey/@autoirc/text()")
+    ahk_code := clipboard
+    pb_name  := "Code auto uploaded with AHK-toolkit v" . s_version
+    if (autoirc && ddl_pastebin = "AutoHotkey.net")
+        pb_subdomain    := xpath(xml, "/root/options/AUS/AutoHotkey/@nick/text()")
+    else if ddl_pastebin = Pastebin.com
+    {
+        pb_name         := xpath(xml, "/root/options/AUS/Pastebin/@name/text()")
+        pb_subdomain    := xpath(xml, "/root/options/AUS/Pastebin/@subdomain/text()")
+        pb_exposure     := xpath(xml, "/root/options/AUS/Pastebin/@exposure/text()")
+        pb_expiration   := xpath(xml, "/root/options/AUS/Pastebin/@expiration/text()")
+    }
+    
     Goto, SendAUS
+}
  GuiControl, 98:, ahk_code, %clipboard%
  Gui, 98: Show, w640 h550, % "Send To Pastebin"
  Gui, 98: Submit, NoHide
@@ -517,7 +620,6 @@ SendAUS:
  } 
  else if ddl_pastebin = Pastebin.com 
  {
-    Gui, 98: Submit
     if pb_exposure = Public
         pb_exposure = 0
     else if pb_exposure = Private
@@ -604,14 +706,15 @@ return
 ;}
 
 GuiCancel:
+96GuiClose:
 96GuiEscape:
 ;{
  Gui, Hide
  if a_gui = 96
  {
-    Gui, 01: Default
-    Gui, -Disabled
-    GuiReset(96)
+     Gui, 01: Default
+     Gui, -Disabled
+     GuiReset(96)
  }
 return
 ;}
@@ -639,6 +742,7 @@ return
 
 MasterHotkey:
 ButtonClose:
+GuiClose:
 GuiEscape:
 ;{
  main_toggle := !main_toggle
@@ -676,6 +780,7 @@ return
 ;}
 
 50GuiClose:
+50GuiEscape:
 ;{
  ExitApp
 ;}
@@ -693,7 +798,6 @@ ena_control(name = "", subdomain = "", exposure = "", expiration = ""){
             GuiControl, 98: Disable, pb_%a_loopfield%
     }
 }
-
 pasted(){
     Global
     FormatTime,cur_time,,[MMM/dd/yyyy - HH:mm:ss]
@@ -721,7 +825,6 @@ pasted(){
     Sleep, 3 * sec
     Gui, 97: Hide
 }
-
 GuiReset(guinum){
     Global
     if guinum = 96
@@ -735,7 +838,6 @@ GuiReset(guinum){
         WinActivate, ahk_id %ActiveHwnd%
     }
 }
-
 CheckLV(lvName){
     Global
     if LV_GetCount()
@@ -765,7 +867,7 @@ CheckLV(lvName){
                 {
                     /*
                      * Need to repeat the process twice for cases where you want to replace
-                     * not only two existing cases. 
+                     * more than one existing cases. 
                      * e.g. Winamp has Win + w and Ccleaner has Win + c
                      * but you want to assign Win + w to Ccleaner. By repeating the process we delete
                      * both existing hotkeys and create a new one with the desired hotkey.
@@ -779,29 +881,8 @@ CheckLV(lvName){
                         if (cname = prog_name || chk = prog_hkL || cdir = prog_dir)
                             LV_Delete(a_index) ; repeating
                     }
-                                      
-                    ; Delete XML instances of this hotkey, same as above repeat to cover case explained above
-                    Loop, % xpath(xml, "/root/hotkeys/hk/count()")
-                    {
-                        load_name := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@name/text()")
-                        load_keyL := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@key/text()")
-                        load_dir := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@dir/text()")
-                        
-                        if (load_name = prog_name || load_keyL = prog_hkL || load_dir = prog_dir)
-                        {
-                            xpath(xml, "/root/hotkeys/hk[" . a_index . "]/remove()")
-                            Loop, % xpath(xml, "/root/hotkeys/hk/count()")
-                            {
-                                load_name := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@name/text()")
-                                load_keyL := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@key/text()")
-                                load_dir := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@dir/text()")
-                                
-                                if (load_name = prog_name || load_keyL = prog_hkL || load_dir = prog_dir)
-                                    xpath(xml, "/root/hotkeys/hk[" . a_index . "]/remove()") ; repeating
-                            }
-                        }
-                    }
-                    isNew := True       ; We already deleted the existing one, so it IS new :)
+                    DelxmlInstance() ; Delete XML instances of this hotkey.
+                    isNew := True    ; We already deleted the existing one, so it IS new :)
                 }
                 IfMsgBox, No
                     isNew := False
@@ -811,6 +892,58 @@ CheckLV(lvName){
         }
         return isNew
     }
+}
+DelxmlInstance(){
+    /*
+     * Need to repeat the process twice for cases where you want to replace
+     * more than one existing cases. 
+     * e.g. Winamp has Win + w and Ccleaner has Win + c
+     * but you want to assign Win + w to Ccleaner. By repeating the process we delete
+     * both existing hotkeys and create a new one with the desired hotkey.
+     */
+    Global
+    xpath_load(xml, s_xml)
+    Loop, % xpath(xml, "/root/hotkeys/hk/count()")
+    {
+        load_name := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@name/text()")
+        load_keyL := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@key/text()")
+        load_dir := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@dir/text()")
+        
+        if (load_name = prog_name || load_keyL = prog_hkL || load_dir = prog_dir)
+        {
+            xpath(xml, "/root/hotkeys/hk[" . a_index . "]/remove()")
+            Loop, % xpath(xml, "/root/hotkeys/hk/count()")
+            {
+                load_name := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@name/text()")
+                load_keyL := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@key/text()")
+                load_dir := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@dir/text()")
+                
+                if (load_name = prog_name || load_keyL = prog_hkL || load_dir = prog_dir)
+                    xpath(xml, "/root/hotkeys/hk[" . a_index . "]/remove()") ; repeating
+            }
+        }
+    xpath_save(xml, s_xml)
+    }
+}
+CleanXML(){
+    Global
+    FileRead, rxml, %s_xml%         ; Read xml file
+    FileDelete, %s_xml%             ; Delete the file because we dont want to append
+    FileAppend, % rxml := RegexReplace(rxml, "\s+\/", "/"), %s_xml% ; Clean and save
+}
+LV_Organize(){
+    hka := LV_GetCount()
+        Loop, 4
+        {
+            if a_index = 4
+                LV_ModifyCol(a_index, "AutoHdr")
+            else
+                LV_ModifyCol(a_index, "Center AutoHdr")
+        }
+        if hka = 1
+            SB_SetText("`t" . hka . " Hotkey currently active")
+        else
+            SB_SetText("`t" . hka . " Hotkeys currently active")
 }
 ;-
 

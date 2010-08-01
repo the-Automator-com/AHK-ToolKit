@@ -1,8 +1,36 @@
-commit d531b39c1b339bb71a39d0a8325009d3cc75da4e
+commit 2c57d1301a0c8a360ef88475da60e9b6c3464ed6
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sun Aug 1 03:06:54 2010 +0200
+
+    AHK-TK v0.2.1
+    
+    Changed:
+    
+    * Add Drag & Drop functionality
+      - support for resolving .lnk files
+    * Add Support for deleting a hotkey with the "Del" key
+    * Add AutoUpload support
+      - fix popup checkbox actions
+    * Add AutoUpload defaults (Prompts included)
+    * Add Functions:
+      -DelxmlInstance()
+      -CleanXML()
+      -LV_Organize
+    * Removed Splash GUI
+    * Removed FirstRun value on xml file
+    * Fixed small bugs
+    
+    ToDo:
+    
+    * Add edit hotkey functionality
+    * Add Options Tab Controls and Functions
+    * Prepare for Hotstrings
+
+commit 159c64e10bd05f635f3205f2b464887e32c7a3d6
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Jul 31 11:09:35 2010 +0200
 
-    AHK-TK v0.2.0
+    AHK-TK v0.2
     
     Changed:
     
