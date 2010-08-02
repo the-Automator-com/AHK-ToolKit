@@ -1,4 +1,39 @@
-commit ece9f76bd31ce0dbc9b879cfb150bab51ae09f53
+commit 5401b71b171dd5fbacdf94d02b5d80dd078031c9
+Author: RaptorX <graptorx@gmail.com>
+Date:   Mon Aug 2 18:20:08 2010 +0200
+
+    AHK-TK v0.3
+    
+    Changed:
+    
+    * Add Live Code GUI Functionality
+    * Add Live Scripts
+    * Fix LV_Organize function
+    
+    ToDo:
+    
+    * Complete Hotstrings functionality
+    * Add Send to ImageBin Functions
+    * Prepare for Options GUI
+
+commit f0e4de276241962326c93a1edb3970a4e1076a5b
+Author: RaptorX <graptorx@gmail.com>
+Date:   Tue Aug 3 17:28:56 2010 +0200
+
+    AHK-TK v0.2.3
+    
+    Changed:
+    
+    * Add basic hotstring functionality
+    
+    ToDo:
+    
+    * Fix LV_Organize function
+    * Finalize Hotstrings
+    * Add Live Code GUI
+    * Prepare Live Code functionality
+
+commit e5e9d2d2a9179d27ff42b3b7b3831e3f44a32469
 Author: RaptorX <graptorx@gmail.com>
 Date:   Tue Aug 3 08:54:02 2010 +0200
 
