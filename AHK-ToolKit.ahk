@@ -407,6 +407,35 @@ LV_Sub:
         }
         LV_Organize()
     }
+    if a_guievent = DoubleClick
+    {
+            LV_GetText(prog_type, sel_row, 1)
+            LV_GetText(prog_hkL, sel_row, 3)
+            LV_GetText(prog_dir, sel_row, 4)
+            if prog_type = File
+                prog_type := 1
+            else if prog_type = Folder
+                prog_type := 2
+            prog_hkS := hkSwap(prog_hkL, "short")
+            StringSplit, prog_hk, prog_hkS   ; Cant be single characters.
+            
+            GuiControl, 96:, e_progpath, %prog_dir%
+            GuiControl, 96:, r_selfof, %prog_type%
+            GuiControl, 96: Choose, ddl_key, % prog_hk%prog_hk0%
+            Loop, % prog_hk0
+            {
+                msgbox % prog_hk%a_index%
+                if prog_hk%a_index% = ^
+                    GuiControl, 96:, mod_ctrl, 1
+                if prog_hk%a_index% = !
+                    GuiControl, 96:, mod_alt, 1
+                if prog_hk%a_index% = +
+                    GuiControl, 96:, mod_shift, 1
+                if prog_hk%a_index% = #
+                    GuiControl, 96:, mod_win, 1
+            }
+            Gosub, AddHotkey
+    }
  }
 return
 ;}
