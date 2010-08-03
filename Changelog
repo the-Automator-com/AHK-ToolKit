@@ -1,4 +1,28 @@
-commit 2c57d1301a0c8a360ef88475da60e9b6c3464ed6
+commit ece9f76bd31ce0dbc9b879cfb150bab51ae09f53
+Author: RaptorX <graptorx@gmail.com>
+Date:   Tue Aug 3 08:54:02 2010 +0200
+
+    AHK-TK v0.2.2
+    
+    Changed:
+    
+    * Add edit hotkey functionality
+    * Add lnk file resolve target
+    * Fixed disable popup action
+    * Fixed ActiveHwnd problem
+    * Fixed small bugs
+    
+    ToDo:
+    
+    * Start with hotstrings
+
+commit 1987ccb39351b0857351d29766ce2dd79bea8769
+Author: RaptorX <graptorx@gmail.com>
+Date:   Mon Aug 2 23:17:26 2010 +0200
+
+    Started working on edit hotkey function
+
+commit 8f2f787b9dc8f6e62e67d75c5f87a100e4332512
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sun Aug 1 03:06:54 2010 +0200
 
@@ -15,7 +39,7 @@ Date:   Sun Aug 1 03:06:54 2010 +0200
     * Add Functions:
       -DelxmlInstance()
       -CleanXML()
-      -LV_Organize
+      -LV_Organize()
     * Removed Splash GUI
     * Removed FirstRun value on xml file
     * Fixed small bugs
@@ -23,8 +47,7 @@ Date:   Sun Aug 1 03:06:54 2010 +0200
     ToDo:
     
     * Add edit hotkey functionality
-    * Add Options Tab Controls and Functions
-    * Prepare for Hotstrings
+    * Hotstrings functionality
 
 commit 159c64e10bd05f635f3205f2b464887e32c7a3d6
 Author: RaptorX <graptorx@gmail.com>

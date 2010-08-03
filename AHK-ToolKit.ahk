@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>		
 Script Name:    AHK-ToolKit
-Script Version: 0.2.1
+Script Version: 0.2.2
 Homepage:       
 
 Creation Date: July 11, 2010 | Modification Date: August 01, 2010
@@ -27,7 +27,7 @@ SetWorkingDir %A_ScriptDir%
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.2.1"                  ; Script Version
+s_version   := "0.2.2"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -372,12 +372,14 @@ GuiDropFiles:
  if a_guicontrol = LV_hklist
  {
     dropped := 1
-    GuiControl, 96:, e_progpath, %a_guievent%
     SplitPath, a_guievent,,prog_dir,,prog_name
-     ; if r_selfof = 2
-        ; prog_dir := prog_dir . "\" . prog_name      ; Needed to have the complete dir since prog_dir would not have
-                                                    ; the last folder name included in this case.
-     StringUpper, prog_name, prog_name, T
+    StringUpper, prog_name, prog_name, T
+    if a_guievent contains .lnk             ; Resolve the link target instead of using the link's directory
+    {
+        FileGetShortcut, %a_guievent%, prog_target        
+        SplitPath, prog_target,,prog_dir,,prog_name
+    }
+    GuiControl, 96:, e_progpath, %prog_dir%
  }
  Gosub, AddHotkey
 return
@@ -410,21 +412,40 @@ LV_Sub:
     if a_guievent = DoubleClick
     {
             LV_GetText(prog_type, sel_row, 1)
+            LV_GetText(prog_name, sel_row, 2)
             LV_GetText(prog_hkL, sel_row, 3)
             LV_GetText(prog_dir, sel_row, 4)
-            if prog_type = File
-                prog_type := 1
-            else if prog_type = Folder
-                prog_type := 2
             prog_hkS := hkSwap(prog_hkL, "short")
-            StringSplit, prog_hk, prog_hkS   ; Cant be single characters.
+            StringSplit, prog_hk, prog_hkS
             
+            /*
+             * Need to handle hotkeys that contain whole words like Enter or Space
+             * Thats why if the array contains more than 5 letters (4 modifiers + 1 key)
+             * the program needs to handle the hotkey in a different way.
+             */
+            if prog_hk0 <= 5
+                GuiControl, 96: Choose, ddl_key, % prog_hk%prog_hk0%
+            else
+            {
+                Loop, % prog_hk0
+                {
+                    if (prog_hk%a_index% = "^" || prog_hk%a_index% = "!"
+                    ||  prog_hk%a_index% = "+" || prog_hk%a_index% = "#")
+                        continue
+                    hk := hk . prog_hk%a_index%
+                }
+                GuiControl, 96: Choose, ddl_key, % hk
+                hk :=                                    ; Empty for next use   
+            }
             GuiControl, 96:, e_progpath, %prog_dir%
-            GuiControl, 96:, r_selfof, %prog_type%
-            GuiControl, 96: Choose, ddl_key, % prog_hk%prog_hk0%
+            GuiControl, 96: Focus, ddl_key
+            if prog_type = File
+                GuiControl, 96:, Select a File, 1
+            else if prog_type = Folder
+                GuiControl, 96:, Select a Folder, 1
+                
             Loop, % prog_hk0
             {
-                msgbox % prog_hk%a_index%
                 if prog_hk%a_index% = ^
                     GuiControl, 96:, mod_ctrl, 1
                 if prog_hk%a_index% = !
@@ -489,7 +510,7 @@ AddHotkey:
 ;{
  if (dropped || a_gui = 1)
  {
-    ActiveHwnd := WinExist("A")
+    ActiveHwnd := WinExist("AutoHotkey ToolKit")
     Gui, 01: +Disabled
     Gui, 96: Show, w420 h210
  }
@@ -506,14 +527,12 @@ AddHotkey:
     if CheckLV("LV_hklist")
     {
         row := LV_Add("", r_selfof, prog_name, prog_hkL, prog_dir)
-        if !row
-            Msgbox, % "There was an error adding the hotkey to the List"
         LV_Organize()           ; Sort the LV and set the status messages
         xpath(xml, "/root/hotkeys/hk[+1]/@type/text()", r_selfof)
         xpath(xml, "/root/hotkeys/hk[last()]/@name/text()", prog_name)
         xpath(xml, "/root/hotkeys/hk[last()]/@key/text()", prog_hkL)
         xpath(xml, "/root/hotkeys/hk[last()]/@dir/text()", prog_dir)
-        Sleep, 100              ; give it little time before saving since we are using SetBatchLines -1
+        Sleep, 100              ; Give it little time before saving since we are using SetBatchLines -1
                                 ; this fixes some problems of xpath appending instead of overwriting the file
         xpath_save(xml,s_xml)
         CleanXML()
@@ -752,7 +771,7 @@ DisablePopup:
 ;{
  Gui, 99: Submit, NoHide
  Msgbox, % "You have chosen to disable the Pastebin Alert, to enable it again go to the options tab"
- xpath(xml, "/root/options/STPP/@value/text()", pastepop_ena)
+ xpath(xml, "/root/options/AUS/@value/text()", !pastepop_ena)
  xpath_save(xml, s_xml)
 return
 ;}
