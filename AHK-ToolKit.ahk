@@ -545,6 +545,28 @@ return
 
 AddHotstring:
 ;{
+ Gui, Submit
+ if hs_autoexpand
+    hs_autoexpand := "*"
+ else
+    hs_autoexpand :=
+ if hs_dnd
+    hs_dnd := "B0"
+ else
+    hs_dnd :=
+ if hs_trigger
+    hs_trigger := "?"
+ else
+    hs_trigger :=
+ if hs_raw
+    hs_raw := "R"
+ else
+    hs_raw :=
+    
+ newhs := ":" . hs_autoexpand . hs_dnd . hs_trigger . hs_raw . ":" . hs_expand . "::" . hs_expandto
+ xpath(xml, "/root/hotstrings/hs[+1]/text()", newhs)
+ xpath_save(xml, s_xml)
+ CleanXML()
 return
 ;}
 
