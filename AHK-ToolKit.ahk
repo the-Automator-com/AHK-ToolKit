@@ -1,10 +1,10 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.3
+Script Version: 0.3.1
 Homepage:
 
-Creation Date: July 11, 2010 | Modification Date: August 02, 2010
+Creation Date: July 11, 2010 | Modification Date: August 04, 2010
 
 [GUI Number Index]
 
@@ -23,11 +23,12 @@ SetBatchLines -1
 ; --
 SendMode Input
 SetWorkingDir %A_ScriptDir%
+onExit, Clean
 ;-
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.3"                    ; Script Version
+s_version   := "0.3.1"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -51,22 +52,24 @@ Clipboard :=
 FileRead, ahk_keywords, res\key.lst     ; Used for the PasteBin routines
 reg_run := "Software\Microsoft\Windows\CurrentVersion\Run"
 mod_list := "mod_ctrl|mod_alt|mod_shift|mod_win"
+hs_optlist := "hs_iscommand|hs_dnd|hs_trigger|hs_raw"
 exc := "ScrollLock|CapsLock|NumLock|NumpadIns|NumpadEnd|NumpadDown|NumpadPgDn|NumpadLeft"
 . "|NumpadClear|NumpadRight|NumpadHome|NumpadUp|NumpadPgUp|NumpadDel|LWin|RWin|LControl"
 . "|RControl|LShift|RShift|LAlt|RAlt|CtrlBreak|Control|Alt|Shift|AppsKey"
 keylist := "None||" . klist(2,0,1, exc)
+hsloc := "res\tools\hslauncher.ahk"
 
 ; Live Code Scripts
 ;{
 live_code =
 (
-; *************************************************************************
-; * All live scripts start with the following default options:            *
-; * #NoEnv, #Persistent, SendMode Input and SetbatchLines -1              *
-; *                                                                       *
-; * You can enable them back using the normal options                     *
-; * (e.g. 'menu, tray, Icon' to show the Tray Icon, or 'SendMode Play')   *
-; *************************************************************************`n`n
+; **************************************************************************
+; * All live scripts start with the following default options:             *
+; * #NoEnv, #Persistent, SendMode Input, SetbatchLines -1 and Esc::ExitApp *
+; *                                                                        *
+; * You can enable change them  at any time using the normal options       *
+; * (e.g.'SendMode Play' to override the SendMode)                         *
+; **************************************************************************`n`n
 )
 
 TimedShutdown_s =
@@ -115,14 +118,14 @@ Esc::ExitApp
 TextControlsRefs_s =
 (
 ; ********************************************************************************
-; This Script is just a demostration of the styles that you can apply to 
+; This Script is just a demostration of the styles that you can apply to
 ; Text controls.
 ;
-; To apply a style just write the code like this: 
+; To apply a style just write the code like this:
 ; Gui, add, Text, [options] [style]
 ; Ex. Gui, add, Text, w50 h50 x20 y25 0x4
 ;
-; As you can see this opens tons of posibilities in your Gui Creation and with 
+; As you can see this opens tons of posibilities in your Gui Creation and with
 ; enough creativity you can create cool interfaces!
 ; Dont limit yourself to the defaults!
 ;
@@ -139,42 +142,42 @@ This color is BLACK in the default color scheme.
 `)
 0x5=
 `(
-Specifies a rectangle filled with the current *screen background* color. 
+Specifies a rectangle filled with the current *screen background* color.
 This color is GRAY in the default color scheme.
 `)
 0x6=
 `(
-Specifies a rectangle filled with the current *window background* color. 
+Specifies a rectangle filled with the current *window background* color.
 This color is WHITE in the default color scheme.
 `)
 0x7=
 `(
-Specifies a box with a frame drawn in the same color as the 
+Specifies a box with a frame drawn in the same color as the
 *window frames*. This color is BLACK in the default color scheme.
 `)
 0x8=
 `(
-Specifies a box with a frame drawn with the same color as the *screen 
+Specifies a box with a frame drawn with the same color as the *screen
 background* (desktop). This color is GRAY in the default color scheme.
 `)
 0x9=
 `(
-Specifies a box with a frame drawn with the same color as the *window 
+Specifies a box with a frame drawn with the same color as the *window
 background*. This color is WHITE in the default color scheme.
 `)
 0x10=
 `(
-Draws the top and bottom edges of the static control using the 
+Draws the top and bottom edges of the static control using the
 EDGE_ETCHED edge style.
 `)
 0x11=
 `(
-Draws the left and right edges of the static control using the 
+Draws the left and right edges of the static control using the
 EDGE_ETCHED edge style.
 `)
 0x12=
 `(
-Draws the frame of the static control using the 
+Draws the frame of the static control using the
 EDGE_ETCHED edge style.
 `)
 0x1000=
@@ -188,7 +191,7 @@ This Script is just a demostration of the styles that you can apply to Text cont
 
 To apply a style just write the code like this: Gui, add, Text, [options] [style]
 Ex. Gui, add, Text, w50 h50 x20 y25 0x4
-	
+
 As you can see this opens tons of posibilities in your Gui Creation and with enough creativity you can create cool interfaces!
 Dont limit yourself to the defaults!
 
@@ -312,8 +315,8 @@ Gui, add, Text, y+10, % "Expand:"
 Gui, add, Edit, w150 x+10 yp-3 vhs_expand
 Gui, add, Text, x+10 yp+3, % "To:"
 Gui, add, Edit, w250 x+10 yp-3 vhs_expandto
-Gui, add, Button, w100 x510 yp, % "Browse..."
-Gui, add, CheckBox, x12 y+10 vhs_autoexpand, % "AutoExpand"
+Gui, add, Checkbox, x510 yp+5 vhs_iscommand, % "Run Command"
+Gui, add, CheckBox, x12 y+15 Checked vhs_autoexpand, % "AutoExpand"
 Gui, add, CheckBox, x250 yp vhs_dnd, % "Do not delete typed abreviation"
 Gui, add, CheckBox, x12 y+10 vhs_trigger, % "Trigger inside other words"
 Gui, add, CheckBox, x250 yp vhs_raw, % "Send Raw (do not translate {Enter} or {key})"
@@ -331,7 +334,7 @@ Gui, add, Text, wp+10 hp+5 xp-4 yp-2.5 0x8
 Gui, add, Text, x+10 yp+2.5 gSaveXYCoords, % "Save X,Y coord list"
 Gui, add, Text, wp+10 hp+5 xp-4 yp-2.5 0x8
 Gui, add, Text, x+10 yp+2.5 gTextControlsRefs, % "Text Controls Style Refs"
-Gui, add, Text, wp+10 hp+5 xp-4 yp-2.5 0x8 
+Gui, add, Text, wp+10 hp+5 xp-4 yp-2.5 0x8
 Gui, add, Text, w630 x0 y272 0x10
 Gui, add, Button, w100 x195 yp+10 gLiveRun, % "&Run"
 Gui, add, Button, w100 x+5 yp gLiveSavetoFile, % "&Save to File"
@@ -340,8 +343,6 @@ Gui, add, Button, w100 x+10 yp, % "&Close"
 
 Gui, Show, Hide ;w619 h341
 SB_SetParts(150,150)
-LV_Organize("LV_hklist")
-SB_SetText("`t" . 0 . " Hotstrings currently active", 2)
 ;}
 
 ; PasteBin Popup GUI
@@ -359,6 +360,7 @@ Gui, 99: add, Button, w60 h25 x+10 gPopNo, % "&No"
 Gui, 99: add, CheckBox, x+10 yp+6 Checked%pastepop_ena% gDisablePopup vpastepop_ena, % "Enable Popup"
 Gui, 99: Show, NoActivate w250 h150 x%monRight% y%monBottom%
 WinGet, 99Hwnd, ID,, % "AHK Code Detected"
+
 Gui, 99: Show, Hide ; w250 h150
 ;}
 
@@ -383,6 +385,7 @@ Gui, 98: add, Text, w650 x0 0x10
 Gui, 98: add, Button, w100 h25 x315 yp+10 gPasteUpload, % "&Upload"
 Gui, 98: add, Button, w100 h25 x+5 yp gPasteSavetoFile, % "&Save to File"
 Gui, 98: add, Button, w100 h25 x+10 yp gGuiCancel, % "&Cancel"
+
 Gui, 98: Show, Hide ; w640 h550
 ;}
 
@@ -398,6 +401,7 @@ Gui, 97: add, Text, w250 x5 yp+5, % "The code has been uploaded correctly.`n"
 Gui, 97: add, Text, w260 x0 0x10
 Gui, 97: Show, NoActivate w250 h90 x1024 y768
 WinGet, 97Hwnd, ID,, % "Code Uploaded Succesfully"
+
 Gui, 97: Show, Hide ; w250 h90
 ;}
 
@@ -417,15 +421,16 @@ Gui, 96: add, CheckBox, x+10 vmod_win, % "Win"
 Gui, 96: add, Text, w425 x0 y+35 0x10
 Gui, 96: add, Button, w100 h25 x200 yp+10 gAddHotkey, % "&Add"
 Gui, 96: add, Button, w100 h25 x+10 yp gGuiCancel, % "&Cancel"
+
 Gui, 96: Show, Hide ; w420 h210
 ;}
 
 Gosub, LVHK_Load
+Gosub, LVHS_Load
 Return ; End of autoexecute area
 ;-
 
 ;+--> ; ---------[Labels]---------
-
 FR_Save:                                                            ; First Run Save
 ;{
  Gui, 50: Submit
@@ -506,7 +511,7 @@ AUInfo:                                                             ; Default Au
 return
 ;}
 
-ReadXML:                                                            ; Read options from XML file    
+ReadXML:                                                            ; Read options from XML file
 ;{
  if !load := xpath_load(xml, s_xml)
     return
@@ -517,6 +522,7 @@ ReadXML:                                                            ; Read optio
  mhk := xpath(xml, "/root/options/MHK/@value/text()")               ; Main Hotkey
  ddl_pastebin := xpath(xml, "/root/options/AUS/@default/text()")    ; Default upload site
  hkcount := xpath(xml, "/root/hotkeys/hk/count()")                  ; Hotkey Count
+ hscount := xpath(xml, "/root/hotstrings/hs/count()")               ; Hotstring Count
  Gosub, SWW
  Hotkey, %mhk%, MasterHotkey
 return
@@ -554,6 +560,62 @@ LVHK_Load:
 return
 ;}
 
+LVHS_Load:
+;{
+ Gosub, ReadXML
+ Gui, 1: Default
+ Gui, ListView, LV_hslist
+ hsloading := True
+ Gosub, CreateHSScript      ; If not exist Create file
+ 
+ Loop, % hscount
+ {
+    load_opts := xpath(xml, "/root/hotstrings/hs[" . a_index . "]/@opts/text()")
+    load_expand := xpath(xml, "/root/hotstrings/hs[" . a_index . "]/@expand/text()")
+    load_expandto := xpath(xml, "/root/hotstrings/hs[" . a_index . "]/@expandto/text()")
+    load_iscommand := xpath(xml, "/root/hotstrings/hs[" . a_index . "]/@iscommand/text()")
+    LV_Add("", load_opts, load_expand, load_expandto)
+    LV_Organize("LV_hslist")
+    Gosub, CreateHSScript   ; Append strings 
+ }
+ Run, %hsloc%,,, hslPID
+return
+;}
+
+CreateHSScript:
+;{
+ if !FileExist(hsloc)
+ {
+    hsfileopts =
+    (Ltrim
+        #NoEnv
+        #SingleInstance Force
+        #NoTrayIcon
+        ; --
+        SetBatchLines -1`n`n
+    )
+ FileAppend, %hsfileopts%, %hsloc%
+ return
+ }
+ 
+ if hsloading
+ {
+    if load_iscommand
+        script := "`n:" . load_opts . ":" . load_expand . "::`n" . load_expandto . "`nreturn`n`n"
+    else
+        script := ":" . load_opts . ":" . load_expand . "::" . load_expandto . "`n"
+ }
+ else if !hsloading
+ {
+    if hs_iscommand
+        script := "`n:" . hs_opts . ":" . hs_expand . "::`n" . hs_expandto . "`nreturn`n`n"
+    else
+        script := ":" . hs_opts . ":" . hs_expand . "::" . hs_expandto . "`n"
+ } 
+    FileAppend, %script%, %hsloc%
+return
+;}
+
 Hotkeyit:
 ;{
  if !load := xpath_load(xml, s_xml)
@@ -581,7 +643,7 @@ GuiDropFiles:
     StringUpper, prog_name, prog_name, T
     if a_guievent contains .lnk             ; Resolve the link target instead of using the link's directory
     {
-        FileGetShortcut, %a_guievent%, prog_target        
+        FileGetShortcut, %a_guievent%, prog_target
         SplitPath, prog_target,,prog_dir,,prog_name
     }
     GuiControl, 96:, e_progpath, %prog_dir%
@@ -593,7 +655,7 @@ return
 LV_Sub:
 ;{
  if a_guicontrol = LV_hklist
- {
+{
     Gui, 1: Default
     Gui, ListView, LV_hklist
     if a_guievent = Normal
@@ -607,59 +669,85 @@ LV_Sub:
             LV_GetText(prog_name, next, 2)
             LV_GetText(prog_hkL, next, 3)
             LV_GetText(prog_dir, next, 4)
-            DelxmlInstance()
+            DelxmlInstance("hk")
             CleanXML()
             LV_Delete(next)
         }
         LV_Organize("LV_hklist")
     }
+    
     if a_guievent = DoubleClick
     {
-            LV_GetText(prog_type, sel_row, 1)
-            LV_GetText(prog_name, sel_row, 2)
-            LV_GetText(prog_hkL, sel_row, 3)
-            LV_GetText(prog_dir, sel_row, 4)
-            prog_hkS := hkSwap(prog_hkL, "short")
-            StringSplit, prog_hk, prog_hkS
-            
-            /*
-             * Need to handle hotkeys that contain whole words like Enter or Space
-             * Thats why if the array contains more than 5 letters (4 modifiers + 1 key)
-             * the program needs to handle the hotkey in a different way.
-             */
-            if prog_hk0 <= 5
-                GuiControl, 96: Choose, ddl_key, % prog_hk%prog_hk0%
-            else
-            {
-                Loop, % prog_hk0
-                {
-                    if (prog_hk%a_index% = "^" || prog_hk%a_index% = "!"
-                    ||  prog_hk%a_index% = "+" || prog_hk%a_index% = "#")
-                        continue
-                    hk := hk . prog_hk%a_index%
-                }
-                GuiControl, 96: Choose, ddl_key, % hk
-                hk :=                                    ; Empty for next use   
-            }
-            GuiControl, 96:, e_progpath, %prog_dir%
-            GuiControl, 96: Focus, ddl_key
-            if prog_type = File
-                GuiControl, 96:, Select a File, 1
-            else if prog_type = Folder
-                GuiControl, 96:, Select a Folder, 1
-                
+        LV_GetText(prog_type, sel_row, 1)
+        LV_GetText(prog_name, sel_row, 2)
+        LV_GetText(prog_hkL, sel_row, 3)
+        LV_GetText(prog_dir, sel_row, 4)
+        prog_hkS := hkSwap(prog_hkL, "short")
+        StringSplit, prog_hk, prog_hkS
+
+        /*
+         * Need to handle hotkeys that contain whole words like Enter or Space
+         * Thats why if the array contains more than 5 letters (4 modifiers + 1 key)
+         * the program needs to handle the hotkey in a different way.
+         */
+        if prog_hk0 <= 5
+            GuiControl, 96: Choose, ddl_key, % prog_hk%prog_hk0%
+        else
+        {
             Loop, % prog_hk0
             {
-                if prog_hk%a_index% = ^
-                    GuiControl, 96:, mod_ctrl, 1
-                if prog_hk%a_index% = !
-                    GuiControl, 96:, mod_alt, 1
-                if prog_hk%a_index% = +
-                    GuiControl, 96:, mod_shift, 1
-                if prog_hk%a_index% = #
-                    GuiControl, 96:, mod_win, 1
+                if (prog_hk%a_index% = "^" || prog_hk%a_index% = "!"
+                ||  prog_hk%a_index% = "+" || prog_hk%a_index% = "#")
+                    continue
+                hk := hk . prog_hk%a_index%
             }
-            Gosub, AddHotkey
+            GuiControl, 96: Choose, ddl_key, % hk
+            hk :=                                    ; Empty for next use
+        }
+        GuiControl, 96:, e_progpath, %prog_dir%
+        GuiControl, 96: Focus, ddl_key
+        if prog_type = File
+            GuiControl, 96:, Select a File, 1
+        else if prog_type = Folder
+            GuiControl, 96:, Select a Folder, 1
+
+        Loop, % prog_hk0
+        {
+            if prog_hk%a_index% = ^
+                GuiControl, 96:, mod_ctrl, 1
+            if prog_hk%a_index% = !
+                GuiControl, 96:, mod_alt, 1
+            if prog_hk%a_index% = +
+                GuiControl, 96:, mod_shift, 1
+            if prog_hk%a_index% = #
+                GuiControl, 96:, mod_win, 1
+        }
+        Gosub, AddHotkey
+    }
+}
+
+ if a_guicontrol = LV_hslist
+ {
+    Gui, 1: Default
+    Gui, ListView, LV_hslist
+    ; if a_guievent = Normal
+        ; sel_row := a_eventinfo                      ; Currently selected Row
+    if (a_guievent = "K" && a_eventinfo = 46)
+    {
+        Loop, % LV_GetCount("S")
+        {
+            if !next := LV_GetNext("F")
+                break
+            LV_GetText(hs_expand, next, 2)
+            LV_GetText(hs_expandto, next, 3)
+            DelxmlInstance("hs")
+            CleanXML()
+            LV_Delete(next)
+        }
+        sleep 100
+        FileDelete, %hsloc%
+        LV_Delete()             ; Delete all rows to reload them from xml file with LVHS_Load
+        Gosub, LVHS_Load
     }
  }
 return
@@ -723,16 +811,14 @@ AddHotkey:
     Gui, 96: Submit
     Gui, 01: Default
     Gui, -Disabled
-    Gui, ListView, lV_hklist
+    Gui, ListView, LV_hklist
     Gosub, VarSwap
     dropped :=
     prog_hkL := mod_ctrl . mod_alt . mod_shift . mod_win . ddl_key
     prog_hkS := hkSwap(prog_hkL, "short") ; convert to short for creating hotkey
     if CheckLV("LV_hklist")
     {
-        row := LV_Add("", r_selfof, prog_name, prog_hkL, prog_dir)
-        if !row
-            Msgbox, % "There was an error adding the hotkey to the List"
+        LV_Add("", r_selfof, prog_name, prog_hkL, prog_dir)
         xpath(xml, "/root/hotkeys/hk[+1]/@type/text()", r_selfof)
         xpath(xml, "/root/hotkeys/hk[last()]/@name/text()", prog_name)
         xpath(xml, "/root/hotkeys/hk[last()]/@key/text()", prog_hkL)
@@ -751,28 +837,27 @@ return
 
 AddHotstring:
 ;{
- Gui, Submit
- if hs_autoexpand
-    hs_autoexpand := "*"
- else
-    hs_autoexpand :=
- if hs_dnd
-    hs_dnd := "B0"
- else
-    hs_dnd :=
- if hs_trigger
-    hs_trigger := "?"
- else
-    hs_trigger :=
- if hs_raw
-    hs_raw := "R"
- else
-    hs_raw :=
-    
- newhs := ":" . hs_autoexpand . hs_dnd . hs_trigger . hs_raw . ":" . hs_expand . "::" . hs_expandto
- xpath(xml, "/root/hotstrings/hs[+1]/text()", newhs)
- xpath_save(xml, s_xml)
- CleanXML()
+ Gui, Submit, NoHide
+ Gui, ListView, LV_hslist
+ Gosub, VarSwap
+ hsloading := False
+ hs_opts :=  hs_autoexpand . hs_dnd . hs_trigger . hs_raw
+ 
+ if CheckLV("LV_hslist")
+ {
+    LV_Add("", hs_opts, hs_expand, hs_expandto)
+    xpath(xml, "/root/hotstrings/hs[+1]/@opts/text()", hs_opts)
+    xpath(xml, "/root/hotstrings/hs[last()]/@expand/text()", hs_expand)
+    xpath(xml, "/root/hotstrings/hs[last()]/@expandto/text()", hs_expandto)
+    xpath(xml, "/root/hotstrings/hs[last()]/@iscommand/text()", hs_iscommand)
+    Sleep, 100
+    xpath_save(xml, s_xml)
+    LV_Organize("LV_hslist")    ; Sort the LV and set the status messages
+    CleanXML()
+    Gosub, CreateHSScript
+    Run, %hsloc%,,, hslPID
+    GuiReset(1)
+ }
 return
 ;}
 
@@ -992,6 +1077,7 @@ SaveXYCoords:
  GuiControl,, live_code, %SaveXYCoords_s%
 return
 ;}
+
 TextControlsRefs:
 ;{
  GuiControl,, live_code, %TextControlsRefs_s%
@@ -1001,7 +1087,7 @@ return
 LiveRun:
 ;{
  Gui, Submit, NoHide
- 
+
  if lcf_name := a_temp . "\" . randomName(8,"ahk")        ; Random Live Code Path
  {
     live_code =
@@ -1015,8 +1101,10 @@ LiveRun:
         sec         :=  1000               ; 1 second
         min         :=  sec * 60           ; 1 minute
         hour        :=  min * 60           ; 1 hour
-        
+
         %live_code%
+        
+        Esc::ExitApp
     )
     FileAppend, %live_code%, %lcf_name%
  }
@@ -1122,6 +1210,7 @@ return
 
 VarSwap:
 ;{
+; Hotkey vars
  if mod_ctrl
     mod_ctrl := "Ctrl + "
  else
@@ -1136,13 +1225,31 @@ VarSwap:
     mod_shift :=
  if mod_win
     mod_win := "Win + "
-else
+ else
     mod_win :=
 
  if r_selfof = 1
     r_selfof := "File"
  else if r_selfof = 2
     r_selfof := "Folder"
+
+; Hotstring vars
+ if hs_autoexpand
+    hs_autoexpand := "*"
+ else
+    hs_autoexpand :=
+ if hs_dnd
+    hs_dnd := "B0"
+ else
+    hs_dnd :=
+ if hs_trigger
+    hs_trigger := "?"
+ else
+    hs_trigger :=
+ if hs_raw
+    hs_raw := "R"
+ else
+    hs_raw :=
 return
 ;}
 
@@ -1150,6 +1257,13 @@ return
 50GuiEscape:
 ;{
  ExitApp
+;}
+
+Clean:
+;{
+WinClose, ahk_pid %hslPID%
+FileDelete, %hsloc%
+ExitApp
 ;}
 ;-
 
@@ -1194,6 +1308,13 @@ pasted(){
 }
 GuiReset(guinum){
     Global
+    if guinum = 1
+    {
+        GuiControl,, hs_expand,
+        GuiControl,, hs_expandto,
+        Loop, Parse, hs_optlist, |
+            GuiControl,, %a_loopfield%, 0
+    }
     if guinum = 96
     {
         GuiControl, 96: Focus, Browse
@@ -1248,7 +1369,7 @@ CheckLV(lvName){
                         if (cname = prog_name || chk = prog_hkL || cdir = prog_dir)
                             LV_Delete(a_index) ; repeating
                     }
-                    DelxmlInstance() ; Delete XML instances of this hotkey.
+                    DelxmlInstance("hk") ; Delete XML instances of this hotkey.
                     isNew := True    ; We already deleted the existing one, so it IS new :)
                 }
                 IfMsgBox, No
@@ -1262,8 +1383,49 @@ CheckLV(lvName){
         }
         return isNew
     }
+    if lvName = LV_hslist
+    {
+        Loop, % lvcount
+        {
+            LV_GetText(chs_expand, a_index, 2)
+            LV_GetText(chs_expandto, a_index, 3)
+
+            if (chs_expand != hs_expand && chs_expandto != hs_expandto)
+            {
+                isNew := True
+                continue
+            }
+            else if (chs_expand = hs_expand || chs_expandto = hs_expandto)
+            {
+                Msgbox,36,% "Duplicate Found"
+                , % "The hotsring that you are trying to set up was already found.`n"
+                  . "Do you want to teplace the existing one for this one?"
+                IfMsgBox, Yes
+                {
+                    LV_Delete(a_index)
+                    Loop % lvcount
+                    {
+                        LV_GetText(chs_expand, a_index, 2)
+                        LV_GetText(chs_expandto, a_index, 3)
+                        if (chs_expand = hs_expand || chs_expandto = hs_expandto)
+                            LV_Delete(a_index) ; Repeating
+                    }
+                    DelxmlInstance("hs") ; Delete XML instances of this hotstring.
+                    isNew := True
+                }
+                IfMsgBox, No
+                {
+                    GuiReset(1)
+                    return isNew := False
+                }
+                xpath_save(xml, s_xml)
+                GuiReset(1)
+            }
+        }
+        return isNew
+    }
 }
-DelxmlInstance(){
+DelxmlInstance(type){
     /*
      * Need to repeat the process twice for cases where you want to replace
      * more than one existing cases.
@@ -1273,26 +1435,51 @@ DelxmlInstance(){
      */
     Global
     xpath_load(xml, s_xml)
-    Loop, % xpath(xml, "/root/hotkeys/hk/count()")
+    if type = hk
     {
-        load_name := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@name/text()")
-        load_keyL := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@key/text()")
-        load_dir := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@dir/text()")
-
-        if (load_name = prog_name || load_keyL = prog_hkL || load_dir = prog_dir)
+        Loop, % xpath(xml, "/root/hotkeys/hk/count()")
         {
-            xpath(xml, "/root/hotkeys/hk[" . a_index . "]/remove()")
-            Loop, % xpath(xml, "/root/hotkeys/hk/count()")
-            {
-                load_name := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@name/text()")
-                load_keyL := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@key/text()")
-                load_dir := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@dir/text()")
+            load_name := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@name/text()")
+            load_keyL := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@key/text()")
+            load_dir := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@dir/text()")
 
-                if (load_name = prog_name || load_keyL = prog_hkL || load_dir = prog_dir)
-                    xpath(xml, "/root/hotkeys/hk[" . a_index . "]/remove()") ; repeating
+            if (load_name = prog_name || load_keyL = prog_hkL || load_dir = prog_dir)
+            {
+                xpath(xml, "/root/hotkeys/hk[" . a_index . "]/remove()")
+                Loop, % xpath(xml, "/root/hotkeys/hk/count()")
+                {
+                    load_name := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@name/text()")
+                    load_keyL := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@key/text()")
+                    load_dir := xpath(xml, "/root/hotkeys/hk[" . a_index . "]/@dir/text()")
+
+                    if (load_name = prog_name || load_keyL = prog_hkL || load_dir = prog_dir)
+                        xpath(xml, "/root/hotkeys/hk[" . a_index . "]/remove()") ; repeating
+                }
             }
+        xpath_save(xml, s_xml)
         }
-    xpath_save(xml, s_xml)
+    }
+    if type = hs
+    {
+        Loop, % xpath(xml, "/root/hotstrings/hs/count()")
+        {
+            load_expand := xpath(xml, "/root/hotstrings/hs[" . a_index . "]/@expand/text()")
+            load_expandto := xpath(xml, "/root/hotstrings/hs[" . a_index . "]/@expandto/text()")
+
+            if (load_expand = hs_expand || load_expandto = hs_expandto)
+            {
+                xpath(xml, "/root/hotstrings/hs[" . a_index . "]/remove()")
+                Loop, % xpath(xml, "/root/hotstrings/hs/count()")
+                {
+                    load_expand := xpath(xml, "/root/hotstrings/hs[" . a_index . "]/@expand/text()")
+                    load_expandto := xpath(xml, "/root/hotstrings/hs[" . a_index . "]/@expandto/text()")
+
+                    if (load_expand = hs_expand || load_expandto = hs_expandto)
+                        xpath(xml, "/root/hotstrings/hs[" . a_index . "]/remove()")
+                }
+            }
+        xpath_save(xml, s_xml)
+        }
     }
 }
 CleanXML(){
@@ -1306,6 +1493,7 @@ LV_Organize(lvName){
     Gosub, ReadXML
     if lvName = LV_hklist
     {
+        Gui, ListView, LV_hklist
         Loop, 4
         {
             if a_index = 4
@@ -1317,6 +1505,21 @@ LV_Organize(lvName){
             SB_SetText("`t" . hkcount . " Hotkey currently active")
         else
             SB_SetText("`t" . hkcount . " Hotkeys currently active")
+    }
+    if lvName = LV_hslist
+    {
+        Gui, ListView, LV_hslist
+        Loop, 3
+        {
+            if a_index = 1
+                LV_ModifyCol(a_index, "Center AutoHdr")
+            else
+                LV_ModifyCol(a_index, "AutoHdr")
+        }
+        if hscount = 1
+            SB_SetText("`t" . hscount . " Hotstrings currently active", 2)
+        else
+            SB_SetText("`t" . hscount . " Hotstrings currently active", 2)
     }
 }
 randomName(length = "", filext = ""){

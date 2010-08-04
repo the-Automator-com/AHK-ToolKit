@@ -1,4 +1,33 @@
-commit 5401b71b171dd5fbacdf94d02b5d80dd078031c9
+commit 7f7a5cd257db24148e30ad3e70cd57d43b507ed3
+Author: RaptorX <graptorx@gmail.com>
+Date:   Wed Aug 4 02:54:23 2010 +0200
+
+    AHK-TK v0.3.1
+    
+    Changed:
+    
+    * Update default message for Live Code
+    * Change Browse button for Run Command (Hotstrings GUI)
+    * Update ReadXML subroutine
+    * Update DelxmlInstance() function
+    * Update LV_Sub subroutine
+    * Update AddHotstring subroutine
+    * Update GuiReset() function
+    * Update CleanXML() function
+    * Update LV_Organize() function
+    * Add OnExit - Clean Directive
+    * Add LVHS_Load subroutine
+    * Fix minor formating issues
+    * Fix minor bugs
+    
+    Todo:
+    
+    * Fix small issues with Hotstrings
+    * Add edit function
+    * Add Send to Imagebin Functions
+    * Prepare for Options GUI
+
+commit ea7af08c52792a4cab4d1f50b33b75c59191b733
 Author: RaptorX <graptorx@gmail.com>
 Date:   Mon Aug 2 18:20:08 2010 +0200
 
