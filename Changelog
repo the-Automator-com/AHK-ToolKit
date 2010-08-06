@@ -1,4 +1,29 @@
-commit 7f7a5cd257db24148e30ad3e70cd57d43b507ed3
+commit b89502a92afab49bdb78deb984b52f9de63d44fd
+Author: RaptorX <graptorx@gmail.com>
+Date:   Fri Aug 6 18:03:05 2010 +0200
+
+    AHK-TK v0.3.2
+    
+    Changed:
+    
+    * Add Advanced Hotstrings Setup GUI
+    * Add edit hotstrings functionality
+    * Add multiline hotstring recognition
+    * Add conditional install of ahk/ and ahk/ahk.exe
+    * Add WM_LBUTTONDBLCLK() function
+    * Add Suspend Hotstrings Hotkey [ F4 ]
+    * Add EscapeXML() function
+    * Organized code for readability
+    * Fix formatting issues
+    * Fix small bugs
+    
+    ToDo:
+    
+    * Add Send to ImageBin Function
+    * Add Hashing functionality
+    * Options Gui
+
+commit 22ccb9f895e9eb9edf54ee1ebed272a6132bcd62
 Author: RaptorX <graptorx@gmail.com>
 Date:   Wed Aug 4 02:54:23 2010 +0200
 
@@ -20,7 +45,7 @@ Date:   Wed Aug 4 02:54:23 2010 +0200
     * Fix minor formating issues
     * Fix minor bugs
     
-    Todo:
+    ToDo:
     
     * Fix small issues with Hotstrings
     * Add edit function
