@@ -1,4 +1,24 @@
-commit b89502a92afab49bdb78deb984b52f9de63d44fd
+commit 87f045a45484daa0c4d5a903346bc88cbeaecc7f
+Author: RaptorX <graptorx@gmail.com>
+Date:   Fri Aug 6 18:03:05 2010 +0200
+
+    AHK-TK v0.3.3
+    
+    Changed:
+    
+    * Add SaveLiveCode() Function
+    * Add Edit Control Hotkeys
+    * Add function to temporarily save/retrieve written Live Code
+    * Fix Live Code Small Scripts buttons
+    * Updated Live Code message
+    
+    ToDo:
+    
+    * Add Send to ImageBin Function
+    * Add Hashing functionality
+    * Options Gui
+
+commit 6cad8f659dd4bb6001d20a4ba9df8c402d74dc70
 Author: RaptorX <graptorx@gmail.com>
 Date:   Fri Aug 6 18:03:05 2010 +0200
 
@@ -19,6 +39,8 @@ Date:   Fri Aug 6 18:03:05 2010 +0200
     
     ToDo:
     
+    * Fix Live Code Small Scripts buttons
+    * Add function to temporarily save/retrieve written Live Code
     * Add Send to ImageBin Function
     * Add Hashing functionality
     * Options Gui

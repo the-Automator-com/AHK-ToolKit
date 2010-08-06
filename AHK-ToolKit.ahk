@@ -1,14 +1,14 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.3.2
+Script Version: 0.3.3
 Homepage:
 
 Creation Date: July 11, 2010 | Modification Date: August 06, 2010
 
 [GUI Number Index]
 
-GUI 01 - Main [AHK-ToolKit]
+GUI 01 - Main [AutoHotkey ToolKit]
 GUI 02 - Advanced Hotstring Setup
 GUI 99 - PasteBin Popup
 GUI 98 - Send to PasteBin
@@ -29,7 +29,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.3.2"                  ; Script Version
+s_version   := "0.3.3"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -50,6 +50,9 @@ s_xml       := "res\ahk_tk.xml"         ; Optional xml file
 
 ;+--> ; ---------[User Configuration]---------
 Clipboard :=
+GroupAdd, Ahk_Tk, % "AutoHotkey ToolKit"
+GroupAdd, Ahk_Tk, % "Advanced Hotstring Setup"
+GroupAdd, Ahk_Tk, % "Send To Pastebin"
 FileRead, ahk_keywords, res\key.lst                     ; Used for the PasteBin routines
 reg_run := "Software\Microsoft\Windows\CurrentVersion\Run"
 mod_list := "mod_ctrl|mod_alt|mod_shift|mod_win"
@@ -62,11 +65,12 @@ hsloc := "res\tools\hslauncher.ahk"
 
 ; Live Code Scripts
 ;{
-live_code =
+s_livecode =
 (
 ; **************************************************************************
 ; * All live scripts start with the following default options:             *
-; * #NoEnv, #Persistent, SendMode Input, SetbatchLines -1 and Esc::ExitApp *
+; * #NoEnv, #SingleInstance Force, SendMode Input, SetbatchLines -1        *
+; * and Esc::ExitApp                                                       *
 ; *                                                                        *
 ; * You can enable change them  at any time using the normal options       *
 ; * (e.g.'SendMode Play' to override the SendMode)                         *
@@ -331,20 +335,25 @@ Gui, add, Button, w100 x+10 yp, % "&Close"
 
 Gui, Tab, Live Code
 Gui, Font, s8, Courier New
-Gui, add, Edit, w600 h215 WantTab T14 vlive_code, % live_code
+Gui, add, Edit, w600 h215 WantTab T14 vlive_code, % s_livecode
 Gui, Font
 Gui, add, Text, y+5, % "Some small tools:"
-Gui, add, Text, x+10 gTimedShutdown, % "Timed Shutdown"
+Gui, add, Radio, x+10 gTimedShutdown vTimedShutdown, % "Timed Shutdown"
 Gui, add, Text, wp+10 hp+5 xp-4 yp-2.5 0x8
-Gui, add, Text, x+10 yp+2.5 gSaveXYCoords, % "Save X,Y coord list"
+Gui, add, Radio, x+10 yp+2.5 gSaveXYCoords vSaveXYCoords, % "Save X,Y coord list"
 Gui, add, Text, wp+10 hp+5 xp-4 yp-2.5 0x8
-Gui, add, Text, x+10 yp+2.5 gTextControlsRefs, % "Text Controls Style Refs"
+Gui, add, Radio, x+10 yp+2.5 gTextControlsRefs vTextControlsRefs, % "Text Controls Style Refs"
+Gui, add, Text, wp+10 hp+5 xp-4 yp-2.5 0x8
+Gui, add, Text, x515 yp+2.5 gRetrieveLC vRetrieveLC, % "Retrieve Live Code"
 Gui, add, Text, wp+10 hp+5 xp-4 yp-2.5 0x8
 Gui, add, Text, w630 x0 y272 0x10
-Gui, add, Button, w100 x195 yp+10 gLiveRun, % "&Run"
+Gui, add, Button, w100 x190 yp+10 gLiveRun, % "&Run"
 Gui, add, Button, w100 x+5 yp gLiveSavetoFile, % "&Save to File"
 Gui, add, Button, w100 x+5 yp gLiveClear, % "Cl&ear"
 Gui, add, Button, w100 x+10 yp, % "&Close"
+
+Gui, Tab, Options
+Gui, add, Picture, w600 h280, res/img/UnderConstruction.png
 
 Gui, Show, Hide ;w619 h341
 SB_SetParts(150,150)
@@ -1236,19 +1245,44 @@ return
 
 TimedShutdown:
 ;{
+ savelivecode()
  GuiControl,, live_code, % TimedShutdown_s
+ GuiControl,, SaveXYCoords, 0
+ GuiControl,, TextControlsRefs, 0 
 return
 ;}
 
 SaveXYCoords:
 ;{
+ savelivecode()
  GuiControl,, live_code, % SaveXYCoords_s
+ GuiControl,, TimedShutdown, 0
+ GuiControl,, TextControlsRefs, 0
 return
 ;}
 
 TextControlsRefs:
 ;{
+ savelivecode()
  GuiControl,, live_code, % TextControlsRefs_s
+ GuiControl,, TimedShutdown, 0
+ GuiControl,, SaveXYCoords, 0
+return
+;}
+
+RetrieveLC:
+;{
+ GuiControl,, TimedShutdown, 0
+ GuiControl,, SaveXYCoords, 0
+ GuiControl,, TextControlsRefs, 0
+ 
+ if w_livecode
+ {
+    GuiControl,,live_code, % w_livecode
+    w_livecode := 
+ }
+ else
+    GuiControl,,live_code, % s_livecode
 return
 ;}
 
@@ -1268,7 +1302,7 @@ LiveRun:
     live_code =
     (Ltrim
         #NoEnv
-        #Persistent
+        #SingleInstance Force
         ; --
         SendMode Input
         SetBatchLines -1
@@ -1332,6 +1366,9 @@ return
 LiveClear:
 ;{
  GuiControl,,live_code,
+ GuiControl,, TimedShutdown, 0
+ GuiControl,, SaveXYCoords, 0
+ GuiControl,, TextControlsRefs, 0
 return
 ;}
 
@@ -1784,6 +1821,14 @@ randomName(length = "", filext = ""){
     }
     return RName . "." . filext
 }
+SaveLiveCode(){
+    Global
+    Gui, Submit, NoHide
+    if live_code contains %TextControlsRefs_s%, %SaveXYCoords_s%, %TimedShutdown_s%
+        live_code :=
+    else
+        w_livecode := live_code
+}
 WM_LBUTTONDBLCLK(wParam, lParam){
     Global
     if a_guicontrol = hs_expandto
@@ -1836,6 +1881,55 @@ return
  nick :=
  Gosub, ^+a
 return
+#IfWinActive
+;-
+;+> ; [Hotkeys for Edit controls]
+#IfWinActive, ahk_group Ahk_Tk
+
+^d::                                ; [Ctrl + D] Duplicate Line 
+ clipold := clipboard
+ Send {Home}+{End}^c{End}{Enter}^v
+ clipboard := clipold
+return
+
+^+Up::                              ; [Ctrl + Shift + Up] Move Up Current Line
+ clipold := clipboard
+ Send {Home}+{End}^x{Delete}{Up}{Enter}{Up}^v{Home}
+ clipboard := clipold
+return
+
+^+Down::                            ; [Ctrl + Shift + Up] Move Down Current Line
+ clipold := clipboard
+ Send {Home}+{End}^x{Delete}{End}{Enter}^v{Home}
+ clipboard := clipold
+return
+
+^u::                                ; [Ctrl + u] UPPERCASE
+ clipold := clipboard
+ Send ^x
+ StringUpper, clipboard, clipboard
+ Send ^v
+ clipboard := clipold
+return
+
+^+u::                                ; [Ctrl + Shift u] lowercase
+ clipold := clipboard
+ Send ^x
+ StringLower, clipboard, clipboard
+ Send ^v
+ clipboard := clipold
+return
+
+^q::                                ; [Ctrl + q] Comment one Line
+ clipold := clipboard
+ Send {Home}+{Right}^c
+ if clipboard contains `;
+    Send {Home}{Delete 2}
+ Else
+    Send {Home}; {Home}
+ clipboard := clipold
+return
+
 #IfWinActive
 ;-
 ;-
