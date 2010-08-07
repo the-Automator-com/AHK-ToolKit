@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.3.3
+Script Version: 0.4
 Homepage:
 
 Creation Date: July 11, 2010 | Modification Date: August 06, 2010
@@ -10,6 +10,7 @@ Creation Date: July 11, 2010 | Modification Date: August 06, 2010
 
 GUI 01 - Main [AutoHotkey ToolKit]
 GUI 02 - Advanced Hotstring Setup
+GUI 03 - Selection Box
 GUI 99 - PasteBin Popup
 GUI 98 - Send to PasteBin
 GUI 97 - Pastebin Success Popup
@@ -24,12 +25,13 @@ SetBatchLines -1
 ; --
 SendMode Input
 SetWorkingDir %A_ScriptDir%
+CoordMode, Mouse, Screen
 onExit, Clean
 ;-
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.3.3"                  ; Script Version
+s_version   := "0.4"                    ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -41,6 +43,7 @@ hour        :=  min * 60                ; 1 hour
 ; --
 SysGet, mon, Monitor                    ; Get the boundaries of the current screen
 SysGet, wa_, MonitorWorkArea            ; Get the working area of the current screen
+WinGet, DeskHwnd, ID, Program Manager   ; Get the current Hwnd of the Destop
 mid_scrw    :=  a_screenwidth / 2       ; Middle of the screen (width)
 mid_scrh    :=  a_screenheight / 2      ; Middle of the screen (heigth)
 ; --
@@ -353,7 +356,7 @@ Gui, add, Button, w100 x+5 yp gLiveClear, % "Cl&ear"
 Gui, add, Button, w100 x+10 yp, % "&Close"
 
 Gui, Tab, Options
-Gui, add, Picture, w600 h280, res/img/UnderConstruction.png
+Gui, add, Picture, w600 h280, res\img\UnderConstruction.png
 
 Gui, Show, Hide ;w619 h341
 SB_SetParts(150,150)
@@ -374,6 +377,12 @@ Gui, 2: add, Button, w100 x+5 yp gLiveRun, % "Test Code"
 Gui, 2: add, Button, w100 x+10 yp gGuiCancel, % "Cancel"
 
 Gui, 2: Show, Hide ;w420 h335
+;}
+
+; Selection Box GUI
+;{
+Gui, 3: -Caption +ToolWindow
+Gui, 3: Show, Hide
 ;}
 
 ; PasteBin Popup GUI
@@ -936,7 +945,7 @@ PopYes:                                                             ; Popup YES
 AUS:
  /*
   * This will replace the includes for the actual files to avoid
-  * the issues of missing includes on pasted code
+  * the issues of missing includes on Pasted code
   */
  Loop, parse, clipboard, `n, `r
  {
@@ -1018,7 +1027,7 @@ SendAUS:
         return
     }
     paste_url := "http://www.autohotkey.net/paste/" . Match2
-    pasted()
+    Pasted()
  }
  else if ddl_pastebin = Pastebin.com
  {
@@ -1048,7 +1057,7 @@ SendAUS:
 
     httpquery(paste_url := "", URL, POST)
     VarSetCapacity(paste_url, -1)
-    pasted()
+    Pasted()
  }
  else if ddl_pastebin = Paste2.org
  {
@@ -1068,7 +1077,7 @@ SendAUS:
         return
     }
     paste_url := "http://paste2.org/p/" . Match1
-    pasted()
+    Pasted()
  }
 return
 ;}
@@ -1292,7 +1301,7 @@ LiveRun:
     Gui, 2: Default
  Gui, Submit, NoHide
 
- if lcf_name := a_temp . "\" . randomName(8,"ahk")        ; Random Live Code Path
+ if lcf_name := a_temp . "\" . RandomName(8, "ahk")        ; Random Live Code Path
  {
     if a_gui = 1
         append_code := live_code
@@ -1458,11 +1467,11 @@ DDL_Pastebin:
 ;{
  Gui, 98: Submit, NoHide
  if ddl_pastebin = AutoHotkey.net
-    ena_control(1,1,0,0)
+    Ena_Control(1,1,0,0)
  else if ddl_pastebin = Pastebin.com
-    ena_control(1,1,1,1)
+    Ena_Control(1,1,1,1)
  else if ddl_pastebin = Paste2.org
-    ena_control(1,0,0,0)
+    Ena_Control(1,0,0,0)
 return
 ;}
 
@@ -1513,7 +1522,7 @@ ExitApp
 ;-
 
 ;+--> ; ---------[Functions]---------
-ena_control(name = "", subdomain = "", exposure = "", expiration = ""){
+Ena_Control(name = "", subdomain = "", exposure = "", expiration = ""){
     _var_list  := "name|subdomain|exposure|expiration"
 
     Loop, parse, _var_list, |
@@ -1524,7 +1533,7 @@ ena_control(name = "", subdomain = "", exposure = "", expiration = ""){
             GuiControl, 98: Disable, pb_%a_loopfield%
     }
 }
-pasted(){
+Pasted(){
     Global
     FormatTime,cur_time,,[MMM/dd/yyyy - HH:mm:ss]
     code_preview :=
@@ -1807,7 +1816,7 @@ LV_Organize(lvName){
             SB_SetText("`t" . hscount . " Hotstrings currently active", 2)
     }
 }
-randomName(length = "", filext = ""){
+RandomName(length = "", filext = ""){
     Loop, % length
     {
         Assign:
@@ -1883,6 +1892,29 @@ return
 return
 #IfWinActive
 ;-
+;+> ; [Alt + LButton] Screen Capture Active Window/Area
+~!LButton::
+ Sleep 10                               ; This fixes a problem when Alt+Clicking a window that was not active.
+ MouseGetPos, scXL, scYT, scWinHwnd
+ if (scWinHwnd && scWinHwnd != DeskHwnd)
+	CaptureScreen(1, 0, a_desktop . "\" . scWin := RandomName(8, "png"))
+ Gui, 3: Show, w1 h1 x%scXL% y%scYT%, %a_space%
+ WinSet, Transparent, 120, %a_space%
+
+ While GetKeyState("LButton", "P")
+ {
+	CoordMode, Mouse, Screen
+	MouseGetPos, scXR, scYB             ; This must be relative to the screen for use with the ScreenCapture
+	CoordMode, Mouse, Relative
+	MouseGetPos, rel_scXR, rel_scYB     ; This is just for creating the selection window, it must be relative
+	WinMove,%a_space%,,,, %rel_scXR%, %rel_scYB%
+	ToolTip, %rel_scXR%`, %rel_scYB%
+ }
+ ToolTip
+ Gui, 3: Hide
+ CaptureScreen(scXL "," scYT "," scXR "," scYB, 0, a_desktop . "\" . scRect := RandomName(8, "png"))
+return
+;-
 ;+> ; [Hotkeys for Edit controls]
 #IfWinActive, ahk_group Ahk_Tk
 
@@ -1940,6 +1972,7 @@ return
 #Include lib\klist.ahk
 #Include lib\xpath.ahk
 #Include lib\hkSwap.ahk
+#Include lib\sc.ahk
 ;-
 
 /*

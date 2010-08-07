@@ -1,4 +1,21 @@
-commit 87f045a45484daa0c4d5a903346bc88cbeaecc7f
+commit 9a3baaf98326d2acf86fa070b6f8f89d39a84af5
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 7 12:31:20 2010 +0200
+
+    AHK-TK v0.4
+    
+    Changed:
+    
+    * Add Screen Capture Functions
+    * Add Selection Box GUI
+    * Fix formatting
+    
+    Todo:
+    
+    * Add Upload Images functions
+    * Options GUI
+
+commit 4f0310c67ea2171fe8cb02501379dec96df3d4e3
 Author: RaptorX <graptorx@gmail.com>
 Date:   Fri Aug 6 18:03:05 2010 +0200
 
@@ -9,6 +26,7 @@ Date:   Fri Aug 6 18:03:05 2010 +0200
     * Add SaveLiveCode() Function
     * Add Edit Control Hotkeys
     * Add function to temporarily save/retrieve written Live Code
+    * Add temporal message for options
     * Fix Live Code Small Scripts buttons
     * Updated Live Code message
     
