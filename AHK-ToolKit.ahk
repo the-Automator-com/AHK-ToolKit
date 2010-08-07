@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.4.1
+Script Version: 0.4.2
 Homepage:
 
 Creation Date: July 11, 2010 | Modification Date: August 06, 2010
@@ -30,7 +30,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.1"                  ; Script Version
+s_version   := "0.4.2"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -258,8 +258,8 @@ GuiClose:
 if !FileExist("res")
 {
     FileCreateDir, % "res\tools"
-    FileInstall, % "res\key.lst", % "res\key.lst", 1
-    FileInstall, % "res\tools\rh.exe", % "res\tools\rh.exe", 1
+    FileInstall, res\key.lst, res\key.lst, 1
+    FileInstall, res\tools\rh.exe, res\tools\rh.exe, 1
 }
 
 ;First Run GUI
@@ -298,9 +298,9 @@ if !load := xpath_load(xml, s_xml)
 if !ahkexist
 {
     if !FileExist("res\ahk")
-        FileCreateDir, % "res\ahk"
+        FileCreateDir, res\ahk
     if !FileExist("res\ahk\ahk.exe")
-        FileInstall, % "res\ahk\ahk.exe", % "res\ahk\ahk.exe", 1
+        FileInstall, res\ahk\ahk.exe, res\ahk\ahk.exe, 1
 }
 ;-
 
@@ -314,13 +314,13 @@ Gui, add, Tab2, w620 h340 x0 y0, % "Hotkeys|Hotstrings|Live Code|Options"
 Gui, add, StatusBar,, % "Add new hotkeys / hotstrings"
 
 Gui, Tab, Hotkeys
-Gui, add, ListView, w600 r15 Sort Grid AltSubmit gLV_Sub vLV_hklist, % "Type|Program Name|Hotkey|Program Path"
+Gui, add, ListView, w600 h234 Sort Grid AltSubmit gLV_Sub vLV_hklist, % "Type|Program Name|Hotkey|Program Path"
 Gui, add, Text, w630 x0 y272 0x10
 Gui, add, Button, w100 x400 yp+10 Default gAddHotkey, % "&Add"
 Gui, add, Button, w100 x+10 yp, % "&Close"
 
 Gui, Tab, Hotstrings
-Gui, add, ListView, w600 r9 Grid AltSubmit gLV_Sub vLV_hslist, % "Options|Abreviation|Expand To"
+Gui, add, ListView, w600 h150 Grid AltSubmit gLV_Sub vLV_hslist, % "Options|Abreviation|Expand To"
 Gui, add, Text, y+10, % "Expand:"
 Gui, add, Edit, w150 x+10 yp-3 vhs_expand
 Gui, add, Text, x+10 yp+3, % "To:"
@@ -1320,7 +1320,8 @@ LiveRun:
         hour        :=  min * 60           ; 1 hour
         
         %append_code%
-
+        
+        GuiClose:
         Esc::ExitApp
     )
     FileAppend, %live_code%, %lcf_name%
@@ -1965,12 +1966,12 @@ return
 ;-
 
 ;+--> ; ---------[Includes]---------
-#Include *i C:\Documents and Settings\RaptorX\My Documents\AutoHotkey ; Current Library
-#Include lib\httpQuery.ahk
-#Include lib\klist.ahk
-#Include lib\xpath.ahk
-#Include lib\hkSwap.ahk
-#Include lib\sc.ahk
+#Include *i %a_scriptdir%\extlib ; Current Library
+#Include httpQuery.ahk
+#Include klist.ahk
+#Include xpath.ahk
+#Include hkSwap.ahk
+#Include sc.ahk
 ;-
 
 /*
