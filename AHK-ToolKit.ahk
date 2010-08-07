@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.4
+Script Version: 0.4.1
 Homepage:
 
 Creation Date: July 11, 2010 | Modification Date: August 06, 2010
@@ -25,13 +25,12 @@ SetBatchLines -1
 ; --
 SendMode Input
 SetWorkingDir %A_ScriptDir%
-CoordMode, Mouse, Screen
 onExit, Clean
 ;-
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4"                    ; Script Version
+s_version   := "0.4.1"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -56,13 +55,13 @@ Clipboard :=
 GroupAdd, Ahk_Tk, % "AutoHotkey ToolKit"
 GroupAdd, Ahk_Tk, % "Advanced Hotstring Setup"
 GroupAdd, Ahk_Tk, % "Send To Pastebin"
-FileRead, ahk_keywords, res\key.lst                     ; Used for the PasteBin routines
+FileRead, ahk_keywords, % "res\key.lst"                   ; Used for the PasteBin routines
 reg_run := "Software\Microsoft\Windows\CurrentVersion\Run"
 mod_list := "mod_ctrl|mod_alt|mod_shift|mod_win"
 hs_optlist := "hs_iscommand|hs_dnd|hs_trigger|hs_raw"
 exc := "ScrollLock|CapsLock|NumLock|NumpadIns|NumpadEnd|NumpadDown|NumpadPgDn|NumpadLeft"
 . "|NumpadClear|NumpadRight|NumpadHome|NumpadUp|NumpadPgUp|NumpadDel|LWin|RWin|LControl"
-. "|RControl|LShift|RShift|LAlt|RAlt|CtrlBreak|Control|Alt|Shift|AppsKey"
+. "|RControl|LShift|RShift|LAlt|RAlt|CtrlBreak|Control|Alt|Shift|AppsKey|/"
 keylist := "None||" . klist(2,0,1, exc)
 hsloc := "res\tools\hslauncher.ahk"
 
@@ -114,13 +113,12 @@ s_file := a_desktop . "\xy-coords.txt"		; Change as desired
 Loop
 {
 	MouseGetPos, X, Y
-	ToolTip, x`%X`% - y`%Y`%					; Tooltip to make everything easier
+	ToolTip, x(`%X`%)``, y(`%Y`%)				; Tooltip to make everything easier
 	Sleep 10
 }
 
-LButton::FileAppend, `%X`%``,`%Y`%``n, `%s_file`%   ; Save coords to parse e.g. 300,400
-RButton::
-Esc::ExitApp
+~LButton::FileAppend, `%X`%`,`%Y`%``n, `%s_file`%  ; Save coords to parse e.g. 300,400
+RButton::ExitApp
 )
 
 TextControlsRefs_s =
@@ -259,9 +257,9 @@ GuiClose:
 ; Resources folder
 if !FileExist("res")
 {
-    FileCreateDir, res\tools
-    FileInstall, res\key.lst, res\key.lst, 1
-    FileInstall, res\tools\rh.exe, res\tools\rh.exe, 1
+    FileCreateDir, % "res\tools"
+    FileInstall, % "res\key.lst", % "res\key.lst", 1
+    FileInstall, % "res\tools\rh.exe", % "res\tools\rh.exe", 1
 }
 
 ;First Run GUI
@@ -300,9 +298,9 @@ if !load := xpath_load(xml, s_xml)
 if !ahkexist
 {
     if !FileExist("res\ahk")
-        FileCreateDir, res\ahk
+        FileCreateDir, % "res\ahk"
     if !FileExist("res\ahk\ahk.exe")
-        FileInstall, res\ahk\ahk.exe, res\ahk\ahk.exe, 1
+        FileInstall, % "res\ahk\ahk.exe", % "res\ahk\ahk.exe", 1
 }
 ;-
 
@@ -356,7 +354,7 @@ Gui, add, Button, w100 x+5 yp gLiveClear, % "Cl&ear"
 Gui, add, Button, w100 x+10 yp, % "&Close"
 
 Gui, Tab, Options
-Gui, add, Picture, w600 h280, res\img\UnderConstruction.png
+Gui, add, Picture, w600 h280, % "res\img\UnderConstruction.png"
 
 Gui, Show, Hide ;w619 h341
 SB_SetParts(150,150)
@@ -721,10 +719,10 @@ Hotkeyit:
  }
  key := a_thishotkey
  key := hkSwap(key, "long")
- name := xpath(xml, "/root/hotkeys/hk[@key=" . key . "]/@name/text()")
+ exec := xpath(xml, "/root/hotkeys/hk[@key=" . key . "]/@exec/text()")
  type := xpath(xml, "/root/hotkeys/hk[@key=" . key . "]/@type/text()")
  if type = File
-    Run % path := xpath(xml,"/root/hotkeys/hk[@key=" . key . "]/@dir/text()") . "\" . name
+    Run % path := xpath(xml,"/root/hotkeys/hk[@key=" . key . "]/@dir/text()") . "\" . exec
  else if type = Folder
     Run % path := xpath(xml,"/root/hotkeys/hk[@key=" . key . "]/@dir/text()")
 return
@@ -735,12 +733,12 @@ GuiDropFiles:
  if a_guicontrol = LV_hklist
  {
     dropped := 1
-    SplitPath, a_guievent,,prog_dir,,prog_name
+    SplitPath, a_guievent,prog_exec, prog_dir,, prog_name
     StringUpper, prog_name, prog_name, T
     if a_guievent contains .lnk             ; Resolve the link target instead of using the link's directory
     {
         FileGetShortcut, %a_guievent%, prog_target
-        SplitPath, prog_target,,prog_dir,,prog_name
+        SplitPath, prog_target,prog_exec, prog_dir,, prog_name
     }
     GuiControl, 96:, e_progpath, % prog_dir
  }
@@ -1144,6 +1142,7 @@ AddHotkey:
         LV_Add("", r_selfof, prog_name, prog_hkL, prog_dir)
         xpath(xml, "/root/hotkeys/hk[+1]/@type/text()", r_selfof)
         xpath(xml, "/root/hotkeys/hk[last()]/@name/text()", prog_name)
+        xpath(xml, "/root/hotkeys/hk[last()]/@exec/text()", prog_exec)
         xpath(xml, "/root/hotkeys/hk[last()]/@key/text()", prog_hkL)
         xpath(xml, "/root/hotkeys/hk[last()]/@dir/text()", prog_dir)
         Sleep, 100              ; Give it little time before saving since we are using SetBatchLines -1
@@ -1333,7 +1332,7 @@ LiveRun:
     if ahkexist
         Run, %lcf_name%
     else
-        Run, res\ahk\ahk.exe "%lcf_name%"
+        Run, "res\ahk\ahk.exe" "%lcf_name%"
     Sleep, 500
     FileDelete, %lcf_name%
  }
@@ -1393,7 +1392,7 @@ ProgBrowse:
  else if r_selfof = 2
     FileSelectFolder, sel_prog, *%a_programfiles%, 3, % "Select the folder to be launched"
 
- SplitPath, sel_prog,,prog_dir,,prog_name
+ SplitPath, sel_prog,prog_exec, prog_dir,, prog_name
  if r_selfof = 2
     prog_dir := prog_dir . "\" . prog_name          ; Needed to have the complete dir since prog_dir would not have
                                                     ; the last folder name included in this case.
@@ -1556,7 +1555,7 @@ Pasted(){
 ----------------------------------------------------------------------
 %code_preview%
 ----------------------------------------------------------------------`n`n
-    ), res\pastebin-log.dat
+    ), % "res\pastebin-log.dat"
     Sleep, 3 * sec
     Gui, 97: Hide
 }
@@ -1607,14 +1606,13 @@ CheckLV(lvName){
         {
             LV_GetText(cname, a_index, 2)
             LV_GetText(chk, a_index, 3)
-            LV_GetText(cdir, a_index, 4)
 
-            if (cname != prog_name && chk != prog_hkL && cdir != prog_dir)
+            if (cname != prog_name && chk != prog_hkL)
             {
                 isNew := True
                 continue
             }
-            else if (cname = prog_name || chk = prog_hkL || cdir = prog_dir)
+            else if (cname = prog_name || chk = prog_hkL)
             {
                 Msgbox,36,% "Duplicate Found"
                 , % "The hotkey or program that you are trying to set up was already found.`n"

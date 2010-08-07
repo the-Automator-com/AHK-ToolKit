@@ -1,4 +1,22 @@
-commit 9a3baaf98326d2acf86fa070b6f8f89d39a84af5
+commit bb6780cff9a5bce2cc070435c5011762ebf8cc6d
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 7 14:31:52 2010 +0200
+
+    AHK-TK v0.4.1
+    
+    Changed:
+    
+    * Add / to the excluded key on the keylist
+    * Update Save X,Y coords script
+    * Fix Run Files
+    * Fix formatting
+    
+    ToDo:
+    
+    * Add upload to ImageBin functionality
+    * Options GUI
+
+commit 23308123aa9ad4e0003a7e61f86908bb49a95a89
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Aug 7 12:31:20 2010 +0200
 
