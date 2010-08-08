@@ -1,4 +1,64 @@
-commit bb6780cff9a5bce2cc070435c5011762ebf8cc6d
+commit 45a257deb573548b7fec8fa3640f1619a6a5bf24
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sun Aug 8 10:26:27 2010 +0200
+
+    AHK-TK v0.4.4
+    
+    Changed:
+    
+    * Add Image Upload Subroutine
+      + Stable using cURL
+    * Add variables for tools
+    * Add way to make sure the Pastebin PopUp dont come up when clipboard is restored
+    * Add descriptive tooltips. Better for giving information.
+    * Changed location of the image file to upload.
+    * Merged MakeProperBoundary() with RandomName. RName() function created
+    
+    ToDo:
+    * Make Image Upload more stable
+    * Options GUI
+    * Add Hashing functions
+
+commit a15c6ce3ae60be760103de3cdf7adcd453036126
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sun Aug 8 10:26:27 2010 +0200
+
+    AHK-TK v0.4.3
+    
+    Changed:
+    
+    * Add Image Upload Subroutine
+      - Not stable
+    * Change the way the PID of the hotsring launcher is retrieved
+    * Add CheckCtrlV subroutine
+    * Add more reliable way for keeping old clipboard with SetTimer
+    * Add MakeProperBoundary() and MIMEtype() Functions
+    * Add suspend Hotkey [F12]
+    * Changed the way Alt + Click works (More reliable)
+    
+    ToDo:
+    
+    * Make Image Upload more stable
+    * Options GUI
+
+commit 8a61ca004969ba34ed78217310a91c75b68c69ed
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 7 16:23:03 2010 +0200
+
+    AHK-TK v0.4.2
+    
+    Changed:
+    
+    * Add extlib folder with Include Files
+    * Change Library folder
+    * Revert Format changes from last commit
+    
+    ToDo:
+    
+    * Add upload to Imagebin functions
+    * Options Gui
+
+commit 44d603d10cf15ec32feca13370949030812a9b71
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Aug 7 14:31:52 2010 +0200
 

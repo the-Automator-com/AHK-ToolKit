@@ -1,10 +1,10 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.4.3
+Script Version: 0.4.4
 Homepage:
 
-Creation Date: July 11, 2010 | Modification Date: August 08, 2010
+Creation Date: July 11, 2010 | Modification Date: August 09, 2010
 
 [GUI Number Index]
 
@@ -28,9 +28,9 @@ SetWorkingDir %A_ScriptDir%
 onExit, Clean
 ;-
 
-;+-->; ---------[Basic Info]---------
+;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.3"                  ; Script Version
+s_version   := "0.4.4"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -56,7 +56,7 @@ GroupAdd, Ahk_Tk, % "AutoHotkey ToolKit"
 GroupAdd, Ahk_Tk, % "Advanced Hotstring Setup"
 GroupAdd, Ahk_Tk, % "Send To Pastebin"
 FileRead, ahk_keywords, % "res\key.lst" ; Used for the PasteBin routines
-reg_run   := "Software\Microsoft\Windows\CurrentVersion\Run"
+reg_SMWCVR:= "Software\Microsoft\Windows\CurrentVersion\Run"
 mod_list  := "mod_ctrl|mod_alt|mod_shift|mod_win"
 hs_optlist:= "hs_iscommand|hs_dnd|hs_trigger|hs_raw"
 exc       := "ScrollLock|CapsLock|NumLock|NumpadIns|NumpadEnd|NumpadDown|NumpadPgDn|NumpadLeft"
@@ -64,6 +64,8 @@ exc       := "ScrollLock|CapsLock|NumLock|NumpadIns|NumpadEnd|NumpadDown|NumpadP
 . "|RControl|LShift|RShift|LAlt|RAlt|CtrlBreak|Control|Alt|Shift|AppsKey|/"
 keylist   := "None||" . klist(2,0,1, exc)
 resahk    := "res\ahk\ahk.exe"
+rescurl   := "res\tools\curl\cu.exe"
+resrehash := "res\tools\rh.exe"
 hsloc     := "res\tools\hslauncher.ahk"
 
 ; Live Code Scripts
@@ -287,7 +289,7 @@ if !load := xpath_load(xml, s_xml)
     Gui, 50: Font, s7
     Gui, 50: add, Text,x10, % "Notes:`nIf no hotkey is selected the default `nwill be Win + ``  (Back Tic)`n`n"
                             . "If AutoUpload is selected the link for `nthe uploaded script will be copied to the "
-                            . "clipboard"
+                            . "Clipboard"
     Gui, 50: add, Text, w370 x0 y+20 0x10
     Gui, 50: add, Button, w100 x260 yp+10 gFR_Save, Save
     
@@ -436,7 +438,7 @@ Gui, 97: add, Text, w250 x0 Center, % "Code Uploaded Succesfully"
 Gui, 97: add, Text, w260 x0 0x10
 Gui, 97: Font, s8 normal
 Gui, 97: add, Text, w250 x5 yp+5, % "The code has been uploaded correctly.`n"
-                                  . "The link has been copied to the clipboard"
+                                  . "The link has been copied to the Clipboard"
 Gui, 97: add, Text, w260 x0 0x10
 Gui, 97: Show, NoActivate w250 h90 x1024 y768
 WinGet, 97Hwnd, ID,, % "Code Uploaded Succesfully"
@@ -901,7 +903,6 @@ return
 OnClipboardChange:
 ;{
  Gosub, ReadXML
- kword_count:=
 /*
 * This checks if the clipboard contains keywords from ahk scripting
 * if it contains more than x ammount of keywords it will fire up the pastebin
@@ -927,7 +928,7 @@ PasteBin:
 ;{
  Gui, 99: Show, NoActivate w250 h150 x%monRight% y%monBottom%
  Gui, 99: Submit, NoHide
- if pastepop_ena
+ if (!oldScript && pastepop_ena)
  {
     WinGetPos,,,99Width,99Height,ahk_id %99Hwnd%                    ; Get Window width and Height
     WinMove, ahk_id %99Hwnd%,,,% wa_Bottom - 99Height               ; Move the window to correct position
@@ -940,6 +941,8 @@ PasteBin:
  Sleep, 5 * sec
  Gui, 99: Hide
  }
+ else
+    oldScript := False
 return
 ;}
 
@@ -951,7 +954,7 @@ AUS:
   * This will replace the includes for the actual files to avoid
   * the issues of missing includes on Pasted code
   */
- Loop, parse, clipboard, `n, `r
+ Loop, parse, Clipboard, `n, `r
  {
     if a_loopfield contains #Include
     {
@@ -960,7 +963,7 @@ AUS:
             FileRead, inc_%a_index%, %inc_file%
         else
             SetWorkingDir, %inc_file%
-        Stringreplace, clipboard, clipboard, %a_loopfield%, % inc_%a_index%
+        Stringreplace, Clipboard, Clipboard, %a_loopfield%, % inc_%a_index%
     }
  } ; Finish Replacing
  SetWorkingDir %A_ScriptDir%
@@ -969,16 +972,16 @@ AUS:
   * when sending the httpQUERY. They are automatically converted back
   * by the HTTP request, so no need to worry there.
   */
- StringReplace, clipboard, clipboard,`%, `%25, 1
- StringReplace, clipboard, clipboard, &, `%26, 1
- StringReplace, clipboard, clipboard, +, `%2B, 1
+ StringReplace, Clipboard, Clipboard,`%, `%25, 1
+ StringReplace, Clipboard, Clipboard, &, `%26, 1
+ StringReplace, Clipboard, Clipboard, +, `%2B, 1
  ; Finish Replacing
  if aus
 {
     ; Some default values
     xpath_load(xml, s_xml)
     autoirc  := xpath(xml, "/root/options/AUS/AutoHotkey/@autoirc/text()")
-    ahk_code := clipboard
+    ahk_code := Clipboard
     pb_name  := "Code auto uploaded with " . s_name . " v" . s_version
     if (autoirc && ddl_pastebin = "AutoHotkey.net")
         pb_subdomain    := xpath(xml, "/root/options/AUS/AutoHotkey/@nick/text()")
@@ -992,7 +995,7 @@ AUS:
 
     Goto, SendAUS
 }
- GuiControl, 98:, ahk_code, %clipboard%
+ GuiControl, 98:, ahk_code, %Clipboard%
  Gui, 98: Show, w640 h550, % "Send To Pastebin"
  Gui, 98: Submit, NoHide
 return
@@ -1127,49 +1130,40 @@ return
 
 ImageUpload:
 ;{
-if FileExist(scWin)
+ if FileExist(scWin)
     image := scWin
-else if FileExist(scRect)
+ else if FileExist(scRect)
     image := scRect
 
-FileGetSize,size,%image%
-SplitPath,image,OFN
-FileRead,img,%image%
-VarSetCapacity(placeholder,size,32+2)
-boundary := makeProperBoundary()
-post:="--" . boundary
-. "`nContent-Disposition: form-data; name=""uploadtype""`n`n"
-. "on`n"
-. "--" . boundary
-. "`ncontent-disposition: form-data; name=""xml""`n`n"
-. "yes`n"
-. "--" . boundary
-. "`nContent-Disposition: form-data; name=""fileupload""; filename=""" . ofn
-. "`nContent-Type: " . MimeType(img) . "`n`n"
-. placeholder
-. "`n--" . boundary . "--"
-headers:="Content-type: multipart/form-data, boundary=" boundary "`nContent-Length: " strlen(post)
-DllCall("RtlMoveMemory","uInt",(offset:=&post+strlen(post)-strlen(Boundary)-size-5)
-     ,"uInt",&img,"uInt",size)
-size := httpQuery(result:="","http://www.imageshack.us/index.php",post,headers)
-VarSetCapacity(result,-1)
-msgbox % result
-RegexMatch(result,"<image_link>(.*?)<", Match)
-clipold := clipboard
-MsgBox % clipboard := Match1
-SetTimer, CheckCtrlV, 50
+ nick := "AHK-TK_" . a_computername
+    
+ RunWait %comspec% /c "%rescurl% -i -F nickname=`"%nick%`" -F image=@`"%image%;type=image/png`" -F disclaimer_agree=Y -F Submit=Submit -F mode=add http://www.imagebin.org/index.php  > `"%a_temp%`"\url",, Hide
+ FileRead, url, %a_temp%\url
+ FileDelete, %a_temp%\url
+ RegexMatch(url,"\w+:\s(\d+)", Match)
+ clipold := Clipboard
+ if !Match1
+ {
+    Tooltip, % "There was an error uploading the picture, try again.", 5, 5
+    Sleep, 5 * sec
+    Tooltip
+    return
+ }
+ Tooltip, % Clipboard := "http://www.imagebin.org/" . Match1, 5,5
+ SetTimer, CheckCtrlV, 30
 return
 ;}
 
 CheckCtrlV:
 ;{
- if (getkeystate("ctrl", "p") && getkeystate("v", "p"))
+ if (GetKeyState("Ctrl", "p") && GetKeyState("v", "p") || GetKeyState("Escape", "p"))
  {
-    clipboard := clipold
+    Clipboard := clipold
     SetTimer, CheckCtrlV, off
+    Tooltip
  }
-;}
 return
+;}
 
 AddHotkey:
 ;{
@@ -1356,7 +1350,7 @@ LiveRun:
     Gui, 2: Default
  Gui, Submit, NoHide
 
- if lcf_name := a_temp . "\" . RandomName(8, "ahk")        ; Random Live Code Path
+ if lcf_name := a_temp . "\" . RName(8, "ahk")        ; Random Live Code Path
  {
     if a_gui = 1
         append_code := live_code
@@ -1591,12 +1585,13 @@ Ena_Control(name = "", subdomain = "", exposure = "", expiration = ""){
 }
 Pasted(){
     Global
+    oldScript := True
     FormatTime,cur_time,,[MMM/dd/yyyy - HH:mm:ss]
     code_preview :=
     xpos := wa_Right - 250 - 5
     ypos := wa_Bottom - 90
-    clipold := clipboard
-    clipboard := paste_url
+    clipold := Clipboard
+    Tooltip, % Clipboard := paste_url, 5, 5
     Gui, 97: Show, x%xpos% y%ypos%
     Loop, parse, ahk_code, `n, `r
     {
@@ -1616,7 +1611,7 @@ Pasted(){
     ), % "res\pastebin-log.dat"
     Sleep, 3 * sec
     Gui, 97: Hide
-    SetTimer, CheckCtrlV, 100
+    SetTimer, CheckCtrlV, 30
 }
 GuiReset(guinum){
     Global
@@ -1873,19 +1868,24 @@ LV_Organize(lvName){
             SB_SetText("`t" . hscount . " Hotstrings currently active", 2)
     }
 }
-RandomName(length = "", filext = ""){
-    Loop, % length
-    {
-        Assign:
-        Random, rand%a_index%, 33, 126
-        if (rand%a_index% = 95 || rand%a_index% = 47 || rand%a_index% = 58
-        || rand%a_index% = 42 || rand%a_index% = 63 || rand%a_index% = 34
-        || rand%a_index% = 60 || rand%a_index% = 62 || rand%a_index% = 124)
-            Goto, Assign
-        rand%a_index% := chr(rand%a_index%)
-        RName := RName . rand%a_index%
-    }
-    return RName . "." . filext
+RName(length = "", filext = ""){
+	if !length
+		Random, length, 8, 15
+	Loop,26
+	{
+		n .= chr(64+a_index)
+		n .= chr(96+a_index)
+	}
+	n .= "0123456789"
+	Loop,% length {
+		Random,rnd,1,% StrLen(n)
+		Random,UL,0,1
+		RName .= RegExReplace(SubStr(n,rnd,1),".$","$" (round(UL)? "U":"L") "0")
+	}
+	if !filext
+		return RName
+	Else
+		return RName . "." . filext
 }
 SaveLiveCode(){
     Global
@@ -1894,17 +1894,6 @@ SaveLiveCode(){
         live_code :=
     else
         w_livecode := live_code
-}
-makeProperBoundary(){
-   Loop,26
-      n .= chr(64+a_index)
-   n .= "0123456789"
-   Loop,% StrLen(A_Now) {
-      Random,rnd,1,% StrLen(n)
-      Random,UL,0,1
-      b .= RegExReplace(SubStr(n,rnd,1),".$","$" (round(UL)? "U":"L") "0")
-   }
-   Return b
 }
 MimeType(ByRef Binary) {
    MimeTypes:="424d image/bmp|4749463 image/gif|ffd8ffe image/jpeg|89504e4 image/png|4657530"
@@ -1973,17 +1962,16 @@ return
 #IfWinActive
 ;-
 ;+> ; [Alt + LButton] Screen Capture Active Window/Area
-~!LButton::
+!LButton::
  CoordMode, Mouse, Screen
  rect := False
  MouseGetPos, scXL, scYT, scWinHwnd
- Sleep, 100
+ WinMove, %a_space%,, %scXL%, %scYT%        ; Move the "Selection Box window" to current mouse position           
+ Sleep, 150
  if GetKeyState("LButton", "P")
  {
-    WinMove, %a_space%,, %scXL%, %scYT%
     Gui, 3: Show, w1 h1 x%scXL% y%scYT%, %a_space%
     WinSet, Transparent, 120, %a_space%
-     
     While GetKeyState("LButton", "P")
     {
         CoordMode, Mouse, Screen
@@ -2001,12 +1989,11 @@ return
     }
     ToolTip
     Gui, 3: Show, w1 h1 x0 y0, %a_space%
-    CaptureScreen(scXL "," scYT "," scXR "," scYB, 0, scRect := a_desktop . "\" . "scRect_" . a_now . ".png")
+    CaptureScreen(scXL "," scYT "," scXR "," scYB, 0, scRect := a_temp . "\scRect_" . RName(0,"png"))
     rect := True
  }
  if (!rect && scWinHwnd != DeskHwnd)
-    CaptureScreen(1, 0, scWin := a_desktop . "\" . "scWin_" . a_now . ".png")
- Sleep 200
+    CaptureScreen(1, 0, scWin := a_temp . "\scWin_" . RName(0,"png"))
  Gosub, ImageUpload
  FileDelete, %scWin%
  FileDelete, %scRect%
@@ -2015,48 +2002,66 @@ return
 ;+> ; [Hotkeys for Edit controls]
 #IfWinActive, ahk_group Ahk_Tk
 
-^d::                                ; [Ctrl + D] Duplicate Line 
- clipold := clipboard
+^d::                    ; [Ctrl + D] Duplicate Line
+ oldScript := True
+ clipold := Clipboard
  Send {Home}+{End}^c{End}{Enter}^v
- clipboard := clipold
+ Clipboard := clipold
 return
 
-^+Up::                              ; [Ctrl + Shift + Up] Move Up Current Line
- clipold := clipboard
+^+Up::                  ; [Ctrl + Shift + Up] Move Up Current Line
+ oldScript := True
+ clipold := Clipboard
  Send {Home}+{End}^x{Delete}{Up}{Enter}{Up}^v{Home}
- clipboard := clipold
+ Clipboard := clipold
 return
 
-^+Down::                            ; [Ctrl + Shift + Up] Move Down Current Line
- clipold := clipboard
+^+Down::                ; [Ctrl + Shift + Up] Move Down Current Line
+ oldScript := True
+ clipold := Clipboard
  Send {Home}+{End}^x{Delete}{End}{Enter}^v{Home}
- clipboard := clipold
+ Clipboard := clipold
 return
 
-^u::                                ; [Ctrl + u] UPPERCASE
- clipold := clipboard
+^+u::                   ; [Ctrl + Shift u] UPPERCASE
+ oldScript := True
+ clipold := Clipboard
  Send ^x
- StringUpper, clipboard, clipboard
+ StringUpper, Clipboard, Clipboard
  Send ^v
- clipboard := clipold
+ Clipboard := clipold
 return
 
-^+u::                                ; [Ctrl + Shift u] lowercase
- clipold := clipboard
+^u::                    ; [Ctrl + u] lowercase
+ oldscript := True
+ clipold := Clipboard
  Send ^x
- StringLower, clipboard, clipboard
+ StringLower, Clipboard, Clipboard
  Send ^v
- clipboard := clipold
+ Clipboard := clipold
 return
 
-^q::                                ; [Ctrl + q] Comment one Line
- clipold := clipboard
- Send {Home}+{Right}^c
- if clipboard contains `;
-    Send {Home}{Delete 2}
- Else
-    Send {Home}; {Home}
- clipboard := clipold
+^q::                    ; [Ctrl + q] Comment one Line
+ oldScript := True
+ clipold := Clipboard
+ Send ^x
+ Loop, Parse, Clipboard, `n, `r
+ {
+    if !a_loopfield
+    {
+        ctext .= "`n"
+        continue
+    }
+    if a_loopfield contains `;
+        ctext .= RegexReplace(a_loopfield, ";\s?", "") . "`n"
+    else
+        ctext .= "; " . a_loopfield . "`n"
+    
+    RegexReplace(ctext, a_loopfield . "(\n\r)", "")
+ }
+ Send %ctext%
+ ctext :=
+ Clipboard := clipold
 return
 
 #IfWinActive
