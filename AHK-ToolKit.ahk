@@ -1,10 +1,10 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.4.2
+Script Version: 0.4.3
 Homepage:
 
-Creation Date: July 11, 2010 | Modification Date: August 06, 2010
+Creation Date: July 11, 2010 | Modification Date: August 08, 2010
 
 [GUI Number Index]
 
@@ -28,26 +28,26 @@ SetWorkingDir %A_ScriptDir%
 onExit, Clean
 ;-
 
-;+--> ; ---------[Basic Info]---------
+;+-->; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.2"                  ; Script Version
+s_version   := "0.4.3"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
 
 ;+--> ; ---------[General Variables]---------
-sec         :=  1000                    ; 1 second
-min         :=  sec * 60                ; 1 minute
-hour        :=  min * 60                ; 1 hour
+sec       :=  1000                      ; 1 second
+min       :=  sec * 60                  ; 1 minute
+hour      :=  min * 60                  ; 1 hour
 ; --
 SysGet, mon, Monitor                    ; Get the boundaries of the current screen
 SysGet, wa_, MonitorWorkArea            ; Get the working area of the current screen
 WinGet, DeskHwnd, ID, Program Manager   ; Get the current Hwnd of the Destop
-mid_scrw    :=  a_screenwidth / 2       ; Middle of the screen (width)
-mid_scrh    :=  a_screenheight / 2      ; Middle of the screen (heigth)
+mid_scrw  :=  a_screenwidth / 2         ; Middle of the screen (width)
+mid_scrh  :=  a_screenheight / 2        ; Middle of the screen (heigth)
 ; --
-s_ini       := ; Optional ini file
-s_xml       := "res\ahk_tk.xml"         ; Optional xml file
+s_ini     :=                            ; Optional ini file
+s_xml     := "res\ahk_tk.xml"           ; Optional xml file
 ;-
 
 ;+--> ; ---------[User Configuration]---------
@@ -55,15 +55,16 @@ Clipboard :=
 GroupAdd, Ahk_Tk, % "AutoHotkey ToolKit"
 GroupAdd, Ahk_Tk, % "Advanced Hotstring Setup"
 GroupAdd, Ahk_Tk, % "Send To Pastebin"
-FileRead, ahk_keywords, % "res\key.lst"                   ; Used for the PasteBin routines
-reg_run := "Software\Microsoft\Windows\CurrentVersion\Run"
-mod_list := "mod_ctrl|mod_alt|mod_shift|mod_win"
-hs_optlist := "hs_iscommand|hs_dnd|hs_trigger|hs_raw"
-exc := "ScrollLock|CapsLock|NumLock|NumpadIns|NumpadEnd|NumpadDown|NumpadPgDn|NumpadLeft"
+FileRead, ahk_keywords, % "res\key.lst" ; Used for the PasteBin routines
+reg_run   := "Software\Microsoft\Windows\CurrentVersion\Run"
+mod_list  := "mod_ctrl|mod_alt|mod_shift|mod_win"
+hs_optlist:= "hs_iscommand|hs_dnd|hs_trigger|hs_raw"
+exc       := "ScrollLock|CapsLock|NumLock|NumpadIns|NumpadEnd|NumpadDown|NumpadPgDn|NumpadLeft"
 . "|NumpadClear|NumpadRight|NumpadHome|NumpadUp|NumpadPgUp|NumpadDel|LWin|RWin|LControl"
 . "|RControl|LShift|RShift|LAlt|RAlt|CtrlBreak|Control|Alt|Shift|AppsKey|/"
-keylist := "None||" . klist(2,0,1, exc)
-hsloc := "res\tools\hslauncher.ahk"
+keylist   := "None||" . klist(2,0,1, exc)
+resahk    := "res\ahk\ahk.exe"
+hsloc     := "res\tools\hslauncher.ahk"
 
 ; Live Code Scripts
 ;{
@@ -300,7 +301,7 @@ if !ahkexist
     if !FileExist("res\ahk")
         FileCreateDir, res\ahk
     if !FileExist("res\ahk\ahk.exe")
-        FileInstall, res\ahk\ahk.exe, res\ahk\ahk.exe, 1
+        FileInstall, res\ahk\ahk.exe, %resahk%, 1
 }
 ;-
 
@@ -636,7 +637,11 @@ LVHS_Load:
  }
  if !hscount
     SB_SetText("`t" . hscount . " Hotstrings currently active", 2)
- Run, %hsloc%,,, hslPID
+ 
+ If ahkexist && FileExist(hsloc)
+        Run, %ahkexist%\AutoHotkey.exe %hsloc%,,, hslPID
+    else
+        Run, %resahk% %hsloc%,,, hslPID
 return
 ;}
 
@@ -740,7 +745,8 @@ GuiDropFiles:
         FileGetShortcut, %a_guievent%, prog_target
         SplitPath, prog_target,prog_exec, prog_dir,, prog_name
     }
-    GuiControl, 96:, e_progpath, % prog_dir
+    GuiControl, 96:, e_progpath, % a_guievent
+    GuiControl, 96: Focus, ddl_key
  }
  Gosub, AddHotkey
 return
@@ -1119,6 +1125,52 @@ PasteSavetoFile:                                                    ; Send to Pa
 return
 ;}
 
+ImageUpload:
+;{
+if FileExist(scWin)
+    image := scWin
+else if FileExist(scRect)
+    image := scRect
+
+FileGetSize,size,%image%
+SplitPath,image,OFN
+FileRead,img,%image%
+VarSetCapacity(placeholder,size,32+2)
+boundary := makeProperBoundary()
+post:="--" . boundary
+. "`nContent-Disposition: form-data; name=""uploadtype""`n`n"
+. "on`n"
+. "--" . boundary
+. "`ncontent-disposition: form-data; name=""xml""`n`n"
+. "yes`n"
+. "--" . boundary
+. "`nContent-Disposition: form-data; name=""fileupload""; filename=""" . ofn
+. "`nContent-Type: " . MimeType(img) . "`n`n"
+. placeholder
+. "`n--" . boundary . "--"
+headers:="Content-type: multipart/form-data, boundary=" boundary "`nContent-Length: " strlen(post)
+DllCall("RtlMoveMemory","uInt",(offset:=&post+strlen(post)-strlen(Boundary)-size-5)
+     ,"uInt",&img,"uInt",size)
+size := httpQuery(result:="","http://www.imageshack.us/index.php",post,headers)
+VarSetCapacity(result,-1)
+msgbox % result
+RegexMatch(result,"<image_link>(.*?)<", Match)
+clipold := clipboard
+MsgBox % clipboard := Match1
+SetTimer, CheckCtrlV, 50
+return
+;}
+
+CheckCtrlV:
+;{
+ if (getkeystate("ctrl", "p") && getkeystate("v", "p"))
+ {
+    clipboard := clipold
+    SetTimer, CheckCtrlV, off
+ }
+;}
+return
+
 AddHotkey:
 ;{
  if (dropped || a_gui = 1)
@@ -1180,7 +1232,11 @@ AddHotstring:
     LV_Organize("LV_hslist")    ; Sort the LV and set the status messages
     CleanXML()
     Gosub, CreateHSScript
-    Run, %hsloc%,,, hslPID
+    
+    If ahkexist && FileExist(hsloc)
+        Run, %ahkexist%\AutoHotkey.exe %hsloc%,,, hslPID
+    else
+        Run, %resahk% %hsloc%,,, hslPID
     GuiReset(1)
  }
 return
@@ -1333,7 +1389,7 @@ LiveRun:
     if ahkexist
         Run, %lcf_name%
     else
-        Run, "res\ahk\ahk.exe" "%lcf_name%"
+        Run, %resahk% %lcf_name%
     Sleep, 500
     FileDelete, %lcf_name%
  }
@@ -1515,8 +1571,8 @@ return
 
 Clean:
 ;{
-WinClose, ahk_pid %hslPID%
-FileDelete, %hsloc%
+ Process,Close, %hslPID%
+ FileDelete, %hsloc%
 ExitApp
 ;}
 ;-
@@ -1539,6 +1595,7 @@ Pasted(){
     code_preview :=
     xpos := wa_Right - 250 - 5
     ypos := wa_Bottom - 90
+    clipold := clipboard
     clipboard := paste_url
     Gui, 97: Show, x%xpos% y%ypos%
     Loop, parse, ahk_code, `n, `r
@@ -1559,6 +1616,7 @@ Pasted(){
     ), % "res\pastebin-log.dat"
     Sleep, 3 * sec
     Gui, 97: Hide
+    SetTimer, CheckCtrlV, 100
 }
 GuiReset(guinum){
     Global
@@ -1837,6 +1895,28 @@ SaveLiveCode(){
     else
         w_livecode := live_code
 }
+makeProperBoundary(){
+   Loop,26
+      n .= chr(64+a_index)
+   n .= "0123456789"
+   Loop,% StrLen(A_Now) {
+      Random,rnd,1,% StrLen(n)
+      Random,UL,0,1
+      b .= RegExReplace(SubStr(n,rnd,1),".$","$" (round(UL)? "U":"L") "0")
+   }
+   Return b
+}
+MimeType(ByRef Binary) {
+   MimeTypes:="424d image/bmp|4749463 image/gif|ffd8ffe image/jpeg|89504e4 image/png|4657530"
+          . " application/x-shockwave-flash|49492a0 image/tiff"
+   @:="0123456789abcdef"
+   Loop,8
+      hex .= substr(@,(*(a:=&Binary-1+a_index)>>4)+1,1) substr(@,((*a)&15)+1,1)
+   Loop,Parse,MimeTypes,|
+      if ((substr(hex,1,strlen(n:=RegExReplace(A_Loopfield,"\s.*"))))=n)
+         Mime := RegExReplace(A_LoopField,".*?\s")
+   Return (Mime!="") ? Mime : "application/octet-stream"
+}
 WM_LBUTTONDBLCLK(wParam, lParam){
     Global
     if a_guicontrol = hs_expandto
@@ -1868,6 +1948,7 @@ WM_LBUTTONDBLCLK(wParam, lParam){
 ;+--> ; ---------[Hotkeys/Hotstrings]---------
 !Esc::ExitApp
 Pause::Reload
+F12::Suspend
 ;+> ; [Ctrl + F5] Send Current Date
 ^F5::Send, % a_mmmm " "a_dd ", " a_yyyy
 ;-
@@ -1893,25 +1974,42 @@ return
 ;-
 ;+> ; [Alt + LButton] Screen Capture Active Window/Area
 ~!LButton::
- Sleep 10                               ; This fixes a problem when Alt+Clicking a window that was not active.
+ CoordMode, Mouse, Screen
+ rect := False
  MouseGetPos, scXL, scYT, scWinHwnd
- if (scWinHwnd && scWinHwnd != DeskHwnd)
-	CaptureScreen(1, 0, a_desktop . "\" . scWin := RandomName(8, "png"))
- Gui, 3: Show, w1 h1 x%scXL% y%scYT%, %a_space%
- WinSet, Transparent, 120, %a_space%
-
- While GetKeyState("LButton", "P")
+ Sleep, 100
+ if GetKeyState("LButton", "P")
  {
-	CoordMode, Mouse, Screen
-	MouseGetPos, scXR, scYB             ; This must be relative to the screen for use with the ScreenCapture
-	CoordMode, Mouse, Relative
-	MouseGetPos, rel_scXR, rel_scYB     ; This is just for creating the selection window, it must be relative
-	WinMove,%a_space%,,,, %rel_scXR%, %rel_scYB%
-	ToolTip, %rel_scXR%`, %rel_scYB%
+    WinMove, %a_space%,, %scXL%, %scYT%
+    Gui, 3: Show, w1 h1 x%scXL% y%scYT%, %a_space%
+    WinSet, Transparent, 120, %a_space%
+     
+    While GetKeyState("LButton", "P")
+    {
+        CoordMode, Mouse, Screen
+        MouseGetPos, scXR, scYB             ; This must be relative to the screen for use with the ScreenCapture
+        CoordMode, Mouse, Relative
+        MouseGetPos, rel_scXR, rel_scYB     ; This is just for creating the selection window, it must be relative
+        WinMove,%a_space%,,,, %rel_scXR%, %rel_scYB%
+        ToolTip, %rel_scXR%`, %rel_scYB%
+        if GetKeyState("RButton", "P")
+        {
+            ToolTip
+            Gui, 3: Show, w1 h1 x0 y0, %a_space%
+            return
+        }
+    }
+    ToolTip
+    Gui, 3: Show, w1 h1 x0 y0, %a_space%
+    CaptureScreen(scXL "," scYT "," scXR "," scYB, 0, scRect := a_desktop . "\" . "scRect_" . a_now . ".png")
+    rect := True
  }
- ToolTip
- Gui, 3: Hide
- CaptureScreen(scXL "," scYT "," scXR "," scYB, 0, a_desktop . "\" . scRect := RandomName(8, "png"))
+ if (!rect && scWinHwnd != DeskHwnd)
+    CaptureScreen(1, 0, scWin := a_desktop . "\" . "scWin_" . a_now . ".png")
+ Sleep 200
+ Gosub, ImageUpload
+ FileDelete, %scWin%
+ FileDelete, %scRect%
 return
 ;-
 ;+> ; [Hotkeys for Edit controls]
