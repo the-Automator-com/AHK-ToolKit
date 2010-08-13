@@ -1,10 +1,10 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.4.5e
+Script Version: 0.4.6
 Homepage:
 
-Creation Date: July 11, 2010 | Modification Date: August 14, 2010
+Creation Date: July 11, 2010 | Modification Date: August 18, 2010
 
 [GUI Number Index]
 
@@ -31,7 +31,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.5e"                 ; Script Version
+s_version   := "0.4.6"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -98,6 +98,7 @@ TimedShutdown_s =
 
 time := RegexReplace(time:=(1*hour + 30*min + 15*sec)/1000,"\.\d+","")
 Run, Shutdown -s -t `%time`% -f
+ExitApp
 )
 
 SaveXYCoords_s =
@@ -251,10 +252,7 @@ Gui, add, Text, w50 h50 x670 y+5 0x7
 Gui, add, Text, w50 h50 x+5 0x6
 
 Gui show
-
-~*Esc::ExitApp
 )
-
 ;}
 
 ; Resources folder
@@ -925,7 +923,7 @@ OnClipboardChange:
         Gosub, AUS
     else
         Gosub, Pastebin
- } ; Finish ahk code detection
+ } ; Finish ahk code detection  
 return
 ;}
 
@@ -1993,45 +1991,85 @@ return
  FileDelete, %scRect%
 return
 ;-
+;+> ; [LButton + Alt] Command Detection
+~LButton::
+ stime := a_tickcount               ; Start Time
+ KeyWait, LButton
+ etime := a_tickcount - stime       ; End Time
+ if etime >= 500                  ; The mouse was dragged
+ {
+    KeyWait, Ctrl, D T1
+    if ErrorLevel
+        return
+    clipold := Clipboard
+    Clipboard := 
+    Send, ^c
+    ClipWait, 1
+    URL  := "http://www.autohotkey.com/search/search.php"
+    POST := "site=4"
+         . "&refine=1"
+         . "&template_demo=phpdig.html"
+         . "&result_page=search.php"
+         . "&query_string=" . Clipboard
+         . "&search=Go+..."
+         . "&option=exact"
+         . "&path=docs%2F%25"
+
+    HttpQuery(html := "", URL, POST)
+    VarSetCapacity(html, -1)
+    if (Clipboard = "WinGet")
+        RegexMatch(html, "99.80 %.+?(href=""(.+?)"")", Match)
+    else if (Clipboard = "ErrorLevel")
+        RegexMatch(html, "4.+82.92 %.+?(href=""(.+?)"")", Match)
+    else 
+        RegexMatch(html, "100.00 %.+?(href=""(.+?)"")", Match)
+    If (WinActive("Post a new topic") || WinActive("Post a reply"))
+        Send, [url=%Match2%]%Clipboard%[/url]
+    else
+        Run, % Match2
+ Clipboard := clipold
+ }
+return
+;-
 ;+> ; [Hotkeys for Edit controls]
 #IfWinActive, ahk_group Ahk_Tk
 
 ^d::                    ; [Ctrl + D] Duplicate Line
  oldScript := True
  clipold := Clipboard
- Send {Home}+{End}^c{End}{Enter}^v
+ Send, {Home}+{End}^c{End}{Enter}^v
  Clipboard := clipold
 return
 
 ^+Up::                  ; [Ctrl + Shift + Up] Move Up Current Line
  oldScript := True
  clipold := Clipboard
- Send {Home}+{End}^x{Delete}{Up}{Enter}{Up}^v{Home}
+ Send, {Home}+{End}^x{Delete}{Up}{Enter}{Up}^v{Home}
  Clipboard := clipold
 return
 
 ^+Down::                ; [Ctrl + Shift + Up] Move Down Current Line
  oldScript := True
  clipold := Clipboard
- Send {Home}+{End}^x{Delete}{End}{Enter}^v{Home}
+ Send, {Home}+{End}^x{Delete}{End}{Enter}^v{Home}
  Clipboard := clipold
 return
 
 ^+u::                   ; [Ctrl + Shift u] UPPERCASE
  oldScript := True
  clipold := Clipboard
- Send ^x
+ Send, ^x
  StringUpper, Clipboard, Clipboard
- Send ^v
+ Send, ^v
  Clipboard := clipold
 return
 
 ^u::                    ; [Ctrl + u] lowercase
  oldscript := True
  clipold := Clipboard
- Send ^x
+ Send, ^x
  StringLower, Clipboard, Clipboard
- Send ^v
+ Send, ^v
  Clipboard := clipold
 return
 
@@ -2039,14 +2077,14 @@ return
  oldScript := True
  clipold := Clipboard
  Clipboard :=
- Send ^x
+ Send, ^x
  if !Clipboard
  {
-    Send {Home}+{Right}^c
+    Send, {Home}+{Right}^c
     if Clipboard contains `;
-        Send {Home}{Delete 2}{Home}
+        Send, {Home}{Delete 2}{Home}
     else
-        Send {Home}; {Home}
+        Send, {Home}; {Home}
  }
  else
  {
@@ -2063,7 +2101,7 @@ return
             ctext .= "; " . a_loopfield . "`n"
     }
     SendRaw %ctext%
-    Send {BackSpace}
+    Send, {BackSpace}
  }
  ctext :=
  Clipboard := clipold
@@ -2087,3 +2125,4 @@ return
  *                          		END OF FILE
  *==================================================================================
  */
+ 
