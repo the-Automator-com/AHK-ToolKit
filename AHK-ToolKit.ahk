@@ -1,7 +1,7 @@
 /*
  * Author:          RaptorX	<graptorx@gmail.com>
  * Script Name:     AutoHotkey ToolKit
- * Script Version:  0.4.9
+ * Script Version:  0.4.9b
  * Homepage:        http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date: July 11, 2010 | Modification Date: August 26, 2010
@@ -31,7 +31,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.8b"                 ; Script Version
+s_version   := "0.4.9b"                 ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 GoSub, CheckUpdate
@@ -68,7 +68,7 @@ keylist   := "None||" . klist(2,0,1, exc)
 resahk    := "res\ahk\ahk.exe"
 rescurl   := "res\tools\curl\cu.exe"
 resrehash := "res\tools\rh.exe"
-hsloc     := "res\tools\hslauncher.ahk"
+hsloc     := a_temp . "\hslauncher.ahk"
 
 ; Live Code Scripts
 ;{
@@ -311,10 +311,10 @@ if !load := xpath_load(xml, s_xml)
 ;-
 
 ;+--> ; ---------[Main]---------
+
 onMessage(0x203, "WM_LBUTTONDBLCLK")
 Gosub, ReadXML
 Gosub, SWW
-
 ; Use ahk.exe if AutoHotkey is not installed
 if !ahkexist
 {
@@ -495,6 +495,7 @@ Return ; End of autoexecute area
 ;-
 
 ;+--> ; ---------[Labels]---------
+
 FR_Save:                                                            ; First Run Save
 ;{
  Gui, 50: Submit
@@ -1226,9 +1227,9 @@ ImageUpload:
  else if FileExist(scRect)
     image := scRect
 
- nick := "AHK-TK_" . a_computername
+ iunick := "AHK-TK_" . a_computername
     
- RunWait %comspec% /c "%rescurl% -i -F nickname=`"%nick%`" -F image=@`"%image%;type=image/png`" -F disclaimer_agree=Y -F Submit=Submit -F mode=add http://www.imagebin.org/index.php  > `"%a_temp%`"\url",, Hide
+ RunWait %comspec% /c "%rescurl% -i -F nickname=`"%iunick%`" -F image=@`"%image%;type=image/png`" -F disclaimer_agree=Y -F Submit=Submit -F mode=add http://www.imagebin.org/index.php  > `"%a_temp%`"\url",, Hide
  FileRead, url, %a_temp%\url
  FileDelete, %a_temp%\url
  RegexMatch(url,"\w+:\s(\d+)", Match)
@@ -1250,6 +1251,7 @@ CheckCtrlV:
  if (GetKeyState("Ctrl", "p") && GetKeyState("v", "p") || GetKeyState("Escape", "p"))
  {
     Clipboard := clipold
+    clipold :=
     SetTimer, CheckCtrlV, off
     Tooltip, % "Your Clipboard has been restored", 5, 5
     Sleep, 5 * sec
@@ -1724,7 +1726,7 @@ Pasted(){
     code_preview :=
     xpos := wa_Right - 250 - 5
     ypos := wa_Bottom - 90
-    clipold := Clipboard
+    ; clipold := Clipboard
     Tooltip, % Clipboard := paste_url, 5, 5
     Gui, 97: Show, x%xpos% y%ypos%
     Loop, parse, ahk_code, `n, `r
@@ -1845,12 +1847,13 @@ CheckLV(lvName){
         {
             LV_GetText(chs_expand, a_index, 2)
             LV_GetText(chs_expandto, a_index, 3)
-            
+            chs_expand := uriSwap(chs_expand, 1) ; encode
             if (chs_expandto = "Multiline (Double Click to see the whole text)")
             {
                 chs_expandto := xpath(xml, "/root/hotstrings/hs[@expand=" . chs_expand . "]/text()")
                 chs_expandto := uriSwap(chs_expandto, 2)
             }
+            chs_expand := uriSwap(chs_expand, 2) ; decode back because we are working with plain text now.
             if (chs_expand != hs_expand && chs_expandto != hs_expandto)
             {
                 isNew := True
@@ -2166,6 +2169,7 @@ return
 return
 ;-
 ;+> ; [Alt + LButton] Screen Capture Active Window/Area
+#IfWinNotActive ahk_class SWarClass
 !LButton::
  CoordMode, Mouse, Screen
  rect := False
@@ -2202,10 +2206,10 @@ return
  FileDelete, %scWin%
  FileDelete, %scRect%
 return
+#IfWinNotActive
 ;-
 ;+> ; [Hotkeys for Edit controls]
 #IfWinActive, ahk_group Ahk_Tk
-
 ^d::                    ; [Ctrl + D] Duplicate Line
  clipold := Clipboard
  Send, {Home}+{End}^c{End}{Enter}^v
@@ -2278,7 +2282,6 @@ return
  Clipboard := clipold
  clipold :=
 return
-
 #IfWinActive
 ;-
 ;-

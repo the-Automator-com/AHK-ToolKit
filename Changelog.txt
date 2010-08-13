@@ -1,4 +1,24 @@
-commit ee0f6a6a9bfee894071ed0087c5602376c10bfe2
+commit f848a7d00ea790d187aa5a5007c0c6b418843aa8
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 14 01:23:03 2010 +0200
+
+    AHK-TK v0.4.9b
+    
+    Changed:
+    
+    * Fix small typos
+    * Fix small bugs
+    
+    ToDo:
+    
+    * Options Gui / Functionality
+    * Add Hotkey commands functionality
+    * Add Hashing functions
+    * Use libcurl.dll instead of cu.exe
+      --Free 1.5MB of space
+    * Add upload screenshot notification
+
+commit 4d345418cf0ada6bea65108435e662ee485df319
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Aug 14 01:23:03 2010 +0200
 
