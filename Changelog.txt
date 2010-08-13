@@ -1,4 +1,32 @@
-commit 2b4848de3759337729d10f5ab77c5dc0adfe9cd9
+commit ee0f6a6a9bfee894071ed0087c5602376c10bfe2
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 14 01:23:03 2010 +0200
+
+    AHK-TK v0.4.9
+    
+    Changed:
+    
+    * Add "Edit post" to the list of windows that command detection works on
+    * Change encoding/decoding function for XML file and pastebin upload routines
+    * Change file types to All *.*
+    * Change hotkey for suspending, F11 Hotkeys, F12 Hotstrings
+    * Clear deleted Hotkeys
+    * Dont Allow empty hotstrings
+    * Drag and Drop resolve shortcuts
+    * Make clipboard swap more stable
+    * Rename EscapeXML() to uriSwap()
+    * Fix minor bugs
+    
+    ToDo:
+    
+    * Options Gui / Functionality
+    * Add Hotkey commands functionality
+    * Add Hashing functions
+    * Use libcurl.dll instead of cu.exe
+      --Free 1.5MB of space
+    * Add upload screenshot notification
+
+commit 1569f8a2393ce8d6c6409d48895662eca85aadc3
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Aug 14 01:23:03 2010 +0200
 

@@ -1,7 +1,12 @@
 --AutoHotkey ToolKit--
-     v0.4.8b
+     v0.4.9
 
-This script started as a personal project but now i feel that it might be helpful to other people so I decided to release it as beta software for testing.
+This script was originally meant for 1) showing the potential of autohotkey and 2) make it easier
+for me to help others while on the IRC/Forum and help with my general tasks. Now I believe that it has more potential.
+
+If you like the script, please comment, and if you did find any bugs comment as well, I have been working very 
+actively on this project and I plan on continuing the work for a while longer. So any info on how can I improve this 
+script is very welcomed! 
 
 Main features:
 

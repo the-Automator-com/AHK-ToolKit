@@ -1,22 +1,22 @@
 /*
-Author:         RaptorX	<graptorx@gmail.com>
-Script Name:    AHK-ToolKit
-Script Version: 0.4.8b
-Homepage:
-
-Creation Date: July 11, 2010 | Modification Date: August 18, 2010
-
-[GUI Number Index]
-
-GUI 01 - Main [AutoHotkey ToolKit]
-GUI 02 - Advanced Hotstring Setup
-GUI 03 - Selection Box
-GUI 99 - PasteBin Popup
-GUI 98 - Send to PasteBin
-GUI 97 - Pastebin Success Popup
-GUI 96 - Add Hotkey
-GUI 50 - First Run
-*/
+ * Author:          RaptorX	<graptorx@gmail.com>
+ * Script Name:     AutoHotkey ToolKit
+ * Script Version:  0.4.9
+ * Homepage:        http://www.autohotkey.com/forum/topic61379.html#376087
+ *
+ * Creation Date: July 11, 2010 | Modification Date: August 26, 2010
+ * 
+ * [GUI Number Index]
+ *
+ * GUI 01 - Main [AutoHotkey ToolKit]
+ * GUI 02 - Advanced Hotstring Setup
+ * GUI 03 - Selection Box
+ * GUI 99 - PasteBin Popup
+ * GUI 98 - Send to PasteBin
+ * GUI 97 - Pastebin Success Popup
+ * GUI 96 - Add Hotkey
+ * GUI 50 - First Run
+ */
 
 ;+--> ; ---------[Directives]---------
 #NoEnv
@@ -63,7 +63,7 @@ mod_list  := "mod_ctrl|mod_alt|mod_shift|mod_win"
 hs_optlist:= "hs_iscommand|hs_dnd|hs_trigger|hs_raw"
 exc       := "ScrollLock|CapsLock|NumLock|NumpadIns|NumpadEnd|NumpadDown|NumpadPgDn|NumpadLeft"
 . "|NumpadClear|NumpadRight|NumpadHome|NumpadUp|NumpadPgUp|NumpadDel|LWin|RWin|LControl"
-. "|RControl|LShift|RShift|LAlt|RAlt|CtrlBreak|Control|Alt|Shift|AppsKey|/"
+. "|RControl|LShift|RShift|LAlt|RAlt|CtrlBreak|Control|Alt|Shift|AppsKey"
 keylist   := "None||" . klist(2,0,1, exc)
 resahk    := "res\ahk\ahk.exe"
 rescurl   := "res\tools\curl\cu.exe"
@@ -272,6 +272,7 @@ if !FileExist("res")
     FileInstall, res\tools\curl\libcurl.dll, res\tools\curl\libcurl.dll, 1
     FileInstall, res\tools\curl\libeay32.dll, res\tools\curl\libeay32.dll, 1
     FileInstall, res\tools\curl\libssl32.dll, res\tools\curl\libssl32.dll, 1
+    FileRead, ahk_keywords, % "res\key.lst" ; First Time Read.
 }
 
 ;First Run GUI
@@ -695,8 +696,8 @@ LVHS_Load:
         load_expandto := xpath(xml, "/root/hotstrings/hs[" . a_index . "]/text()")
     }
     
-    load_expand := EscapeXML(load_expand, 2)
-    load_expandto := EscapeXML(load_expandto , 2)
+    load_expand := uriSwap(load_expand, 2)
+    load_expandto := uriSwap(load_expandto , 2)
     
     if loadIsMultiline
     {
@@ -713,19 +714,19 @@ LVHS_Load:
  if !hscount
     SB_SetText("`t" . hscount . " Hotstrings currently active", 2)
  
- If ahkexist && FileExist(hsloc)
-        Run, %ahkexist%\AutoHotkey.exe %hsloc%,,, hslPID
-    else
-        Run, %resahk% %hsloc%,,, hslPID
+ if ahkexist && FileExist(hsloc)
+    Run, %ahkexist%\AutoHotkey.exe %hsloc%,,, hslPID
+ else
+    Run, %resahk% %hsloc%,,, hslPID
 return
 ;}
 
 CreateHSScript:
 ;{
-hs_expand := EscapeXML(hs_expand, 2)
-hs_expandto := EscapeXML(hs_expandto , 2)
-load_expand := EscapeXML(load_expand, 2)
-load_expandto := EscapeXML(load_expandto , 2)
+ hs_expand := uriSwap(hs_expand, 2)
+ hs_expandto := uriSwap(hs_expandto , 2)
+ load_expand := uriSwap(load_expand, 2)
+ load_expandto := uriSwap(load_expandto , 2)
 
  if !FileExist(hsloc)
  {
@@ -736,13 +737,13 @@ load_expandto := EscapeXML(load_expandto , 2)
         #NoTrayIcon
         ; --
         SetBatchLines -1
-        F4::Suspend`n`n
+        F12::Suspend`n`n
     )
  FileAppend, %hsfileopts%, %hsloc%
  return
  }
   
- if (hs_loading && hs_isadv)             ; This is because im using the LVHS_Load subroutine which sets hs_loading
+ if (hs_loading && hs_isadv)         ; This is because im using the AdvHotstring subroutine which sets hs_loading
  {
     if loadisMultiline
     {
@@ -764,6 +765,8 @@ load_expandto := EscapeXML(load_expandto , 2)
  
   if (hs_loading && !hs_isadv)
  {
+    if (!load_opts || !load_expand || !load_expandto)
+        return
     if load_iscommand
         script := "`n:" . load_opts . ":" . load_expand . "::`n" . load_expandto . "`nreturn`n`n"
     else
@@ -814,15 +817,17 @@ GuiDropFiles:
  {
     dropped := 1
     SplitPath, a_guievent,prog_exec, prog_dir,, prog_name
-    StringUpper, prog_name, prog_name, T
     if a_guievent contains .lnk             ; Resolve the link target instead of using the link's directory
     {
         FileGetShortcut, %a_guievent%, prog_target
         SplitPath, prog_target,prog_exec, prog_dir,, prog_name
+        GuiControl, 96:, e_progpath, % prog_target
     }
-    GuiControl, 96:, e_progpath, % a_guievent
-    GuiControl, 96: Focus, ddl_key
+    else
+        GuiControl, 96:, e_progpath, % a_guievent
  }
+ StringUpper, prog_name, prog_name, T
+ GuiControl, 96: Focus, ddl_key
  Gosub, AddHotkey
 return
 ;}
@@ -845,6 +850,8 @@ LV_Sub:
             LV_GetText(prog_name, next, 2)
             LV_GetText(prog_hkL, next, 3)
             LV_GetText(prog_dir, next, 4)
+            prog_hkS := hkSwap(prog_hkL, "short")
+            Hotkey, %prog_hkS%, Off
             DelxmlInstance("hk")
             CleanXML()
             LV_Delete(next)
@@ -948,12 +955,14 @@ LV_Sub:
         LV_GetText(hs_opts, sel_row, 1)
         LV_GetText(hs_expand, sel_row, 2)
         LV_GetText(hs_expandto, sel_row, 3)
+        hs_expand := uriSwap(hs_expand,1)
         hs_iscommand := xpath(xml, "/root/hotstrings/hs[@expand=" . hs_expand . "]/@iscommand/text()")
         
         if (hs_expandto = "Multiline (Double Click to see the whole text)")
             hs_expandto := xpath(xml, "/root/hotstrings/hs[@expand=" . hs_expand . "]/text()")
         
-        hs_expandto := EscapeXML(hs_expandto, 2)
+        hs_expandto := uriSwap(hs_expandto, 2)
+        hs_expand := uriSwap(hs_expand,2)
         GuiControl, 2:, ahs_opts, % hs_opts
         GuiControl, 2:, ahs_expand, % hs_expand
         GuiControl, 2:, ahs_expandto, % hs_expandto
@@ -963,9 +972,9 @@ LV_Sub:
             GuiControl, 2:, ahs_iscommand, % hs_iscommand
             
         if hs_iscommand
-            GuiControl, 2: Enable, Test Code
+            GuiControl, 2: Enable, % "Test Code"
         else if !hs_iscommand
-            GuiControl, 2: Disable, Test Code
+            GuiControl, 2: Disable, % "Test Code"
             
         Gui, 2: Show, w420 h335, % "Advanced Hotstring Setup"
     }
@@ -981,8 +990,8 @@ OnClipboardChange:
     autoCode := False
     return
  }
- if Clipboard = %oldScript%
-    return
+ if (Clipboard = oldScript || clipold)
+   return
  oldScript := Clipboard
  kword_count :=
  Gosub, ReadXML
@@ -1268,7 +1277,10 @@ AddHotkey:
     prog_hkL := mod_ctrl . mod_alt . mod_shift . mod_win . ddl_key
     prog_hkS := hkSwap(prog_hkL, "short") ; convert to short for creating hotkey
     if !br_prog
+    {
         SplitPath, e_progpath,prog_exec, prog_dir,, prog_name
+        StringUpper, prog_name, prog_name, T
+    }
     if (prog_hkS = "None")
     {
        prog_hkS := 
@@ -1306,11 +1318,18 @@ AddHotstring:
  hs_isadv := False
  hs_opts :=  hs_autoexpand . hs_dnd . hs_trigger . hs_raw
 
+ if  !hs_expand
+ {
+    MsgBox, % "Please specify a hotstring"
+    GuiReset(1)
+    GuiReset(2)
+    return
+ }
  if CheckLV("LV_hslist")
  {
     LV_Add("", hs_opts, hs_expand, hs_expandto)
-    hs_expand := EscapeXML(hs_expand , 1)
-    hs_expandto := EscapeXML(hs_expandto , 1)
+    hs_expand := uriSwap(hs_expand , 1)
+    hs_expandto := uriSwap(hs_expandto , 1)
     xpath(xml, "/root/hotstrings/hs[+1]/@opts/text()", hs_opts)
     xpath(xml, "/root/hotstrings/hs[last()]/@expand/text()", hs_expand)
     xpath(xml, "/root/hotstrings/hs[last()]/@expandto/text()", hs_expandto)
@@ -1341,23 +1360,29 @@ AdvHotstring:
  hs_opts := ahs_opts
  hs_expand := ahs_expand
  hs_expandto := ahs_expandto
-  
+ 
+ if  !hs_expand
+ {
+    MsgBox, % "Please specify a hotstring"
+    GuiReset(1)
+    GuiReset(2)
+    return
+ }
  if CheckLV("LV_hslist")
  {
     Loop, Parse, hs_expandto, `n,`r
     {
-        if (a_index >= 2 && a_loopfield)
+        if (a_index >= 2 && a_loopfield || InStr(a_loopfield, "0xa"))
             isMultiline := True            
     }
-    
     if isMultiline
         hs_expandto := "Multiline (Double Click to see the whole text)"
     else
         hs_expandto := RegexReplace(hs_expandto, "\n", "")  ; Make sure there are no accidental "`n" laying around 
                                                             ; on a non multiline hotstring
-    hs_expand := EscapeXML(hs_expand, 1)
-    hs_expandto := EscapeXML(hs_expandto , 1)
-    ahs_expandto := EscapeXML(ahs_expandto, 1)
+    hs_expand := uriSwap(hs_expand, 1)
+    hs_expandto := uriSwap(hs_expandto , 1)
+    ahs_expandto := uriSwap(ahs_expandto, 1)
     
     xpath(xml, "/root/hotstrings/hs[+1]/@opts/text()", hs_opts)
     xpath(xml, "/root/hotstrings/hs[last()]/@expand/text()", hs_expand)
@@ -1453,11 +1478,11 @@ LiveRun:
     else 
         append_code := Clipboard
     
-    if append_code not contains Gui
+    if !InStr(append_code,"Gui")
         append_code .= "`n`nExitApp"
-    else if append_code not contains GuiClose
+    else if !InStr(append_code,"GuiClose")
     {
-        if append_code not contains return
+        if !InStr(append_code,"return")
             append_code .= "`nreturn"
         append_code .= "`n`nGuiClose:`nExitApp"
     }
@@ -1507,7 +1532,7 @@ LiveSavetoFile:                                                     ; Live Code 
   * existed as "file.ahk", which caused the file to be saved as "file.ahk.ahk" and added a msgbox if the user
   * is overwriting an existing file
   */
- if f_saved contains .ahk               ; Check whether the user added the file extension or not
+ if InStr(f_saved, ".ahk")               ; Check whether the user added the file extension or not
  {
     if FileExist(f_saved)
         FileDelete, %f_saved%
@@ -1542,7 +1567,6 @@ ProgBrowse:
  ; File or Folder?
  if r_selfof = 1
     FileSelectFile, sel_prog, 3, %a_programfiles%, % "Select the program to be launched"
-    , Executable files (*.exe)
  else if r_selfof = 2
     FileSelectFolder, sel_prog, *%a_programfiles%, 3, % "Select the folder to be launched"
 
@@ -1674,6 +1698,8 @@ Clean:
 ;{
  Process,Close, %hslPID%
  FileDelete, %hsloc%
+ if FileExist(hsloc)
+    MsgBox, % "File could not be deleted"
 50GuiClose:
 50GuiEscape:
 ExitApp
@@ -1814,11 +1840,17 @@ CheckLV(lvName){
     
     if lvName = LV_hslist
     {
+        xpath_load(xml, s_xml)
         Loop, % lvcount
         {
             LV_GetText(chs_expand, a_index, 2)
             LV_GetText(chs_expandto, a_index, 3)
-
+            
+            if (chs_expandto = "Multiline (Double Click to see the whole text)")
+            {
+                chs_expandto := xpath(xml, "/root/hotstrings/hs[@expand=" . chs_expand . "]/text()")
+                chs_expandto := uriSwap(chs_expandto, 2)
+            }
             if (chs_expand != hs_expand && chs_expandto != hs_expandto)
             {
                 isNew := True
@@ -1894,8 +1926,8 @@ DelxmlInstance(type){
         {
             load_expand := xpath(xml, "/root/hotstrings/hs[" . a_index . "]/@expand/text()")
             load_expandto := xpath(xml, "/root/hotstrings/hs[" . a_index . "]/@expandto/text()")
-            hs_expand := EscapeXML(hs_expand, 1)
-            hs_expandto := EscapeXML(hs_expandto, 1)
+            hs_expand := uriSwap(hs_expand, 1)
+            hs_expandto := uriSwap(hs_expandto, 1)
             
             if (load_expand = hs_expand || load_expandto = hs_expandto)
             {
@@ -1919,25 +1951,26 @@ CleanXML(){
     FileDelete, %s_xml%             ; Delete the file because we dont want to append
     FileAppend, % rxml := RegexReplace(rxml, "\s+\/", "/"), %s_xml% ; Clean and save
 }
-EscapeXML(var, action){
-    Global
+uriSwap(str, action){
     if action = 1
     {
-        var := RegexReplace(var, """", "&#34;")
-        var := RegexReplace(var, ",", "&#44;")
-        var := RegexReplace(var, "<", "&#60;")
-        var := RegexReplace(var, ">", "&#62;")
-        var := RegexReplace(var, "\n", "&ret;")
+        oldformat := a_formatinteger
+        SetFormat, integer, hex
+        loop, parse, str
+            e_str := hx_str .= regexreplace(a_loopfield, "[^\w]", asc(a_loopfield))
+        SetFormat, integer, % oldformat
+        return e_str
     }
     else if action = 2
     {
-        var := RegexReplace(var, "&#34;", """")
-        var := RegexReplace(var, "&#44;", ",")
-        var := RegexReplace(var, "&#60;", "<")
-        var := RegexReplace(var, "&#62;", ">")
-        var := RegexReplace(var, "&ret;", "`n")
+        Loop
+        {
+            if !RegExMatch(str, "((?<=0x)[a-f]|(?<=0x)[\da-f]{1,2})", hex)
+                break
+            str := regexreplace(str,"0x" . hex, chr("0x" . hex))
+        }
+        return d_str := str
     }
-    return var
 }
 LV_Organize(lvName){
     Global
@@ -2057,16 +2090,12 @@ WriteBin(byref bin,filename,size){
    h := DllCall("CloseHandle", "Uint", h)
    return, 1
 }
-
 ;-
 
 ;+--> ; ---------[Hotkeys/Hotstrings]---------
 !Esc::ExitApp
 Pause::Reload
-F12::Suspend
-;+> ; [Ctrl + F5] Send Current Date
-^F5::Send, % a_mmmm " "a_dd ", " a_yyyy
-;-
+F11::Suspend
 ;+> ; [Ctrl + Shift + A/Z] BW ally
 #IfWinActive ahk_class SWarClass
 ^+a::
@@ -2126,11 +2155,12 @@ return
         RegexMatch(html, "4.+82.92 %.+?(href=""(.+?)"")", Match)
     else 
         RegexMatch(html, "100.00 %.+?(href=""(.+?)"")", Match)
-    If (WinActive("Post a new topic") || WinActive("Post a reply"))
+    If (WinActive("Post a new topic") || WinActive("Post a reply") || WinActive("Edit post"))
         Send, [url=%Match2%]%Clipboard%[/url]
     else
         Run, % Match2
     Clipboard := clipold
+    clipold :=
     ToolTip
  }
 return
@@ -2180,18 +2210,21 @@ return
  clipold := Clipboard
  Send, {Home}+{End}^c{End}{Enter}^v
  Clipboard := clipold
+ clipold :=
 return
 
 ^+Up::                  ; [Ctrl + Shift + Up] Move Up Current Line
  clipold := Clipboard
  Send, {Home}+{End}^x{Delete}{Up}{Enter}{Up}^v{Home}
  Clipboard := clipold
+ clipold :=
 return
 
 ^+Down::                ; [Ctrl + Shift + Up] Move Down Current Line
  clipold := Clipboard
  Send, {Home}+{End}^x{Delete}{End}{Enter}^v{Home}
  Clipboard := clipold
+ clipold :=
 return
 
 ^+u::                   ; [Ctrl + Shift u] UPPERCASE
@@ -2200,6 +2233,7 @@ return
  StringUpper, Clipboard, Clipboard
  Send, ^v
  Clipboard := clipold
+ clipold :=
 return
 
 ^u::                    ; [Ctrl + u] lowercase
@@ -2208,6 +2242,7 @@ return
  StringLower, Clipboard, Clipboard
  Send, ^v
  Clipboard := clipold
+ clipold :=
 return
 
 ^q::                    ; [Ctrl + q] Comment one Line
@@ -2241,6 +2276,7 @@ return
  }
  ctext :=
  Clipboard := clipold
+ clipold :=
 return
 
 #IfWinActive
