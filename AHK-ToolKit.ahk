@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.4.5c
+Script Version: 0.4.5e
 Homepage:
 
 Creation Date: July 11, 2010 | Modification Date: August 14, 2010
@@ -31,7 +31,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.5c"                 ; Script Version
+s_version   := "0.4.5e"                 ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -308,6 +308,7 @@ if !load := xpath_load(xml, s_xml)
 ;+--> ; ---------[Main]---------
 onMessage(0x203, "WM_LBUTTONDBLCLK")
 Gosub, ReadXML
+Gosub, SWW
 
 ; Use ahk.exe if AutoHotkey is not installed
 if !ahkexist
@@ -561,6 +562,7 @@ return
 
 ReadXML:                                                            ; Read options from XML file
 ;{
+ RegRead, sww_exist, HKCU, %reg_SMWCVR%, ahk-tk
  if !load := xpath_load(xml, s_xml)
     return
  ahkexist := xpath(xml, "/root/@ahkexist/text()", ahkexist)
@@ -571,21 +573,16 @@ ReadXML:                                                            ; Read optio
  ddl_pastebin := xpath(xml, "/root/options/AUS/@default/text()")    ; Default upload site
  hkcount := xpath(xml, "/root/hotkeys/hk/count()")                  ; Hotkey Count
  hscount := xpath(xml, "/root/hotstrings/hs/count()")               ; Hotstring Count
- Gosub, SWW
  Hotkey, %mhk%, MasterHotkey
 return
 ;}
 
 SWW:                                                                ; Start With Windows subroutine
 ;{
- if (sww && ahkexist != a_scriptfullpath)
-    RegWrite, REG_SZ, HKCU, %reg_run%, ahk-tk, %a_scriptfullpath%
- else
- {
-    RegRead, sww_exist, HKCU, %reg_run%, ahk-tk
-    if sww_exist
-        RegDelete, HKCU, %reg_run%, ahk-tk
- }
+ if sww
+    RegWrite, REG_SZ, HKCU, %reg_SMWCVR%, ahk-tk, %a_scriptfullpath%
+ else if (!sww && sww_exist)
+	RegDelete, HKCU, %reg_SMWCVR%, ahk-tk
 return
 ;}
 
@@ -2077,7 +2074,7 @@ return
 ;-
 
 ;+--> ; ---------[Includes]---------
-#Include *i %a_scriptdir%\extlib ; Current Library
+#Include *i C:\Documents and Settings\RaptorX\My Documents\AutoHotkey\AHK-ToolKit\extlib ; Current Library
 #Include httpQuery.ahk
 #Include klist.ahk
 #Include xpath.ahk

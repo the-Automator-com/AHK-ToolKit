@@ -1,4 +1,22 @@
-commit dc548d1f3f178ad764f10794600d126148137add
+commit e2ff9ae54509ef7f17f2da95ed9dac4772e6ca92
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 14 01:23:03 2010 +0200
+
+    AHK-TK v0.4.5e
+    
+    Changed:
+    
+    * Fixed problems introduced by last commit because of changed variables
+    * Moved the SWW label to be run outside of ReadXML
+    * Changed lib path to complete path instead of variable
+    
+    ToDo:
+    
+    * Options Gui / Functionality
+    * Add Hotkey commands functionality
+    * Add Hashing functions
+
+commit 769491f2e5fbd32ca0b8af10c0b057a647cdc3ea
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Aug 14 01:23:03 2010 +0200
 
