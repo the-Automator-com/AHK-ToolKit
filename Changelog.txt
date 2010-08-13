@@ -1,4 +1,39 @@
-commit e2ff9ae54509ef7f17f2da95ed9dac4772e6ca92
+commit ae2ab8f2071f5d49fd19de36216fe7a8540814dd
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 14 01:23:03 2010 +0200
+
+    AHK-TK v0.4.6b
+    
+    Changed:
+    
+    * Add Ctrl + F5 Hotkey Back
+    * Add check of "none" hotkey
+    * Fix minor bugs
+    
+    ToDo:
+    
+    * Options Gui / Functionality
+    * Add Hotkey commands functionality
+    * Add Hashing functions
+
+commit d20449f55e60521da7380504fdf60fca3721ddee
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 14 01:23:03 2010 +0200
+
+    AHK-TK v0.4.6
+    
+    Changed:
+    
+    * Add selected command to online documentation
+    * Add selected command to tags if in ahk forum
+    
+    ToDo:
+    
+    * Options Gui / Functionality
+    * Add Hotkey commands functionality
+    * Add Hashing functions
+
+commit 4c932191009ed9d6e2b575544164ea7ba44c0326
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Aug 14 01:23:03 2010 +0200
 

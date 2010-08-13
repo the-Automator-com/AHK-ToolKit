@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.4.6
+Script Version: 0.4.6b
 Homepage:
 
 Creation Date: July 11, 2010 | Modification Date: August 18, 2010
@@ -31,7 +31,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.6"                  ; Script Version
+s_version   := "0.4.6b"                 ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -1188,6 +1188,13 @@ AddHotkey:
     dropped :=
     prog_hkL := mod_ctrl . mod_alt . mod_shift . mod_win . ddl_key
     prog_hkS := hkSwap(prog_hkL, "short") ; convert to short for creating hotkey
+    if (prog_hkS = "None")
+    {
+       prog_hkS := 
+       MsgBox, % "Please select a hotkey"
+       Gui, 96: Show, w420 h210
+       return
+    }
     if CheckLV("LV_hklist")
     {
         LV_Add("", r_selfof, prog_name, prog_hkL, prog_dir)
@@ -1945,12 +1952,77 @@ WM_LBUTTONDBLCLK(wParam, lParam){
 !Esc::ExitApp
 Pause::Reload
 F12::Suspend
+;+> ; [Ctrl + F5] Send Current Date
+^F5::Send, % a_mmmm " "a_dd ", " a_yyyy
+;-
+;+> ; [Ctrl + Shift + A/Z] BW ally
+#IfWinActive ahk_class SWarClass
+^+a::
+ if !nick
+    Inputbox, nick, % "Set your ally", % "Pease enter the nick of your ally",,210,120, % mid_scrw - (210/2)
+    , % mid_scrh - (120/2)
+ else
+    Send, /ally %nick% {Enter}
+
+ IfWinNotActive ahk_class SWarClass
+    WinActivate
+ else
+    WinMaximize
+return
+^+z::
+ nick :=
+ Gosub, ^+a
+return
+#IfWinActive
+;-
 ;+> ; [Ctrl + Alt + LButton] Auto Run Selected Code
 ~^!LButton Up::
  autoCode := True
  Send, ^c
  Gosub, LiveRun
  autoCode := False
+return
+;-
+;+> ; [LButton + Alt] Command Detection
+~LButton::
+ stime := a_tickcount               ; Start Time
+ KeyWait, LButton
+ etime := a_tickcount - stime       ; End Time
+ if etime >= 500                    ; The mouse was dragged
+ {
+    KeyWait, Alt, D T1
+    if ErrorLevel
+        return
+    clipold := Clipboard
+    Send, ^c
+    ClipWait
+    Sleep 10
+    ToolTip, % Clipboard
+    URL  := "http://www.autohotkey.com/search/search.php"
+    POST := "site=4"
+         . "&refine=1"
+         . "&template_demo=phpdig.html"
+         . "&result_page=search.php"
+         . "&query_string=" . Clipboard
+         . "&search=Go+..."
+         . "&option=exact"
+         . "&path=docs%2F%25"
+
+    HttpQuery(html := "", URL, POST)
+    VarSetCapacity(html, -1)
+    if (Clipboard = "WinGet")
+        RegexMatch(html, "99.80 %.+?(href=""(.+?)"")", Match)
+    else if (Clipboard = "ErrorLevel")
+        RegexMatch(html, "4.+82.92 %.+?(href=""(.+?)"")", Match)
+    else 
+        RegexMatch(html, "100.00 %.+?(href=""(.+?)"")", Match)
+    If (WinActive("Post a new topic") || WinActive("Post a reply"))
+        Send, [url=%Match2%]%Clipboard%[/url]
+    else
+        Run, % Match2
+    Clipboard := clipold
+    ToolTip
+ }
 return
 ;-
 ;+> ; [Alt + LButton] Screen Capture Active Window/Area
@@ -1986,49 +2058,9 @@ return
  }
  if (!rect && scWinHwnd != DeskHwnd)
     CaptureScreen(1, 0, scWin := a_temp . "\scWin_" . RName(0,"png"))
- Gosub, ImageUpload
+ Gosub, ImageUpload 
  FileDelete, %scWin%
  FileDelete, %scRect%
-return
-;-
-;+> ; [LButton + Alt] Command Detection
-~LButton::
- stime := a_tickcount               ; Start Time
- KeyWait, LButton
- etime := a_tickcount - stime       ; End Time
- if etime >= 500                  ; The mouse was dragged
- {
-    KeyWait, Ctrl, D T1
-    if ErrorLevel
-        return
-    clipold := Clipboard
-    Clipboard := 
-    Send, ^c
-    ClipWait, 1
-    URL  := "http://www.autohotkey.com/search/search.php"
-    POST := "site=4"
-         . "&refine=1"
-         . "&template_demo=phpdig.html"
-         . "&result_page=search.php"
-         . "&query_string=" . Clipboard
-         . "&search=Go+..."
-         . "&option=exact"
-         . "&path=docs%2F%25"
-
-    HttpQuery(html := "", URL, POST)
-    VarSetCapacity(html, -1)
-    if (Clipboard = "WinGet")
-        RegexMatch(html, "99.80 %.+?(href=""(.+?)"")", Match)
-    else if (Clipboard = "ErrorLevel")
-        RegexMatch(html, "4.+82.92 %.+?(href=""(.+?)"")", Match)
-    else 
-        RegexMatch(html, "100.00 %.+?(href=""(.+?)"")", Match)
-    If (WinActive("Post a new topic") || WinActive("Post a reply"))
-        Send, [url=%Match2%]%Clipboard%[/url]
-    else
-        Run, % Match2
- Clipboard := clipold
- }
 return
 ;-
 ;+> ; [Hotkeys for Edit controls]
@@ -2112,7 +2144,7 @@ return
 ;-
 
 ;+--> ; ---------[Includes]---------
-#Include *i C:\Documents and Settings\RaptorX\My Documents\AutoHotkey\AHK-ToolKit\extlib ; Current Library
+#Include *i %a_scriptdir%\extlib ; Current Library
 #Include httpQuery.ahk
 #Include klist.ahk
 #Include xpath.ahk

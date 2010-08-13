@@ -1,5 +1,5 @@
 --AutoHotkey ToolKit--
-     v0.4.5b
+     v0.4.6b
 
 This script started as a personal project but now i feel that it might be helpful to other people so I decided to release it as beta software for testing.
 
@@ -16,7 +16,8 @@ Main features:
      But this really shines when the script is compiled and you are in a 
      pc  that does not have AHK installed.
 
-* Detect AutoHotkey scripts copied to the clipboard and allow you to upload it to a pastebin service or save it to a file.
+* Detect AutoHotkey scripts copied to the clipboard and allow you to upload it to a pastebin service or save it to 
+  a file.
   -- This little gem copies the link of the created pastebin to the clipboard  
       and restores your old clipboard once you Ctrl + V.
   -- If you use AutoHotkey.net as the pastebin (you can choose 2 other)
@@ -25,6 +26,10 @@ Main features:
   -- It also auto replace #Include files by the actual files in case you forgot
      no more: "oh i forgot to mention that thereare includes there, 
      remove those lines!".
+     
+* Detect selected AHK command and open online documentation by pressing Alt. If you are in the forum creating a
+  new post or replying to an existing post the selected command will get [url] tags instead linking to the online
+  documentation.
 
 
 Secondary features:
