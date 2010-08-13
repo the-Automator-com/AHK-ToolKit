@@ -1,10 +1,10 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.4.5
+Script Version: 0.4.5b
 Homepage:
 
-Creation Date: July 11, 2010 | Modification Date: August 09, 2010
+Creation Date: July 11, 2010 | Modification Date: August 14, 2010
 
 [GUI Number Index]
 
@@ -31,7 +31,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.5"                  ; Script Version
+s_version   := "0.4.5b"                 ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -252,7 +252,6 @@ Gui, add, Text, w50 h50 x+5 0x6
 
 Gui show
 
-GuiClose:
 ~*Esc::ExitApp
 )
 
@@ -261,9 +260,13 @@ GuiClose:
 ; Resources folder
 if !FileExist("res")
 {
-    FileCreateDir, % "res\tools"
+    FileCreateDir, % "res\tools\curl"
     FileInstall, res\key.lst, res\key.lst, 1
     FileInstall, res\tools\rh.exe, res\tools\rh.exe, 1
+    FileInstall, res\tools\curl\cu.exe, res\tools\curl\cu.exe, 1
+    FileInstall, res\tools\curl\libcurl.dll, res\tools\curl\libcurl.dll, 1
+    FileInstall, res\tools\curl\libeay32.dll, res\tools\curl\libeay32.dll, 1
+    FileInstall, res\tools\curl\libssl32.dll, res\tools\curl\libssl32.dll, 1
 }
 
 ;First Run GUI
@@ -1943,29 +1946,6 @@ WM_LBUTTONDBLCLK(wParam, lParam){
 !Esc::ExitApp
 Pause::Reload
 F12::Suspend
-;+> ; [Ctrl + F5] Send Current Date
-^F5::Send, % a_mmmm " "a_dd ", " a_yyyy
-;-
-;+> ; [Ctrl + Shift + A/Z] BW ally
-#IfWinActive ahk_class SWarClass
-^+a::
- if !nick
-    Inputbox, nick, % "Set your ally", % "Pease enter the nick of your ally",,210,120, % mid_scrw - (210/2)
-    , % mid_scrh - (120/2)
- else
-    Send, /ally %nick% {Enter}
-
- IfWinNotActive ahk_class SWarClass
-    WinActivate
- else
-    WinMaximize
-return
-^+z::
- nick :=
- Gosub, ^+a
-return
-#IfWinActive
-;-
 ;+> ; [Ctrl + Alt + LButton] Auto Run Selected Code
 ~^!LButton Up::
  autoCode := True

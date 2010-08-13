@@ -1,4 +1,23 @@
-commit 11d6c3652d00e916d9fb99fcaf611a3b21506894
+commit 8455fe29b34a2f857bbbe6358ff66107eaa2ef05
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 14 01:23:03 2010 +0200
+
+    AHK-TK v0.4.5b
+    
+    Changed:
+    
+    * Add Autorun selected code functionality
+    * Add Clipboard restore notification
+    * Fix Ctrl + Q bugs
+    * Removed personal Hotkeys
+    
+    ToDo:
+    
+    * Options Gui / Functionality
+    * Add Hotkey commands functionality
+    * Add Hashing functions
+
+commit 8bcf5368ef3414ea1c8ce03ceedf57feffdcad45
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Aug 14 01:23:03 2010 +0200
 
