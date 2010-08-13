@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.4.6c
+Script Version: 0.4.7
 Homepage:
 
 Creation Date: July 11, 2010 | Modification Date: August 18, 2010
@@ -31,7 +31,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.6c"                 ; Script Version
+s_version   := "0.4.7"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -252,6 +252,10 @@ Gui, add, Text, w50 h50 x670 y+5 0x7
 Gui, add, Text, w50 h50 x+5 0x6
 
 Gui show
+return
+
+GuiClose:
+ExitApp
 )
 ;}
 
@@ -317,6 +321,16 @@ if !ahkexist
     if !FileExist("res\ahk\ahk.exe")
         FileInstall, res\ahk\ahk.exe, %resahk%, 1
 }
+
+; Tray Menu
+;{
+Menu, Tray, NoStandard
+Menu, Tray, Click, 1
+Menu, Tray, add, % "Show Main Gui", MasterHotkey
+Menu, Tray, Default, % "Show Main Gui"
+Menu, Tray, add
+Menu, Tray, Standard
+;}
 
 ; Hotkey Maker GUI[Main]
 ;{
@@ -1190,6 +1204,8 @@ AddHotkey:
     dropped :=
     prog_hkL := mod_ctrl . mod_alt . mod_shift . mod_win . ddl_key
     prog_hkS := hkSwap(prog_hkL, "short") ; convert to short for creating hotkey
+    if !br_prog
+        prog_dir := e_progpath
     if (prog_hkS = "None")
     {
        prog_hkS := 
@@ -1199,6 +1215,7 @@ AddHotkey:
     }
     if CheckLV("LV_hklist")
     {
+        br_prog := False
         LV_Add("", r_selfof, prog_name, prog_hkL, prog_dir)
         xpath(xml, "/root/hotkeys/hk[+1]/@type/text()", r_selfof)
         xpath(xml, "/root/hotkeys/hk[last()]/@name/text()", prog_name)
@@ -1372,7 +1389,10 @@ LiveRun:
         append_code := ahs_expandto
     else 
         append_code := Clipboard
-        
+    
+    if append_code not contains Gui
+        append_code .= "`n`nExitApp"
+    
     live_code =
     (Ltrim
         #NoEnv
@@ -1387,7 +1407,6 @@ LiveRun:
         
         %append_code%
         
-        GuiClose:
         Esc::ExitApp
     )
     FileAppend, %live_code%, %lcf_name%
@@ -1451,7 +1470,7 @@ ProgBrowse:
 ;{
  Gui, 96: +OwnDialogs
  Gui, 96: Submit, NoHide
-
+ br_prog := True
  ; File or Folder?
  if r_selfof = 1
     FileSelectFile, sel_prog, 3, %a_programfiles%, % "Select the program to be launched"
@@ -1573,16 +1592,22 @@ GuiEscape:
 return
 ;}
 
-50GuiClose:
-50GuiEscape:
+GuiSize:
 ;{
- ExitApp
+ if a_eventinfo = 1
+ {
+    main_toggle := !main_toggle
+    Gui, Hide
+ }
+return
 ;}
 
 Clean:
 ;{
  Process,Close, %hslPID%
  FileDelete, %hsloc%
+50GuiClose:
+50GuiEscape:
 ExitApp
 ;}
 ;-
@@ -1992,7 +2017,7 @@ return
  etime := a_tickcount - stime       ; End Time
  if etime >= 500                    ; The mouse was dragged
  {
-    KeyWait, Alt, D T1
+    KeyWait, Shift, D T1.5
     if ErrorLevel
         return
     clipold := Clipboard

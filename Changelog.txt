@@ -1,4 +1,23 @@
-commit ffabf5f387a38cc1cf1c7d138bcf0435661b6c21
+commit f51980a9d494b558296c1079c067f120134a78c3
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 14 01:23:03 2010 +0200
+
+    AHK-TK v0.4.7
+    
+    Changed:
+    
+    * Add click on tray toggle Main GUI
+    * Add minimize to tray
+    * Add append ExitApp on Live Code that dont has a GUI
+    * Fix issue when manually editing the path on a hotkey
+    
+    ToDo:
+    
+    * Options Gui / Functionality
+    * Add Hotkey commands functionality
+    * Add Hashing functions
+
+commit c7ffef9fbe106043cf52ce856642409c66be06e0
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Aug 14 01:23:03 2010 +0200
 
