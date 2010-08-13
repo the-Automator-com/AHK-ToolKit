@@ -1,4 +1,20 @@
-commit 8455fe29b34a2f857bbbe6358ff66107eaa2ef05
+commit 6cf64fd7513a80fb6fe99eae0818208f61c7f203
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 14 01:23:03 2010 +0200
+
+    AHK-TK v0.4.5c
+    
+    Changed:
+    
+    * Fixed small bug on Ctrl + Q which removed all the '+' signs
+    
+    ToDo:
+    
+    * Options Gui / Functionality
+    * Add Hotkey commands functionality
+    * Add Hashing functions
+
+commit d0af49a30c028f65fb46634f3db6362755666806
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Aug 14 01:23:03 2010 +0200
 

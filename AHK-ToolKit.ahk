@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.4.5b
+Script Version: 0.4.5c
 Homepage:
 
 Creation Date: July 11, 2010 | Modification Date: August 14, 2010
@@ -31,7 +31,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.5b"                 ; Script Version
+s_version   := "0.4.5c"                 ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -1363,7 +1363,8 @@ LiveRun:
         append_code := live_code
     else if a_gui = 2
         append_code := ahs_expandto
-    else append_code := Clipboard
+    else 
+        append_code := Clipboard
         
     live_code =
     (Ltrim
@@ -2061,7 +2062,8 @@ return
         else
             ctext .= "; " . a_loopfield . "`n"
     }
-    Send %ctext%{BackSpace}
+    SendRaw %ctext%
+    Send {BackSpace}
  }
  ctext :=
  Clipboard := clipold
