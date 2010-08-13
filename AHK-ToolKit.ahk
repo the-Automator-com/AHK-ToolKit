@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.4.4
+Script Version: 0.4.5
 Homepage:
 
 Creation Date: July 11, 2010 | Modification Date: August 09, 2010
@@ -21,16 +21,17 @@ GUI 50 - First Run
 ;+--> ; ---------[Directives]---------
 #NoEnv
 #SingleInstance Force
-SetBatchLines -1
 ; --
+SetBatchLines -1
 SendMode Input
+CoordMode, Tooltip, Screen
 SetWorkingDir %A_ScriptDir%
 onExit, Clean
 ;-
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.4"                  ; Script Version
+s_version   := "0.4.5"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -902,15 +903,16 @@ return
 
 OnClipboardChange:
 ;{
+ kword_count :=
  Gosub, ReadXML
 /*
-* This checks if the clipboard contains keywords from ahk scripting
+* This checks if the Clipboard contains keywords from ahk scripting
 * if it contains more than x ammount of keywords it will fire up the pastebin
 * routines. You can change this to suit you better.
 */
  Loop, parse, ahk_keywords, `n, `r
  {
-    if RegexMatch(clipboard, "i)\b" . a_loopfield . "\b\(?")
+    if RegexMatch(Clipboard, "i)\b" . a_loopfield . "\b\(?")
         kword_count++
  }
  if kword_count >= 3
@@ -928,7 +930,7 @@ PasteBin:
 ;{
  Gui, 99: Show, NoActivate w250 h150 x%monRight% y%monBottom%
  Gui, 99: Submit, NoHide
- if (!oldScript && pastepop_ena)
+ if (!oldScript && !autoCode && pastepop_ena)
  {
     WinGetPos,,,99Width,99Height,ahk_id %99Hwnd%                    ; Get Window width and Height
     WinMove, ahk_id %99Hwnd%,,,% wa_Bottom - 99Height               ; Move the window to correct position
@@ -1149,7 +1151,7 @@ ImageUpload:
     Tooltip
     return
  }
- Tooltip, % Clipboard := "http://www.imagebin.org/" . Match1, 5,5
+ Tooltip, % Clipboard := "http://www.imagebin.org/" . Match1, 5, 5
  SetTimer, CheckCtrlV, 30
 return
 ;}
@@ -1160,6 +1162,8 @@ CheckCtrlV:
  {
     Clipboard := clipold
     SetTimer, CheckCtrlV, off
+    Tooltip, % "Your Clipboard has been restored", 5, 5
+    Sleep, 5 * sec
     Tooltip
  }
 return
@@ -1354,8 +1358,9 @@ LiveRun:
  {
     if a_gui = 1
         append_code := live_code
-    if a_gui = 2
+    else if a_gui = 2
         append_code := ahs_expandto
+    else append_code := Clipboard
         
     live_code =
     (Ltrim
@@ -1961,6 +1966,14 @@ return
 return
 #IfWinActive
 ;-
+;+> ; [Ctrl + Alt + LButton] Auto Run Selected Code
+~^!LButton Up::
+ autoCode := True
+ Send, ^c
+ Gosub, LiveRun
+ autoCode := False
+return
+;-
 ;+> ; [Alt + LButton] Screen Capture Active Window/Area
 !LButton::
  CoordMode, Mouse, Screen
@@ -2044,22 +2057,32 @@ return
 ^q::                    ; [Ctrl + q] Comment one Line
  oldScript := True
  clipold := Clipboard
+ Clipboard :=
  Send ^x
- Loop, Parse, Clipboard, `n, `r
+ if !Clipboard
  {
-    if !a_loopfield
-    {
-        ctext .= "`n"
-        continue
-    }
-    if a_loopfield contains `;
-        ctext .= RegexReplace(a_loopfield, ";\s?", "") . "`n"
+    Send {Home}+{Right}^c
+    if Clipboard contains `;
+        Send {Home}{Delete 2}{Home}
     else
-        ctext .= "; " . a_loopfield . "`n"
-    
-    RegexReplace(ctext, a_loopfield . "(\n\r)", "")
+        Send {Home}; {Home}
  }
- Send %ctext%
+ else
+ {
+    Loop, Parse, Clipboard, `n, `r
+    {
+        if !a_loopfield
+        {
+            ctext .= "`n"
+            continue
+        }
+        if a_loopfield contains `;
+            ctext .= RegexReplace(a_loopfield, ";\s?", "") . "`n"
+        else
+            ctext .= "; " . a_loopfield . "`n"
+    }
+    Send %ctext%{BackSpace}
+ }
  ctext :=
  Clipboard := clipold
 return
