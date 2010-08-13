@@ -1,5 +1,5 @@
 --AutoHotkey ToolKit--
-     v0.4.8
+     v0.4.8b
 
 This script started as a personal project but now i feel that it might be helpful to other people so I decided to release it as beta software for testing.
 

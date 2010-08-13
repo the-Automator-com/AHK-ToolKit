@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.4.8
+Script Version: 0.4.8b
 Homepage:
 
 Creation Date: July 11, 2010 | Modification Date: August 18, 2010
@@ -31,7 +31,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.8"                  ; Script Version
+s_version   := "0.4.8b"                 ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 GoSub, CheckUpdate
@@ -597,23 +597,27 @@ CheckUpdate:
         break
     }
  }
- if a_iscompiled
-    URL := "http://www.autohotkey.net/~RaptorX/AHK-TK/AHK-Toolkit-" . Match . "-Compiled.zip"
- else
-    URL := "http://www.autohotkey.net/~RaptorX/AHK-TK/AHK-ToolKit-" . Match . ".zip"   
+ if s_version != %u_version%
+ {
+    if a_iscompiled
+        URL := "http://www.autohotkey.net/~RaptorX/AHK-TK/AHK-Toolkit-" . Match . "-Compiled.zip"
+    else
+        URL := "http://www.autohotkey.net/~RaptorX/AHK-TK/AHK-ToolKit-" . Match . ".zip"   
 
- FileSelectFile, updatezip, S16, %a_workingdir%\AutoHotkey Toolkit.zip
- , % "Please selecte where to download the file.", Zip Files (*.zip)
- SetTimer, dlCheck, 10
- VarSEtCapacity(f_update, 5242880)
- length := HttpQuery(f_update := "", URL)
- WriteBin(f_update, updatezip, length)
- SetTimer, dlCheck, Off
- Tooltip
- Msgbox, % "Download Completed"
- Run, % updatezip
- VarSEtCapacity(f_update, 0)
-ExitApp
+    FileSelectFile, updatezip, S16, %a_workingdir%\AutoHotkey Toolkit.zip
+    , % "Please selecte where to download the file.", Zip Files (*.zip)
+    SetTimer, dlCheck, 10
+    VarSEtCapacity(f_update, 5242880)
+    length := HttpQuery(f_update := "", URL)
+    WriteBin(f_update, updatezip, length)
+    SetTimer, dlCheck, Off
+    Tooltip
+    Msgbox, % "Download Completed"
+    Run, % updatezip
+    VarSEtCapacity(f_update, 0)
+    ExitApp
+ }
+return
 ;}
 
 dlCheck:
