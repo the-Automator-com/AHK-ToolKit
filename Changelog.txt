@@ -1,4 +1,20 @@
-commit 6cf64fd7513a80fb6fe99eae0818208f61c7f203
+commit dc548d1f3f178ad764f10794600d126148137add
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 14 01:23:03 2010 +0200
+
+    AHK-TK v0.4.5d
+    
+    Changed:
+    
+    * Fixed small problems with compiled version
+    
+    ToDo:
+    
+    * Options Gui / Functionality
+    * Add Hotkey commands functionality
+    * Add Hashing functions
+
+commit cb46fca9f9bb7d04b6eebd96c224fea3014f86ef
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Aug 14 01:23:03 2010 +0200
 

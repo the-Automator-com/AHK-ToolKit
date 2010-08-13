@@ -260,8 +260,10 @@ Gui show
 ; Resources folder
 if !FileExist("res")
 {
+    FileCreateDir, % "res\img"
     FileCreateDir, % "res\tools\curl"
     FileInstall, res\key.lst, res\key.lst, 1
+    FileInstall, res\img\UnderConstruction.png, res\img\UnderConstruction.png
     FileInstall, res\tools\rh.exe, res\tools\rh.exe, 1
     FileInstall, res\tools\curl\cu.exe, res\tools\curl\cu.exe, 1
     FileInstall, res\tools\curl\libcurl.dll, res\tools\curl\libcurl.dll, 1
@@ -301,6 +303,12 @@ if !load := xpath_load(xml, s_xml)
     Pause
 }
 
+;-
+
+;+--> ; ---------[Main]---------
+onMessage(0x203, "WM_LBUTTONDBLCLK")
+Gosub, ReadXML
+
 ; Use ahk.exe if AutoHotkey is not installed
 if !ahkexist
 {
@@ -309,11 +317,6 @@ if !ahkexist
     if !FileExist("res\ahk\ahk.exe")
         FileInstall, res\ahk\ahk.exe, %resahk%, 1
 }
-;-
-
-;+--> ; ---------[Main]---------
-onMessage(0x203, "WM_LBUTTONDBLCLK")
-Gosub, ReadXML
 
 ; Hotkey Maker GUI[Main]
 ;{
