@@ -1,4 +1,35 @@
-commit f848a7d00ea790d187aa5a5007c0c6b418843aa8
+commit 05cad6801271ae70db6fcb2ba08c8539017ae7b0
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 14 01:23:03 2010 +0200
+
+    AHK-TK v0.4.10
+    
+    Changed:
+    
+    * Add Shift Tab Hotkey to editor
+    * Add function matchclip() to match the contents of the clipboard
+      for use with the Command Detection feature
+    * Change SetTitleMatchMode to Regex
+    * Change Suspend Hotkeys back to F12
+    * Change Suspend Hotstrings back to F11
+    * Change selection box window name from %a_space% to "SelBox"
+    * Remove some optional files/folders from compiled version
+    * Increase requirement from 3 - 5 of matched keywords for CODET
+    * Update uriSwap() function. Add actions 3 and 4 for encoding using
+      "%" signs instead of direct hex values
+    * Update how the Command Detection feature works
+      --More reliable now
+    * Using curl without ssl support
+      --Free 1.5MB of space
+    
+    ToDo:
+    
+    * Options Gui / Functionality
+    * Add Hotkey commands functionality
+    * Add Hashing functions
+    * Add upload screenshot notification
+
+commit 1087e7a514081c8926acece9b5a46c161da2ed8e
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Aug 14 01:23:03 2010 +0200
 

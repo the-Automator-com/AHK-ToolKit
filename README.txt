@@ -1,5 +1,5 @@
 --AutoHotkey ToolKit--
-      v0.4.9b
+      v0.4.10
 
 This script was originally meant for 1) showing the potential of autohotkey and 2) make it easier
 for me to help others while on the IRC/Forum and help with my general tasks. Now I believe that it has more potential.

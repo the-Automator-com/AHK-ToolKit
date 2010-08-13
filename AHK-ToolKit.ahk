@@ -1,10 +1,10 @@
 /*
  * Author:          RaptorX	<graptorx@gmail.com>
  * Script Name:     AutoHotkey ToolKit
- * Script Version:  0.4.9b
+ * Script Version:  0.4.10
  * Homepage:        http://www.autohotkey.com/forum/topic61379.html#376087
  *
- * Creation Date: July 11, 2010 | Modification Date: August 26, 2010
+ * Creation Date: July 11, 2010 | Modification Date: September 06, 2010
  * 
  * [GUI Number Index]
  *
@@ -24,6 +24,7 @@
 ; --
 SetBatchLines -1
 SendMode Input
+SetTitleMatchMode, Regex
 CoordMode, Tooltip, Screen
 SetWorkingDir %A_ScriptDir%
 onExit, Clean
@@ -31,7 +32,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.9b"                 ; Script Version
+s_version   := "0.4.10"                 ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 GoSub, CheckUpdate
@@ -65,9 +66,9 @@ exc       := "ScrollLock|CapsLock|NumLock|NumpadIns|NumpadEnd|NumpadDown|NumpadP
 . "|NumpadClear|NumpadRight|NumpadHome|NumpadUp|NumpadPgUp|NumpadDel|LWin|RWin|LControl"
 . "|RControl|LShift|RShift|LAlt|RAlt|CtrlBreak|Control|Alt|Shift|AppsKey"
 keylist   := "None||" . klist(2,0,1, exc)
-resahk    := "res\ahk\ahk.exe"
+resahk    := "res\tools\ahk\ahk.exe"
 rescurl   := "res\tools\curl\cu.exe"
-resrehash := "res\tools\rh.exe"
+resrehash := "res\tools\rehash\rh.exe"
 hsloc     := a_temp . "\hslauncher.ahk"
 
 ; Live Code Scripts
@@ -263,15 +264,12 @@ ExitApp
 ; Resources folder
 if !FileExist("res")
 {
-    FileCreateDir, % "res\img"
-    FileCreateDir, % "res\tools\curl"
+    FileCreateDir, % "res\tools"
+    FileCreateDir, % regexreplace(rescurl, "\\\w+\.exe", "")
+    FileCreateDir, % regexreplace(resrehash, "\\\w+\.exe", "")
     FileInstall, res\key.lst, res\key.lst, 1
-    FileInstall, res\img\UnderConstruction.png, res\img\UnderConstruction.png
-    FileInstall, res\tools\rh.exe, res\tools\rh.exe, 1
+    FileInstall, res\tools\rehash\rh.exe, res\tools\rehash\rh.exe, 1
     FileInstall, res\tools\curl\cu.exe, res\tools\curl\cu.exe, 1
-    FileInstall, res\tools\curl\libcurl.dll, res\tools\curl\libcurl.dll, 1
-    FileInstall, res\tools\curl\libeay32.dll, res\tools\curl\libeay32.dll, 1
-    FileInstall, res\tools\curl\libssl32.dll, res\tools\curl\libssl32.dll, 1
     FileRead, ahk_keywords, % "res\key.lst" ; First Time Read.
 }
 
@@ -318,10 +316,10 @@ Gosub, SWW
 ; Use ahk.exe if AutoHotkey is not installed
 if !ahkexist
 {
-    if !FileExist("res\ahk")
-        FileCreateDir, res\ahk
-    if !FileExist("res\ahk\ahk.exe")
-        FileInstall, res\ahk\ahk.exe, %resahk%, 1
+    if !FileExist("res\tools\ahk")
+        FileCreateDir, % regexreplace(resahk, "\\\w+\.exe", "")
+    if !FileExist("res\tools\ahk\ahk.exe")
+        FileInstall, res\tools\ahk\ahk.exe, %resahk%, 1
 }
 
 ; Tray Menu
@@ -380,7 +378,8 @@ Gui, add, Button, w100 x+5 yp gLiveClear, % "Cl&ear"
 Gui, add, Button, w100 x+10 yp, % "&Close"
 
 Gui, Tab, Options
-Gui, add, Picture, w600 h280, % "res\img\UnderConstruction.png"
+FileInstall, res\img\UnderConstruction.png, % a_temp . "\" . "UC.png"
+Gui, add, Picture, w600 h280, % a_temp . "\" . "UC.png"
 
 Gui, Show, Hide ;w619 h341
 SB_SetParts(150,150)
@@ -495,7 +494,6 @@ Return ; End of autoexecute area
 ;-
 
 ;+--> ; ---------[Labels]---------
-
 FR_Save:                                                            ; First Run Save
 ;{
  Gui, 50: Submit
@@ -637,13 +635,13 @@ ReadXML:                                                            ; Read optio
  if !load := xpath_load(xml, s_xml)
     return
  ahkexist := xpath(xml, "/root/@ahkexist/text()", ahkexist)
- pastepop_ena := !aus                                               ; Pastebin Popup if Autoupload is off
  aus := xpath(xml, "/root/options/AUS/@value/text()")               ; AutoUpload copied scripts
  sww := xpath(xml, "/root/options/SWW/@value/text()")               ; Start with Windows
  mhk := xpath(xml, "/root/options/MHK/@value/text()")               ; Main Hotkey
  ddl_pastebin := xpath(xml, "/root/options/AUS/@default/text()")    ; Default upload site
  hkcount := xpath(xml, "/root/hotkeys/hk/count()")                  ; Hotkey Count
  hscount := xpath(xml, "/root/hotstrings/hs/count()")               ; Hotstring Count
+ pastepop_ena := !aus                                               ; Pastebin Popup if Autoupload is off
  Hotkey, %mhk%, MasterHotkey
 return
 ;}
@@ -738,7 +736,7 @@ CreateHSScript:
         #NoTrayIcon
         ; --
         SetBatchLines -1
-        F12::Suspend`n`n
+        F11::Suspend`n`n
     )
  FileAppend, %hsfileopts%, %hsloc%
  return
@@ -1007,7 +1005,7 @@ OnClipboardChange:
     if RegexMatch(Clipboard, "i)\b" . a_loopfield . "\b\(?")
         kword_count++
  }
- if kword_count >= 3
+ if kword_count >= 5
  {
     kword_count :=
     if aus
@@ -1059,15 +1057,7 @@ AUS:
     }
  } ; Finish Replacing
  SetWorkingDir %A_ScriptDir%
- /*
-  * The following code replaces signs that might provoke issues
-  * when sending the httpQUERY. They are automatically converted back
-  * by the HTTP request, so no need to worry there.
-  */
- StringReplace, Clipboard, Clipboard,`%, `%25, 1
- StringReplace, Clipboard, Clipboard, &, `%26, 1
- StringReplace, Clipboard, Clipboard, +, `%2B, 1
- ; Finish Replacing
+ 
  if aus
 {
     ; Some default values
@@ -1109,14 +1099,14 @@ SendAUS:
         irc_stat = 1
     else
         irc_stat = 0
-
     URL  := "http://www.autohotkey.net/paste/"
     POST := "text="             . ahk_code
          . "&irc="              . irc_stat
          . "&ircnick="          . pb_subdomain
          . "&ircdescr="         . pb_name
          . "&submit=submit"
-
+    
+    uriSwap(POST, 3)
     httpquery(paste_url := "", URL, POST)
     VarSetCapacity(paste_url, -1)
     RegexMatch(paste_url, "Paste\s(#(.*?)<)", Match)
@@ -1152,8 +1142,8 @@ SendAUS:
          . "&paste_subdomain="      . pb_subdomain
          . "&paste_private="        . pb_exposure
          . "&paste_expire_date="    . pb_expiration
-
-
+    
+    uriSwap(POST, 3)
     httpquery(paste_url := "", URL, POST)
     VarSetCapacity(paste_url, -1)
     Pasted()
@@ -1165,7 +1155,8 @@ SendAUS:
          . "&description="   . pb_name
          . "&code="          . ahk_code
          . "&parent=0"
-
+    
+    uriSwap(POST, 3)
     httpquery(paste_url := "", URL, POST)
     VarSetCapacity(paste_url, -1)
 
@@ -1187,15 +1178,7 @@ PasteSavetoFile:                                                    ; Send to Pa
  FileSelectFile, f_saved, S24, %a_desktop%, Save script as..., AutoHotkey (*.ahk)
  if !f_saved
     return
- /*
-  * The following fixes back the code replacement done earlier to prevent
-  * issues with httpQUERY.
-  */
- StringReplace, ahk_code, ahk_code, `%25,`%, 1
- StringReplace, ahk_code, ahk_code, `%26, &, 1
- StringReplace, ahk_code, ahk_code, `%2B, +, 1
- ; Finish Replacing
-
+ 
  /*
   * The following piece of code fixes the issue with saving a file without adding the extension while the file
   * existed as "file.ahk", which caused the file to be saved as "file.ahk.ahk" and added a msgbox if the user
@@ -1702,6 +1685,8 @@ Clean:
  FileDelete, %hsloc%
  if FileExist(hsloc)
     MsgBox, % "File could not be deleted"
+ FileRemoveDir, %resahk%, 1
+ FileDelete, % a_temp . "\" . "UC.png"
 50GuiClose:
 50GuiEscape:
 ExitApp
@@ -1974,6 +1959,26 @@ uriSwap(str, action){
         }
         return d_str := str
     }
+    else if action = 3
+    {
+        oldformat := a_formatinteger
+        SetFormat, integer, hex
+        loop, parse, str
+            e_str := regexreplace(e_str := hx_str .= RegexReplace(a_loopfield, "[^\w]", asc(a_loopfield))
+            , "0x", "%")
+        SetFormat, integer, % oldformat
+        return e_str
+    }
+    else if action = 4
+    {
+        Loop
+        {
+            if !RegExMatch(str, "((?<=%)[a-f]|(?<=%)[\da-f]{1,2})", hex)
+                break
+            str := regexreplace(str,"%" . hex, chr("0x" . hex))
+        }
+        return d_str := str
+    }
 }
 LV_Organize(lvName){
     Global
@@ -2093,12 +2098,108 @@ WriteBin(byref bin,filename,size){
    h := DllCall("CloseHandle", "Uint", h)
    return, 1
 }
+matchclip(type){
+	
+    global fnct_name1
+    clipold := Clipboard
+	if type = var
+		URL := "http://www.autohotkey.com/docs/Variables.htm"
+	if type = fnct
+		URL := "http://www.autohotkey.com/docs/Functions.htm"
+    if type = cmd
+		URL := "http://www.autohotkey.com/docs/Commands.htm"
+    
+	httpQuery(htm, URL)
+	VarSetCapacity(htm, -1)
+    
+	if type = var
+    {
+        if !RegexMatch(htm, "i)" . Clipboard, Match)
+            return 0
+        if InStr(Clipboard, "screen")
+            Match := URL . "#Screen"
+        else if InStr(Clipboard, "caret")
+            Match := URL . "#Caret"
+        else if InStr(Clipboard, "guiheight")
+            Match := URL . "#GuiWidth"
+        else
+            Match := URL . "#" . SubStr(Match, 3)
+        return Match
+    }
+    if type = fnct
+    {
+        if !RegexMatch(htm, "i)" . fnct_name1, Match)
+            return 0
+        if (InStr(fnct_name1, "regex") || InStr(fnct_name1, "dllcall"))
+            return Match := matchclip("cmd")
+        else if InStr(fnct_name1, "asc")
+            return Match := URL . "#Asc"
+        else if InStr(fnct_name1, "abs")
+            return Match := URL . "#Abs"
+        else
+            Match := URL . "#" . Match
+        return Match
+    }
+    if type = cmd
+    {
+        if ((InStr(Clipboard, "clipboard") || InStr(Clipboard, "thread")) && !InStr(Clipboard, "regex"))
+            URL := "http://www.autohotkey.com/docs/misc/"
+        else
+            URL := "http://www.autohotkey.com/docs/commands/"
+        
+        if !RegexMatch(htm, "i)>(" . RegexReplace(Clipboard, "\W.*", "") . ").*?<", Match)
+            return 0
+        if InStr(Clipboard, "#")
+            Match := URL . RegexReplace(Clipboard, "#", "_") . ".htm"
+        else if (InStr(Clipboard, "regex") || InStr(Clipboard, "dllcall"))
+            Match := URL . RegexReplace(Clipboard, "\s?\(.*\).*", "") . ".htm"
+        else
+            Match := URL . Match1 . ".htm"
+        return Match
+    }
+    if type = manual
+    {
+        Match := RegexReplace(Clipboard, "\(.*", "")
+        if InStr(Match, "guiwidth")
+            Match := "A_GuiWidth"
+        ToolTip, % "Searching for """ . Match . """ on the documentation files"
+        Sleep 2*sec
+        URL := "http://www.autohotkey.com/search/search.php"
+        POST := "site=4"
+             . "&refine=1"
+             . "&template_demo=phpdig.html"
+             . "&result_page=search.php"
+             . "&query_string=" . Match
+             . "&search=Go+..."
+             . "&option=start"
+             . "&path=docs%2F%25"
+
+        HttpQuery(html := "", URL, POST)
+        VarSetCapacity(html, -1)
+        if (Clipboard = "WinGet")
+            RegexMatch(html, "99.80 %.+?(href=""(.+?)"")", Match)
+        else if (Clipboard = "ErrorLevel")
+            RegexMatch(html, "4.+82.92 %.+?(href=""(.+?)"")", Match)
+        else
+            RegexMatch(html, "100.00 %.+?(href=""(.+?)"")", Match)
+        return Match2
+    }
+	return 0
+}
 ;-
 
 ;+--> ; ---------[Hotkeys/Hotstrings]---------
 !Esc::ExitApp
 Pause::Reload
-F11::Suspend
+F12::Suspend
+;+> ; [Ctrl + S] Save and Reload scripts
+#IfWinActive .*\.ahk - .*pad
+^s::
+Send, ^s
+Reload
+return
+#IfWinActive
+;-
 ;+> ; [Ctrl + Shift + A/Z] BW ally
 #IfWinActive ahk_class SWarClass
 ^+a::
@@ -2139,31 +2240,36 @@ return
     Send, ^c
     ClipWait
     Sleep 10
+	Loop, Parse, Clipboard,`n,`r
+		if a_index > 1
+			return
     ToolTip, % Clipboard
-    URL  := "http://www.autohotkey.com/search/search.php"
-    POST := "site=4"
-         . "&refine=1"
-         . "&template_demo=phpdig.html"
-         . "&result_page=search.php"
-         . "&query_string=" . Clipboard
-         . "&search=Go+..."
-         . "&option=exact"
-         . "&path=docs%2F%25"
 
-    HttpQuery(html := "", URL, POST)
-    VarSetCapacity(html, -1)
-    if (Clipboard = "WinGet")
-        RegexMatch(html, "99.80 %.+?(href=""(.+?)"")", Match)
-    else if (Clipboard = "ErrorLevel")
-        RegexMatch(html, "4.+82.92 %.+?(href=""(.+?)"")", Match)
-    else 
-        RegexMatch(html, "100.00 %.+?(href=""(.+?)"")", Match)
-    If (WinActive("Post a new topic") || WinActive("Post a reply") || WinActive("Edit post"))
-        Send, [url=%Match2%]%Clipboard%[/url]
-    else
-        Run, % Match2
+	if RegexMatch(Clipboard, "i)a_\w+")
+		Match := matchclip("var")
+	else if RegexMatch(Clipboard, "i)\s?(\w+)\(.*", fnct_name)
+		Match := matchclip("fnct")
+	else
+		Match := matchclip("cmd")
+	
+    httpQuery(htm, Match)
+    VarSetCapacity(htm, -1)
+    if (InStr(htm, "403") || InStr(htm, "404") || !Match)
+    {
+        ToolTip, % "Not found. `nTrying a manual search, results may be inaccurate"
+        Sleep 3*sec
+        Match := matchclip("manual")
+        if !Match
+            ToolTip, % "Not found in the documentation files"
+    }
+    
+	if WinActive("i).*post.*")
+		Send, {raw}[url=%Match%]%Clipboard%[/url]
+	else
+        Run, % Match
     Clipboard := clipold
     clipold :=
+    Sleep, 2*sec
     ToolTip
  }
 return
@@ -2174,35 +2280,35 @@ return
  CoordMode, Mouse, Screen
  rect := False
  MouseGetPos, scXL, scYT, scWinHwnd
- WinMove, %a_space%,, %scXL%, %scYT%        ; Move the "Selection Box window" to current mouse position           
+ WinMove, % "SelBox",, %scXL%, %scYT%        ; Move the "Selection Box window" to current mouse position
  Sleep, 150
  if GetKeyState("LButton", "P")
  {
-    Gui, 3: Show, w1 h1 x%scXL% y%scYT%, %a_space%
-    WinSet, Transparent, 120, %a_space%
+    Gui, 3: Show, w1 h1 x%scXL% y%scYT%, % "SelBox"
+    WinSet, Transparent, 120, % "SelBox"
     While GetKeyState("LButton", "P")
     {
         CoordMode, Mouse, Screen
         MouseGetPos, scXR, scYB             ; This must be relative to the screen for use with the ScreenCapture
         CoordMode, Mouse, Relative
         MouseGetPos, rel_scXR, rel_scYB     ; This is just for creating the selection window, it must be relative
-        WinMove,%a_space%,,,, %rel_scXR%, %rel_scYB%
+        WinMove, % "SelBox",,,, %rel_scXR%, %rel_scYB%
         ToolTip, %rel_scXR%`, %rel_scYB%
         if GetKeyState("RButton", "P")
         {
             ToolTip
-            Gui, 3: Show, w1 h1 x0 y0, %a_space%
+            Gui, 3: Show, w1 h1 x0 y0, % "SelBox"
             return
         }
     }
     ToolTip
-    Gui, 3: Show, w1 h1 x0 y0, %a_space%
+    Gui, 3: Show, w1 h1 x0 y0, % "SelBox"
     CaptureScreen(scXL "," scYT "," scXR "," scYB, 0, scRect := a_temp . "\scRect_" . RName(0,"png"))
     rect := True
  }
  if (!rect && scWinHwnd != DeskHwnd)
     CaptureScreen(1, 0, scWin := a_temp . "\scWin_" . RName(0,"png"))
- Gosub, ImageUpload 
+ Gosub, ImageUpload
  FileDelete, %scWin%
  FileDelete, %scRect%
 return
@@ -2282,6 +2388,7 @@ return
  Clipboard := clipold
  clipold :=
 return
++Tab::BackSpace         ; [Shift + Tab] delete Tab
 #IfWinActive
 ;-
 ;-
