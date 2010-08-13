@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.4.7
+Script Version: 0.4.8
 Homepage:
 
 Creation Date: July 11, 2010 | Modification Date: August 18, 2010
@@ -31,9 +31,10 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.7"                  ; Script Version
+s_version   := "0.4.8"                  ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
+GoSub, CheckUpdate
 ;-
 
 ;+--> ; ---------[General Variables]---------
@@ -344,14 +345,14 @@ Gui, add, Button, w100 x400 yp+10 Default gAddHotkey, % "&Add"
 Gui, add, Button, w100 x+10 yp, % "&Close"
 
 Gui, Tab, Hotstrings
-Gui, add, ListView, w600 h150 Grid AltSubmit gLV_Sub vLV_hslist, % "Options|Abreviation|Expand To"
+Gui, add, ListView, w600 h150 Grid AltSubmit gLV_Sub vLV_hslist, % "Options|Abbreviation|Expand To"
 Gui, add, Text, y+10, % "Expand:"
 Gui, add, Edit, w150 x+10 yp-3 vhs_expand
 Gui, add, Text, x+10 yp+3, % "To:"
 Gui, add, Edit, w250 x+10 yp-3 gLV_Sub vhs_expandto
 Gui, add, Checkbox, x510 yp+5 vhs_iscommand, % "Run Command"
 Gui, add, CheckBox, x12 y+15 Checked vhs_autoexpand, % "AutoExpand"
-Gui, add, CheckBox, x250 yp vhs_dnd, % "Do not delete typed abreviation"
+Gui, add, CheckBox, x250 yp vhs_dnd, % "Do not delete typed abbreviation"
 Gui, add, CheckBox, x12 y+10 vhs_trigger, % "Trigger inside other words"
 Gui, add, CheckBox, x250 yp vhs_raw, % "Send Raw (do not translate {Enter} or {key})"
 Gui, add, Text, w630 x0 y272 0x10
@@ -574,6 +575,56 @@ AUInfo:                                                             ; Default Au
 return
 ;}
 
+CheckUpdate:
+;{
+ URL := "http://github.com/RaptorX/AHK-ToolKit/raw/master/Changelog.txt"
+ Httpquery(update := "", URL)
+ VarSetCapacity(update, -1)
+ Loop, Parse, update, `n,`r
+ {
+    if a_index = 5
+    {
+        RegexMatch(a_loopfield, "v(.+)", Match)
+        u_version := Match1
+        if s_version != %u_version%
+            MsgBox, 4, % "New update available"
+            , % "A new update has been found.`nDo you want to update AutoHotkey Toolkit to " . Match
+              . "`n`n Current Version: v" s_version, 10
+        IfMsgBox, No
+            return
+        IfMsgBox, Timeout
+            return
+        break
+    }
+ }
+ if a_iscompiled
+    URL := "http://www.autohotkey.net/~RaptorX/AHK-TK/AHK-Toolkit-" . Match . "-Compiled.zip"
+ else
+    URL := "http://www.autohotkey.net/~RaptorX/AHK-TK/AHK-ToolKit-" . Match . ".zip"   
+
+ FileSelectFile, updatezip, S16, %a_workingdir%\AutoHotkey Toolkit.zip
+ , % "Please selecte where to download the file.", Zip Files (*.zip)
+ SetTimer, dlCheck, 10
+ VarSEtCapacity(f_update, 5242880)
+ length := HttpQuery(f_update := "", URL)
+ WriteBin(f_update, updatezip, length)
+ SetTimer, dlCheck, Off
+ Tooltip
+ Msgbox, % "Download Completed"
+ Run, % updatezip
+ VarSEtCapacity(f_update, 0)
+ExitApp
+;}
+
+dlCheck:
+;{
+ httpQueryOps := "updateSize"
+ u_csize := RegexReplace(t := HttpQueryCurrentSize/1048576, "\d{4}$", "")
+ Tooltip, % "Downloaded: " . u_csize . "MB/" 
+ . u_tsize := RegexReplace(c := HttpQueryFullSize/1048576, "\d{4}$", "") . "MB"
+return
+;}
+ 
 ReadXML:                                                            ; Read options from XML file
 ;{
  RegRead, sww_exist, HKCU, %reg_SMWCVR%, ahk-tk
@@ -920,8 +971,18 @@ return
 
 OnClipboardChange:
 ;{
+ if autoCode
+ {
+    Gosub, LiveRun
+    autoCode := False
+    return
+ }
+ if Clipboard = %oldScript%
+    return
+ oldScript := Clipboard
  kword_count :=
  Gosub, ReadXML
+ 
 /*
 * This checks if the Clipboard contains keywords from ahk scripting
 * if it contains more than x ammount of keywords it will fire up the pastebin
@@ -939,7 +1000,7 @@ OnClipboardChange:
         Gosub, AUS
     else
         Gosub, Pastebin
- } ; Finish ahk code detection  
+ } ; Finish ahk code detection
 return
 ;}
 
@@ -947,7 +1008,7 @@ PasteBin:
 ;{
  Gui, 99: Show, NoActivate w250 h150 x%monRight% y%monBottom%
  Gui, 99: Submit, NoHide
- if (!oldScript && !autoCode && pastepop_ena)
+ if (!autoCode && pastepop_ena)
  {
     WinGetPos,,,99Width,99Height,ahk_id %99Hwnd%                    ; Get Window width and Height
     WinMove, ahk_id %99Hwnd%,,,% wa_Bottom - 99Height               ; Move the window to correct position
@@ -960,8 +1021,6 @@ PasteBin:
  Sleep, 5 * sec
  Gui, 99: Hide
  }
- else
-    oldScript := False
 return
 ;}
 
@@ -1205,7 +1264,7 @@ AddHotkey:
     prog_hkL := mod_ctrl . mod_alt . mod_shift . mod_win . ddl_key
     prog_hkS := hkSwap(prog_hkL, "short") ; convert to short for creating hotkey
     if !br_prog
-        prog_dir := e_progpath
+        SplitPath, e_progpath,prog_exec, prog_dir,, prog_name
     if (prog_hkS = "None")
     {
        prog_hkS := 
@@ -1392,7 +1451,12 @@ LiveRun:
     
     if append_code not contains Gui
         append_code .= "`n`nExitApp"
-    
+    else if append_code not contains GuiClose
+    {
+        if append_code not contains return
+            append_code .= "`nreturn"
+        append_code .= "`n`nGuiClose:`nExitApp"
+    }
     live_code =
     (Ltrim
         #NoEnv
@@ -1626,7 +1690,6 @@ Ena_Control(name = "", subdomain = "", exposure = "", expiration = ""){
 }
 Pasted(){
     Global
-    oldScript := True
     FormatTime,cur_time,,[MMM/dd/yyyy - HH:mm:ss]
     code_preview :=
     xpos := wa_Right - 250 - 5
@@ -1973,6 +2036,24 @@ WM_LBUTTONDBLCLK(wParam, lParam){
         Gui, 2: Show, w420 h335, % "Advanced Hotstring Setup"
     }
 }
+WriteBin(byref bin,filename,size){
+   h := DllCall("CreateFile","str",filename,"Uint",0x40000000
+            ,"Uint",0,"UInt",0,"UInt",4,"Uint",0,"UInt",0)
+   IfEqual h,-1, SetEnv, ErrorLevel, -1
+   IfNotEqual ErrorLevel,0,ExitApp ; couldn't create the file
+   r := DllCall("SetFilePointerEx","Uint",h,"Int64",0,"UInt *",p,"Int",0)
+   IfEqual r,0, SetEnv, ErrorLevel, -3
+   IfNotEqual ErrorLevel,0, {
+      t = %ErrorLevel%              ; save ErrorLevel to be returned
+      DllCall("CloseHandle", "Uint", h)
+      ErrorLevel = %t%              ; return seek error
+   }
+   result := DllCall("WriteFile","UInt",h,"Str",bin,"UInt"
+               ,size,"UInt *",Written,"UInt",0)
+   h := DllCall("CloseHandle", "Uint", h)
+   return, 1
+}
+
 ;-
 
 ;+--> ; ---------[Hotkeys/Hotstrings]---------
@@ -2003,21 +2084,19 @@ return
 #IfWinActive
 ;-
 ;+> ; [Ctrl + Alt + LButton] Auto Run Selected Code
-~^!LButton Up::
+^!LButton::
  autoCode := True
  Send, ^c
- Gosub, LiveRun
- autoCode := False
 return
 ;-
-;+> ; [LButton + Alt] Command Detection
+;+> ; [LButton + Shift] Command Detection
 ~LButton::
  stime := a_tickcount               ; Start Time
  KeyWait, LButton
  etime := a_tickcount - stime       ; End Time
  if etime >= 500                    ; The mouse was dragged
  {
-    KeyWait, Shift, D T1.5
+    KeyWait, Shift, D T.5
     if ErrorLevel
         return
     clipold := Clipboard
@@ -2094,28 +2173,24 @@ return
 #IfWinActive, ahk_group Ahk_Tk
 
 ^d::                    ; [Ctrl + D] Duplicate Line
- oldScript := True
  clipold := Clipboard
  Send, {Home}+{End}^c{End}{Enter}^v
  Clipboard := clipold
 return
 
 ^+Up::                  ; [Ctrl + Shift + Up] Move Up Current Line
- oldScript := True
  clipold := Clipboard
  Send, {Home}+{End}^x{Delete}{Up}{Enter}{Up}^v{Home}
  Clipboard := clipold
 return
 
 ^+Down::                ; [Ctrl + Shift + Up] Move Down Current Line
- oldScript := True
  clipold := Clipboard
  Send, {Home}+{End}^x{Delete}{End}{Enter}^v{Home}
  Clipboard := clipold
 return
 
 ^+u::                   ; [Ctrl + Shift u] UPPERCASE
- oldScript := True
  clipold := Clipboard
  Send, ^x
  StringUpper, Clipboard, Clipboard
@@ -2124,7 +2199,6 @@ return
 return
 
 ^u::                    ; [Ctrl + u] lowercase
- oldscript := True
  clipold := Clipboard
  Send, ^x
  StringLower, Clipboard, Clipboard
@@ -2133,7 +2207,6 @@ return
 return
 
 ^q::                    ; [Ctrl + q] Comment one Line
- oldScript := True
  clipold := Clipboard
  Clipboard :=
  Send, ^x

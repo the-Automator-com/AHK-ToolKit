@@ -1,5 +1,5 @@
 --AutoHotkey ToolKit--
-     v0.4.7
+     v0.4.8
 
 This script started as a personal project but now i feel that it might be helpful to other people so I decided to release it as beta software for testing.
 
@@ -27,7 +27,7 @@ Main features:
      no more: "oh i forgot to mention that thereare includes there, 
      remove those lines!".
      
-* Detect selected AHK command and open online documentation by pressing Alt. If you are in the forum creating a
+* Detect selected AHK command and open online documentation by pressing Shift. If you are in the forum creating a
   new post or replying to an existing post the selected command will get [url] tags instead linking to the online
   documentation.
 

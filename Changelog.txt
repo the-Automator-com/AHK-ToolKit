@@ -1,4 +1,35 @@
-commit f51980a9d494b558296c1079c067f120134a78c3
+commit 5d67c79dc1a3d95a615f067f85ec707e35938596
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 14 01:23:03 2010 +0200
+
+    AHK-TK v0.4.8
+    
+    Changed:
+    
+    * Add automatic download of latest version
+    * Add WriteBin() function
+    * Add return to Live Code scripts that contain the GUI command but have no return
+    * Add GuiClose label to Live Code scripts that have a GUI but dont already have that label
+    * Change Command Detection hotkey
+      -- Shift instead of Alt
+    * Change time limit for Command Detection
+      -- 500ms instead of 1500ms
+    * Fix typos
+    * Fix bug introduced in last version
+      -- When drag and dropping files on the Hotkey View the hotkey was setup correctly but when trying to
+         launch the program/file it would give an error
+    * Fix Live Code execution bugs (Ctrl + Alt + Click selected script)
+      -- More reliable
+    * Fix onClipboardChange to store last copied script and compare it so the CODET pop up is not shown
+      for the same copied script twice.
+    
+    ToDo:
+    
+    * Options Gui / Functionality
+    * Add Hotkey commands functionality
+    * Add Hashing functions
+
+commit f236d7da7da30dfac9c97f931ee3e740263bc5db
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Aug 14 01:23:03 2010 +0200
 
