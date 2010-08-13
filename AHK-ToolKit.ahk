@@ -1,7 +1,7 @@
 /*
 Author:         RaptorX	<graptorx@gmail.com>
 Script Name:    AHK-ToolKit
-Script Version: 0.4.6b
+Script Version: 0.4.6c
 Homepage:
 
 Creation Date: July 11, 2010 | Modification Date: August 18, 2010
@@ -31,7 +31,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.6b"                 ; Script Version
+s_version   := "0.4.6c"                 ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 ;-
@@ -298,6 +298,7 @@ if !load := xpath_load(xml, s_xml)
     Gui, 50: add, Button, w100 x260 yp+10 gFR_Save, Save
     
     Gui, 50: Show, w365, % "First Run"
+    Suspend
     Pause
 }
 
@@ -525,6 +526,7 @@ FR_Save:                                                            ; First Run 
  }
  xpath_save(xml, s_xml)
  Pause                                                      ; Unpause Script
+ Suspend
 
  Gui, 50: Destroy
 return

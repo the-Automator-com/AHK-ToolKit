@@ -1,4 +1,20 @@
-commit ae2ab8f2071f5d49fd19de36216fe7a8540814dd
+commit ffabf5f387a38cc1cf1c7d138bcf0435661b6c21
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Aug 14 01:23:03 2010 +0200
+
+    AHK-TK v0.4.6c
+    
+    Changed:
+    
+    * Fix Pause problem on First Run
+    
+    ToDo:
+    
+    * Options Gui / Functionality
+    * Add Hotkey commands functionality
+    * Add Hashing functions
+
+commit 62543739fe9607956a76eaa8cd3d8a0b76163855
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Aug 14 01:23:03 2010 +0200
 
