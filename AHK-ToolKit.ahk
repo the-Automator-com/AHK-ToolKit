@@ -1,10 +1,11 @@
 /*
- * Author:          RaptorX	<graptorx@gmail.com>
- * Script Name:     AutoHotkey ToolKit
- * Script Version:  0.4.10
- * Homepage:        http://www.autohotkey.com/forum/topic61379.html#376087
+ * Author           : RaptorX	<graptorx@gmail.com>
+ * Script Name      : AutoHotkey ToolKit
+ * Script Version   : 0.4.11
+ * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
- * Creation Date: July 11, 2010 | Modification Date: September 06, 2010
+ * Creation Date    : July 11, 2010 
+ * Modification Date: September 12, 2010
  * 
  * [GUI Number Index]
  *
@@ -13,7 +14,6 @@
  * GUI 03 - Selection Box
  * GUI 99 - PasteBin Popup
  * GUI 98 - Send to PasteBin
- * GUI 97 - Pastebin Success Popup
  * GUI 96 - Add Hotkey
  * GUI 50 - First Run
  */
@@ -32,7 +32,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.10"                 ; Script Version
+s_version   := "0.4.11"                 ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 GoSub, CheckUpdate
@@ -78,7 +78,7 @@ s_livecode =
 ; **************************************************************************
 ; * All live scripts start with the following default options:             *
 ; * #NoEnv, #SingleInstance Force, SendMode Input, SetbatchLines -1        *
-; * and Esc::ExitApp                                                       *
+; * and ^Esc::ExitApp                                                      *
 ; *                                                                        *
 ; * You can enable change them  at any time using the normal options       *
 ; * (e.g.'SendMode Play' to override the SendMode)                         *
@@ -265,8 +265,10 @@ ExitApp
 if !FileExist("res")
 {
     FileCreateDir, % "res\tools"
+    FileCreateDir, % "res\img"
     FileCreateDir, % regexreplace(rescurl, "\\\w+\.exe", "")
     FileCreateDir, % regexreplace(resrehash, "\\\w+\.exe", "")
+    FileInstall, res\img\UnderConstruction.png, res\img\UnderConstruction.png, 1
     FileInstall, res\key.lst, res\key.lst, 1
     FileInstall, res\tools\rehash\rh.exe, res\tools\rehash\rh.exe, 1
     FileInstall, res\tools\curl\cu.exe, res\tools\curl\cu.exe, 1
@@ -378,8 +380,7 @@ Gui, add, Button, w100 x+5 yp gLiveClear, % "Cl&ear"
 Gui, add, Button, w100 x+10 yp, % "&Close"
 
 Gui, Tab, Options
-FileInstall, res\img\UnderConstruction.png, % a_temp . "\" . "UC.png"
-Gui, add, Picture, w600 h280, % a_temp . "\" . "UC.png"
+Gui, add, Picture, w600 h280, res\img\UnderConstruction.png
 
 Gui, Show, Hide ;w619 h341
 SB_SetParts(150,150)
@@ -450,22 +451,6 @@ Gui, 98: add, Button, w100 h25 x+5 yp gPasteSavetoFile, % "&Save to File"
 Gui, 98: add, Button, w100 h25 x+10 yp gGuiCancel, % "&Cancel"
 
 Gui, 98: Show, Hide ; w640 h550
-;}
-
-; PasteBin Success Popup GUI
-;{
-Gui, 97: -Caption +Border +AlwaysOnTop +ToolWindow
-Gui, 97: Font, s10 w600, Verdana
-Gui, 97: add, Text, w250 x0 Center, % "Code Uploaded Succesfully"
-Gui, 97: add, Text, w260 x0 0x10
-Gui, 97: Font, s8 normal
-Gui, 97: add, Text, w250 x5 yp+5, % "The code has been uploaded correctly.`n"
-                                  . "The link has been copied to the Clipboard"
-Gui, 97: add, Text, w260 x0 0x10
-Gui, 97: Show, NoActivate w250 h90 x1024 y768
-WinGet, 97Hwnd, ID,, % "Code Uploaded Succesfully"
-
-Gui, 97: Show, Hide ; w250 h90
 ;}
 
 ; Add Hotkey GUI
@@ -700,6 +685,7 @@ LVHS_Load:
     
     if loadIsMultiline
     {
+        loadIsMultiline := False
         old_expandto := load_expandto
         LV_Add("", load_opts, load_expand, load_expandto := "Multiline (Double Click to see the whole text)")
         load_expandto := old_expandto
@@ -1099,6 +1085,7 @@ SendAUS:
         irc_stat = 1
     else
         irc_stat = 0
+    ahk_code := uriSwap(ahk_code, 3)
     URL  := "http://www.autohotkey.net/paste/"
     POST := "text="             . ahk_code
          . "&irc="              . irc_stat
@@ -1106,7 +1093,6 @@ SendAUS:
          . "&ircdescr="         . pb_name
          . "&submit=submit"
     
-    uriSwap(POST, 3)
     httpquery(paste_url := "", URL, POST)
     VarSetCapacity(paste_url, -1)
     RegexMatch(paste_url, "Paste\s(#(.*?)<)", Match)
@@ -1135,7 +1121,8 @@ SendAUS:
         pb_expiration = 1D
     else if pb_expiration = 1 Month
         pb_expiration = 1M
-
+    
+    ahk_code := uriSwap(ahk_code, 3)
     URL  := "http://pastebin.com/api_public.php"
     POST := "paste_code="           . ahk_code
          . "&paste_name="           . pb_name
@@ -1143,20 +1130,19 @@ SendAUS:
          . "&paste_private="        . pb_exposure
          . "&paste_expire_date="    . pb_expiration
     
-    uriSwap(POST, 3)
     httpquery(paste_url := "", URL, POST)
     VarSetCapacity(paste_url, -1)
     Pasted()
  }
  else if ddl_pastebin = Paste2.org
  {
+    ahk_code := uriSwap(ahk_code, 3)
     URL  := "http://paste2.org/new-paste"
     POST := "lang=text"
          . "&description="   . pb_name
          . "&code="          . ahk_code
          . "&parent=0"
-    
-    uriSwap(POST, 3)
+
     httpquery(paste_url := "", URL, POST)
     VarSetCapacity(paste_url, -1)
 
@@ -1485,7 +1471,7 @@ LiveRun:
         
         %append_code%
         
-        Esc::ExitApp
+        ^Esc::ExitApp
     )
     FileAppend, %live_code%, %lcf_name%
  }
@@ -1686,7 +1672,6 @@ Clean:
  if FileExist(hsloc)
     MsgBox, % "File could not be deleted"
  FileRemoveDir, %resahk%, 1
- FileDelete, % a_temp . "\" . "UC.png"
 50GuiClose:
 50GuiEscape:
 ExitApp
@@ -1713,7 +1698,6 @@ Pasted(){
     ypos := wa_Bottom - 90
     ; clipold := Clipboard
     Tooltip, % Clipboard := paste_url, 5, 5
-    Gui, 97: Show, x%xpos% y%ypos%
     Loop, parse, ahk_code, `n, `r
     {
         if a_index = 20
@@ -1730,8 +1714,6 @@ Pasted(){
 %code_preview%
 ----------------------------------------------------------------------`n`n
     ), % "res\pastebin-log.dat"
-    Sleep, 3 * sec
-    Gui, 97: Hide
     SetTimer, CheckCtrlV, 30
 }
 GuiReset(guinum){
@@ -1964,7 +1946,7 @@ uriSwap(str, action){
         oldformat := a_formatinteger
         SetFormat, integer, hex
         loop, parse, str
-            e_str := regexreplace(e_str := hx_str .= RegexReplace(a_loopfield, "[^\w]", asc(a_loopfield))
+            e_str := regexreplace(e_str := hx_str .= RegexReplace(a_loopfield, "[^\w\s\.]", asc(a_loopfield))
             , "0x", "%")
         SetFormat, integer, % oldformat
         return e_str

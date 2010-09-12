@@ -1,4 +1,27 @@
-commit 05cad6801271ae70db6fcb2ba08c8539017ae7b0
+commit ce4e6a9973edc091890486179747b787b1a3b161
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sun Sep 12 02:20:58 2010 +0200
+
+    AHK-TK v0.4.11
+    
+    Changed:
+    
+    * Add res/img/ again
+    * Fix paste upload URI encode bug
+    * Fix Header
+    * Fix multiline hotstring bug
+    * Update klist() library
+    * Change exitapp hotkey for livecode
+    * Delete Gui 97
+    
+    ToDo:
+    
+    * Options Gui / Functionality
+    * Add Hotkey commands functionality
+    * Add Hashing functions
+    * Add upload screenshot notification
+
+commit 34e74de9e2729cc76da4f82ed21c169038e5c48f
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Aug 14 01:23:03 2010 +0200
 
