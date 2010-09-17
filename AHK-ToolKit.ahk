@@ -1,11 +1,11 @@
 /*
  * Author           : RaptorX	<graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit
- * Script Version   : 0.4.12
+ * Script Version   : 0.4.12b
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010 
- * Modification Date: September 17, 2010
+ * Modification Date: November 05, 2010
  * 
  * [GUI Number Index]
  *
@@ -31,11 +31,12 @@ onExit, Clean
 ;-
 
 ;+--> ; ---------[Basic Info]---------
-s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.12"                 ; Script Version
+s_name      := "AHK-ToolKit"            ; Script Name
+s_version   := "0.4.12b"                ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
-GoSub, CheckUpdate
+getparams()
+update(s_version)
 ;-
 
 ;+--> ; ---------[General Variables]---------
@@ -561,60 +562,6 @@ AUInfo:                                                             ; Default Au
 return
 ;}
 
-CheckUpdate:
-;{
- URL := "http://github.com/RaptorX/AHK-ToolKit/raw/master/Changelog.txt"
- Httpquery(update := "", URL)
- VarSetCapacity(update, -1)
- Loop, Parse, update, `n,`r
- {
-    if a_index = 5
-    {
-        RegexMatch(a_loopfield, "v(.+)", Match)
-        u_version := Match1
-        if s_version != %u_version%
-            MsgBox, 4, % "New update available"
-            , % "A new update has been found.`nDo you want to update AutoHotkey Toolkit to " . Match
-              . "`n`n Current Version: v" s_version, 10
-        IfMsgBox, No
-            return
-        IfMsgBox, Timeout
-            return
-        break
-    }
- }
- if s_version != %u_version%
- {
-    if a_iscompiled
-        URL := "http://www.autohotkey.net/~RaptorX/AHK-TK/AHK-Toolkit-" . Match . "-Compiled.zip"
-    else
-        URL := "http://www.autohotkey.net/~RaptorX/AHK-TK/AHK-ToolKit-" . Match . ".zip"   
-
-    FileSelectFile, updatezip, S16, %a_workingdir%\AutoHotkey Toolkit.zip
-    , % "Please selecte where to download the file.", Zip Files (*.zip)
-    SetTimer, dlCheck, 10
-    VarSEtCapacity(f_update, 5242880)
-    length := HttpQuery(f_update := "", URL)
-    WriteBin(f_update, updatezip, length)
-    SetTimer, dlCheck, Off
-    Tooltip
-    Msgbox, % "Download Completed"
-    Run, % updatezip
-    VarSEtCapacity(f_update, 0)
-    ExitApp
- }
-return
-;}
-
-dlCheck:
-;{
- httpQueryOps := "updateSize"
- u_csize := RegexReplace(t := HttpQueryCurrentSize/1048576, "\d{4}$", "")
- Tooltip, % "Downloaded: " . u_csize . "MB/" 
- . u_tsize := RegexReplace(c := HttpQueryFullSize/1048576, "\d{4}$", "") . "MB"
-return
-;}
- 
 ReadXML:                                                            ; Read options from XML file
 ;{
  RegRead, sww_exist, HKCU, %reg_SMWCVR%, ahk-tk
@@ -2176,20 +2123,188 @@ matchclip(type){
     }
 	return 0
 }
+getparams(){
+    global
+    ; First we organize the parameters by priority [-sd, then -d , then everything else]
+    ; I want to make sure that if i select to save a debug file, the debugging will be ON
+    ; since the beginning because i use the debugging inside the next parameter checks as well.
+    Loop, %0%
+        param .= %a_index% .  a_space           ; param will contain the whole list of parameters
+    
+    if (InStr(param, "-h") || InStr(param, "--help")
+    ||  InStr(param, "-?") || InStr(param, "/?")){
+        debug ? debug("* ExitApp [0]", 2)
+        Msgbox, 64, % "Accepted Parameters"
+                  , % "The script accepts the following parameters:`n`n"
+                    . "-h    --help`tOpens this dialog.`n"
+                    . "-v    --version`tOpens a dialog containing the current script version.`n"
+                    . "-d    --debug`tStarts the script with debug ON.`n"
+                    . "-sd  --save-debug`tStarts the script with debug ON but saves the info on the `n"
+                    . "`t`tspecified txt file.`n"
+                    . "-sc  --source-code`tSaves a copy of the source code on the specified dir, specially `n"
+                    . "`t`tuseful when the script is compiled and you want to see the source code."
+        ExitApp
+    }
+    if (InStr(param, "-v") || InStr(param, "--version")){
+        debug ? debug("* ExitApp [0]", 2)
+        Msgbox, 64, % "Version"
+                  , % "Author: " s_author " <" s_email ">`n" "Version: " s_name " v" s_version "`t"
+        ExitApp
+    }
+    if (InStr(param, "-d") 
+    ||  InStr(param, "--debug")){
+        sparam := "-d "                         ; replace sparam with -d at the beginning.
+    }
+    if (InStr(param, "-sd") 
+    ||  InStr(param, "--save-debug")){
+        RegexMatch(param,"-sd\s(\w+\.\w+)", df) ; replace sparam with -sd at the beginning
+        sparam := "-sd " df1  a_space           ; also save the output file name next to it
+    }
+    Loop, Parse, param, %a_space%
+    {
+        if (a_loopfield = "-d" || a_loopfield = "-sd" 
+        ||  InStr(a_loopfield, ".txt")){        ; we already have those, so we just add the
+            continue                            ; other parameters    
+        }
+        sparam .= a_loopfield . a_space
+    }        
+    sparam := RegexReplace(sparam, "\s+$","")   ; Remove trailing spaces. Organizing is done
+    
+	Loop, Parse, sparam, %a_space%
+    {
+        if (sdebug && !debugfile && (!a_loopfield || !InStr(a_loopfield,".txt") 
+        || InStr(a_loopfield,"-"))){
+            debug ? debug("* Error, debug file name not specified. ExitApp [1]", 2)
+            Msgbox, 16, % "Error"
+                      , % "You must provide a name to a txt file to save the debug output.`n`n"
+                        . "usage: " a_scriptname " -sd file.txt"
+            ExitApp
+        }
+        else if (sdebug){
+            debugfile ? :debugfile := a_loopfield
+            debug ? debug("") 
+        }
+        if (a_loopfield = "-d" 
+        ||  a_loopfield = "--debug"){
+            debug := True, sdebug := False
+            debug ? debug("* " s_name " Debug ON`n* " s_name " [Start]`n* getparams() [Start]", 1)
+        }
+        if (a_loopfield = "-sd" 
+        ||  a_loopfield = "--save-debug"){
+            sdebug := True, debug := True
+        }
+        if (a_loopfield = "-sc" 
+        ||  a_loopfield = "--source-code"){
+            sc := True
+            debug ? debug("* Copying source code")
+            FileSelectFile, instloc, S16, source_%a_scriptname%
+                          , % "Save source file to..."
+                          , % "AutoHotkey Script (*.ahk)"
+            if (!instloc){
+                debug ? debug("* Canceled. ExitApp [1]", 2)
+                ExitApp
+            }
+            FileInstall,AHK-Toolkit.ahk, %instloc%
+            if (!ErrorLevel){
+                debug ? debug("* Source code successfully copied")
+                MsgBox, 64, % "Source code copied"
+                          , % "The source code was successfully copied"
+                          , 10 ; 10s timeout
+            }
+            else 
+            {
+                debug ? debug("* Error while copying the source code")
+                Msgbox, 16, % "Error while copying"
+                          , % "There was an error while copying the source code.`nPlease check that "
+                          . "the file is not already present in the current directory and that "
+                          . "you have write permissions on the current folder."
+                          , 10 ; 10s timeout
+            }
+        }
+    }
+    debug ? : debug("* " s_name " Debug OFF")
+    if (sdebug && !debugfile){                      ; needed in case -sd is the only parameter given
+        debug ? debug("* Error, debug file name not specified. ExitApp [1]", 2)
+        Msgbox, 16, % "Error"
+                  , % "You must provide a name to a txt file to save the debug output.`n`n"
+                  .   "usage: " a_scriptname " -sd file.txt"
+        ExitApp
+    }
+    if (sc = True){
+        debug ? debug("* ExitApp [0]", 2)
+        ExitApp
+    }
+    debug ? debug("* getparams() [End]", 2)
+    return
+}
+debug(msg,delimiter = False){
+    global
+    static ft := True   ; First time
+    
+    t := delimiter = 1 ? msg := "* ------------------------------------------`n" msg
+    t := delimiter = 2 ? msg := msg "`n* ------------------------------------------"
+    t := delimiter = 3 ? msg := "* ------------------------------------------`n" msg 
+                             .  "`n* ------------------------------------------"
+    if (!debugfile){
+        sdebug && ft ? (msg := "* ------------------------------------------`n"
+                            .  "* " s_name " Debug ON`n* " s_name "[Start]`n"
+                            .  "* getparams() [Start]`n" msg, ft := 0)
+        OutputDebug, %msg%        
+    }
+    else if (debugfile){
+        ft ? (msg .= "* ------------------------------------------`n"
+                  .  "* " s_name " Debug ON`n* " s_name 
+                  .  " [Start]`n* getparams() [Start]", ft := 0)
+        FileAppend, %msg%`n, %debugfile%
+    }
+}
+update(lversion, rfile="github", logurl="", vline=5){
+    global s_author, s_name
+    
+    debug ? debug("* update() [Start]", 1)
+    t := rfile = "github" ? logurl := "https://www.github.com/" s_author "/" s_name "/raw/master/Changelog.txt"
+    RunWait %ComSpec% /c "Ping -n 1 -w 3000 google.com",, Hide  ; Check if we are connected to the internet
+    connected := !ErrorLevel
+    
+    if connected
+    {
+        UrlDownloadToFile, %logurl%, %a_temp%\logurl
+        FileReadLine, logurl, %a_temp%\logurl, %vline%
+        RegexMatch(logurl, "v(.*)", Version)
+        if (rfile = "github"){
+            if (a_iscompiled)
+                rfile := "http://github.com/downloads/" s_author "/" s_name "/" s_name "-" Version "-Compiled.zip"
+            else 
+                rfile := "http://github.com/" s_author "/" s_name "/zipball/" Version
+        }
+        if (Version1 > lversion){
+            Msgbox, 68, % "New Update Available"
+                      , % "There is a new update available for this application.`n"
+                        . "Do you wish to upgrade to " Version "?"
+                      , 10 ; 10s timeout
+            IfMsgbox, Timeout
+                return 1 debug ? debug("* Update message timed out", 3)
+            IfMsgbox, No
+                return 2 debug ? debug("* Update aborted by user", 3)
+            FileSelectFile, lfile, S16, %a_temp%
+            UrlDownloadToFile, %rfile%, %lfile%
+            Msgbox, 64, % "Download Complete"
+                      , % "To install the new version simply replace the old file with the one`n"
+                      .   "that was downloaded.`n`n The application will exit now."
+            Run, %lfile%
+            ExitApp
+        }
+        return 0 debug ? debug("* update() [End]", 2)
+    }
+    else
+        return 3 debug ? debug("* Connection Failed", 3)
+}
 ;-
 
 ;+--> ; ---------[Hotkeys/Hotstrings]---------
 !Esc::ExitApp
 Pause::Reload
 F12::Suspend
-;+> ; [Ctrl + S] Save and Reload scripts
-#IfWinActive i).*\.ahk - .*pad
-^s::
-Send, ^s
-Reload
-return
-#IfWinActive
-;-
 ;+> ; [Ctrl + Shift + A/Z] BW ally
 #IfWinActive ahk_class SWarClass
 ^+a::
@@ -2211,6 +2326,7 @@ return
 #IfWinActive
 ;-
 ;+> ; [Ctrl + Alt + LButton] Auto Run Selected Code
+#IfWinNotActive ahk_class SWarClass
 ^!LButton::
  autoCode := True
  Send, ^c
@@ -2283,7 +2399,6 @@ return
 return
 ;-
 ;+> ; [Alt + LButton] Screen Capture Active Window/Area
-#IfWinNotActive ahk_class SWarClass
 !LButton::
  CoordMode, Mouse, Screen
  rect := False

@@ -1,4 +1,14 @@
-commit 7cc18473cd621a8594f4dc63c8708f3451b05bf2
+commit 5eae2697519ccf6a920e90a87b95d79437bc4d99
+Author: RaptorX <graptorx@gmail.com>
+Date:   Fri Sep 17 02:56:30 2010 +0200
+
+    AHK-TK v0.4.12b
+    
+    Changed:
+    
+    * Removed the update function until bug with github is solved
+
+commit c129fcbe319496c86cfd9cbbf93e6bf9296c3d8d
 Author: RaptorX <graptorx@gmail.com>
 Date:   Fri Sep 17 02:56:30 2010 +0200
 
@@ -14,8 +24,8 @@ Date:   Fri Sep 17 02:56:30 2010 +0200
       -- Toggles Tab and Shift + Tab to spaces for adding code formatting
     * Make +Tab specific to Live Code Edit control
     * Fix live code Directives
-    * Fix Screen Capture window bug
     * Fix Hotstrings temporal script directives
+    * Fix Screen Capture window bug
     * Fix minor bugs
     
     ToDo:
