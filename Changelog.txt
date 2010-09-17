@@ -1,4 +1,31 @@
-commit ce4e6a9973edc091890486179747b787b1a3b161
+commit 7cc18473cd621a8594f4dc63c8708f3451b05bf2
+Author: RaptorX <graptorx@gmail.com>
+Date:   Fri Sep 17 02:56:30 2010 +0200
+
+    AHK-TK v0.4.12
+    
+    Changed:
+    
+    * Add mouse gesture for forum posting command detection
+      -- Allows to choose between adding tags to selected command
+         or opening the command in a new window
+    * Add printscreen autoupload function
+    * Add forum posting hotkeys
+      -- Toggles Tab and Shift + Tab to spaces for adding code formatting
+    * Make +Tab specific to Live Code Edit control
+    * Fix live code Directives
+    * Fix Screen Capture window bug
+    * Fix Hotstrings temporal script directives
+    * Fix minor bugs
+    
+    ToDo:
+    
+    * Options Gui / Functionality
+    * Add Hotkey commands functionality
+    * Add Hashing functions
+    * Add upload screenshot notification
+
+commit d794c2cadb9b9bbcb964c5e8933c076b93ce87cf
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sun Sep 12 02:20:58 2010 +0200
 

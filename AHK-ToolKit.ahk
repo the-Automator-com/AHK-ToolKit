@@ -1,11 +1,11 @@
 /*
  * Author           : RaptorX	<graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit
- * Script Version   : 0.4.11
+ * Script Version   : 0.4.12
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010 
- * Modification Date: September 12, 2010
+ * Modification Date: September 17, 2010
  * 
  * [GUI Number Index]
  *
@@ -32,7 +32,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AutoHotkey ToolKit"     ; Script Name
-s_version   := "0.4.11"                 ; Script Version
+s_version   := "0.4.12"                 ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 GoSub, CheckUpdate
@@ -405,8 +405,9 @@ Gui, 2: Show, Hide ;w420 h335
 
 ; Selection Box GUI
 ;{
-Gui, 3: -Caption +ToolWindow
-Gui, 3: Show, Hide
+Gui, 3: -Caption +ToolWindow +AlwaysOnTop +Border
+Gui, 3: Color, 600000
+Gui, 3: Show, Hide, % "SelBox"
 ;}
 
 ; PasteBin Popup GUI
@@ -717,11 +718,16 @@ CreateHSScript:
  {
     hsfileopts =
     (Ltrim
+        ;+--> ; ---------[Directives]---------
         #NoEnv
         #SingleInstance Force
         #NoTrayIcon
         ; --
         SetBatchLines -1
+        SendMode Input
+        SetTitleMatchMode, Regex
+        SetWorkingDir %A_ScriptDir%
+        ;-
         F11::Suspend`n`n
     )
  FileAppend, %hsfileopts%, %hsloc%
@@ -1459,12 +1465,15 @@ LiveRun:
     }
     live_code =
     (Ltrim
+        ;+--> ; ---------[Directives]---------
         #NoEnv
         #SingleInstance Force
         ; --
-        SendMode Input
         SetBatchLines -1
-        ; --
+        SendMode Input
+        SetTitleMatchMode, Regex
+        SetWorkingDir %A_ScriptDir%
+        ;-
         sec         :=  1000               ; 1 second
         min         :=  sec * 60           ; 1 minute
         hour        :=  min * 60           ; 1 hour
@@ -1649,7 +1658,7 @@ GuiEscape:
 ;{
  main_toggle := !main_toggle
  if main_toggle
-    Gui, Show, w619 h341, AutoHotkey ToolKit
+    Gui, Show, w619 h341, % "AutoHotkey ToolKit"
  else
     Gui, Hide
 return
@@ -1668,10 +1677,9 @@ return
 Clean:
 ;{
  Process,Close, %hslPID%
- FileDelete, %hsloc%
+ FileDelete, %a_temp%\*.ahk
  if FileExist(hsloc)
     MsgBox, % "File could not be deleted"
- FileRemoveDir, %resahk%, 1
 50GuiClose:
 50GuiEscape:
 ExitApp
@@ -2175,7 +2183,7 @@ matchclip(type){
 Pause::Reload
 F12::Suspend
 ;+> ; [Ctrl + S] Save and Reload scripts
-#IfWinActive .*\.ahk - .*pad
+#IfWinActive i).*\.ahk - .*pad
 ^s::
 Send, ^s
 Reload
@@ -2211,8 +2219,20 @@ return
 ;+> ; [LButton + Shift] Command Detection
 ~LButton::
  stime := a_tickcount               ; Start Time
+ MouseGetPos, xStart                ; x pos at start
  KeyWait, LButton
  etime := a_tickcount - stime       ; End Time
+ MouseGetPos, xEnd                  ; x pos at end
+ if (xStart < xEnd)
+ {
+    ltr := True
+    rtl := False
+ }
+ if (xStart > xEnd)
+ {
+    rtl := True
+    ltr := False
+ }
  if etime >= 500                    ; The mouse was dragged
  {
     KeyWait, Shift, D T.5
@@ -2246,7 +2266,13 @@ return
     }
     
 	if WinActive("i).*post.*")
-		Send, {raw}[url=%Match%]%Clipboard%[/url]
+    {
+        outputdebug % "winactive Rtl " . rtl . " Ltr"  . ltr
+        if ltr           
+            Send, {raw}[url=%Match%]%Clipboard%[/url]
+        else if rtl
+            Run, % Match
+    }
 	else
         Run, % Match
     Clipboard := clipold
@@ -2261,8 +2287,8 @@ return
 !LButton::
  CoordMode, Mouse, Screen
  rect := False
- MouseGetPos, scXL, scYT, scWinHwnd
- WinMove, % "SelBox",, %scXL%, %scYT%        ; Move the "Selection Box window" to current mouse position
+ MouseGetPos, scXL, scYT
+ WinMove, % "SelBox",, %scXL%, %scYT%
  Sleep, 150
  if GetKeyState("LButton", "P")
  {
@@ -2270,24 +2296,41 @@ return
     WinSet, Transparent, 120, % "SelBox"
     While GetKeyState("LButton", "P")
     {
-        CoordMode, Mouse, Screen
-        MouseGetPos, scXR, scYB             ; This must be relative to the screen for use with the ScreenCapture
-        CoordMode, Mouse, Relative
-        MouseGetPos, rel_scXR, rel_scYB     ; This is just for creating the selection window, it must be relative
-        WinMove, % "SelBox",,,, %rel_scXR%, %rel_scYB%
-        ToolTip, %rel_scXR%`, %rel_scYB%
+        ; amazing solution by adabo
+        ; first we check which direction we are dragging the mouse
+        ; then we calculate the width and height and finally show the GUI
+        MouseGetPos, scXR, scYB
+        if (scXL < scXR) and (scYT < scYB) ; direction - right up
+            Gui, 3:Show, % "x"(scXL) "y"(scYT) "w"(scXR - scXL) "h"(scYB - scYT), % "SelBox"
+
+        if (scXL < scXR) and (scYT > scYB) ; direction - right down
+            Gui, 3:Show, % "x"(scXL) "y"(scYB) "w"(scXR - scXL) "h"(scYT - scYB), % "SelBox"
+
+        if (scXL > scXR) and (scYT < scYB) ; direction - left up
+            Gui, 3:Show, % "x"(scXR) "y"(scYT) "w"(scXL - scXR) "h"(scYB - scYT), % "SelBox"
+
+        if (scXL > scXR) and (scYT > scYB) ; direction - left down
+            Gui, 3:Show, % "x"(scXR) "y"(scYB) "w"(scXL - scXR) "h"(scYT - scYB), % "SelBox"
+
+        WinGetPos,,, guiw, guih, % "SelBox"
+        ToolTip, % guiw "," guih
         if GetKeyState("RButton", "P")
         {
             ToolTip
-            Gui, 3: Show, w1 h1 x0 y0, % "SelBox"
+            Gui, 3: Show, Hide w1 h1 x0 y0, % "SelBox"
             return
         }
     }
     ToolTip
-    Gui, 3: Show, w1 h1 x0 y0, % "SelBox"
-    CaptureScreen(scXL "," scYT "," scXR "," scYB, 0, scRect := a_temp . "\scRect_" . RName(0,"png"))
+    Gui, 3: Show, Hide w1 h1 x0 y0, % "SelBox"
+    outputdebug, % scXL "-" scXR
+    if (scXL < scXR)
+        CaptureScreen(scXL "," scYT "," scXR "," scYB, 0, scRect := a_temp . "\scRect_" . RName(0,"png"))
+    else
+        CaptureScreen(scXR "," scYB "," scXL "," scYT, 0, scRect := a_temp . "\scRect_" . RName(0,"png"))
     rect := True
  }
+ PrintScreen::
  if (!rect && scWinHwnd != DeskHwnd)
     CaptureScreen(1, 0, scWin := a_temp . "\scWin_" . RName(0,"png"))
  Gosub, ImageUpload
@@ -2297,7 +2340,7 @@ return
 #IfWinNotActive
 ;-
 ;+> ; [Hotkeys for Edit controls]
-#IfWinActive, ahk_group Ahk_Tk
+#IfWinActive ahk_group Ahk_Tk
 ^d::                    ; [Ctrl + D] Duplicate Line
  clipold := Clipboard
  Send, {Home}+{End}^c{End}{Enter}^v
@@ -2370,7 +2413,38 @@ return
  Clipboard := clipold
  clipold :=
 return
-+Tab::BackSpace         ; [Shift + Tab] delete Tab
+
++Tab::                  ; [Shift + Tab] delete Tab
+ ControlGetFocus, ctrlid
+ if (WinActive("AutoHotkey ToolKit") && ctrlid = "Edit3")
+    Send, {BackSpace}
+ else
+    Send, +{Tab}
+return
+
+^Backspace::Send, ^+{Left}{Delete} ; Emulate Ctrl + Backspace
+#IfWinActive
+;-
+;+> ; [AutoHotkey Forum Posting]
+#IfWinActive i).*post.*
+Numpad1::               ; Toggles the tab behaviour
+1::
+ tabtog := !tabtog
+return
+
+Tab::                   ; Allows me to put indentation on the code
+ if tabtog
+    Send, {Space 4}
+ else
+    Send, {Tab}
+return
+
++Tab::                  ; Allows me to delete indentation
+ if tabtog
+    Send, {Backspace 4}
+ else
+    Send, +{Tab}
+return
 #IfWinActive
 ;-
 ;-
