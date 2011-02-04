@@ -1,7 +1,7 @@
 /*
  * Author           : RaptorX	<graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit
- * Script Version   : 0.4.12b
+ * Script Version   : 0.4.12c
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010 
@@ -32,7 +32,7 @@ onExit, Clean
 
 ;+--> ; ---------[Basic Info]---------
 s_name      := "AHK-ToolKit"            ; Script Name
-s_version   := "0.4.12b"                ; Script Version
+s_version   := "0.4.12c"                ; Script Version
 s_author    := "RaptorX"                ; Script Author
 s_email     := "graptorx@gmail.com"     ; Author's contact email
 getparams()
@@ -675,7 +675,7 @@ CreateHSScript:
         SetTitleMatchMode, Regex
         SetWorkingDir %A_ScriptDir%
         ;-
-        F11::Suspend`n`n
+        !F11::Suspend`n`n
     )
  FileAppend, %hsfileopts%, %hsloc%
  return
@@ -2303,8 +2303,8 @@ update(lversion, rfile="github", logurl="", vline=5){
 
 ;+--> ; ---------[Hotkeys/Hotstrings]---------
 !Esc::ExitApp
-Pause::Reload
-F12::Suspend
+!Pause::Reload
+!F12::Suspend
 ;+> ; [Ctrl + Shift + A/Z] BW ally
 #IfWinActive ahk_class SWarClass
 ^+a::
@@ -2541,25 +2541,10 @@ return
 #IfWinActive
 ;-
 ;+> ; [AutoHotkey Forum Posting]
+
 #IfWinActive i).*post.*
-Numpad1::               ; Toggles the tab behaviour
-1::
- tabtog := !tabtog
-return
-
-Tab::                   ; Allows me to put indentation on the code
- if tabtog
-    Send, {Space 4}
- else
-    Send, {Tab}
-return
-
-+Tab::                  ; Allows me to delete indentation
- if tabtog
-    Send, {Backspace 4}
- else
-    Send, +{Tab}
-return
+Tab::Send, {Space 4}                        ; Allows me to put indentation on the code
++Tab::Send, {Backspace 4}                   ; Allows me to delete indentation
 #IfWinActive
 ;-
 ;-
