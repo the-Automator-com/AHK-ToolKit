@@ -2333,118 +2333,118 @@ return
 return
 ;-
 ;+> ; [LButton + Shift] Command Detection
-~LButton::
- stime := a_tickcount               ; Start Time
- MouseGetPos, xStart                ; x pos at start
- KeyWait, LButton
- etime := a_tickcount - stime       ; End Time
- MouseGetPos, xEnd                  ; x pos at end
- if (xStart < xEnd)
- {
-    ltr := True
-    rtl := False
- }
- if (xStart > xEnd)
- {
-    rtl := True
-    ltr := False
- }
- if etime >= 500                    ; The mouse was dragged
- {
-    KeyWait, Shift, D T.5
-    if ErrorLevel
-        return
-    clipold := Clipboard
-    Send, ^c
-    ClipWait
-    Sleep 10
-	Loop, Parse, Clipboard,`n,`r
-		if a_index > 1
-			return
-    ToolTip, % Clipboard
+; ~LButton::
+ ; stime := a_tickcount               ; Start Time
+ ; MouseGetPos, xStart                ; x pos at start
+ ; KeyWait, LButton
+ ; etime := a_tickcount - stime       ; End Time
+ ; MouseGetPos, xEnd                  ; x pos at end
+ ; if (xStart < xEnd)
+ ; {
+    ; ltr := True
+    ; rtl := False
+ ; }
+ ; if (xStart > xEnd)
+ ; {
+    ; rtl := True
+    ; ltr := False
+ ; }
+ ; if etime >= 500                    ; The mouse was dragged
+ ; {
+    ; KeyWait, Shift, D T.5
+    ; if ErrorLevel
+        ; return
+    ; clipold := Clipboard
+    ; Send, ^c
+    ; ClipWait
+    ; Sleep 10
+	; Loop, Parse, Clipboard,`n,`r
+		; if a_index > 1
+			; return
+    ; ToolTip, % Clipboard
 
-	if RegexMatch(Clipboard, "i)a_\w+")
-		Match := matchclip("var")
-	else if RegexMatch(Clipboard, "i)\s?(\w+)\(.*", fnct_name)
-		Match := matchclip("fnct")
-	else
-		Match := matchclip("cmd")
+	; if RegexMatch(Clipboard, "i)a_\w+")
+		; Match := matchclip("var")
+	; else if RegexMatch(Clipboard, "i)\s?(\w+)\(.*", fnct_name)
+		; Match := matchclip("fnct")
+	; else
+		; Match := matchclip("cmd")
 	
-    httpQuery(htm, Match)
-    VarSetCapacity(htm, -1)
-    if (InStr(htm, "403") || InStr(htm, "404") || !Match)
-    {
-        ToolTip, % "Not found. `nTrying a manual search, results may be inaccurate"
-        Sleep 3*sec
-        Match := matchclip("manual")
-        if !Match
-            ToolTip, % "Not found in the documentation files"
-    }
+    ; httpQuery(htm, Match)
+    ; VarSetCapacity(htm, -1)
+    ; if (InStr(htm, "403") || InStr(htm, "404") || !Match)
+    ; {
+        ; ToolTip, % "Not found. `nTrying a manual search, results may be inaccurate"
+        ; Sleep 3*sec
+        ; Match := matchclip("manual")
+        ; if !Match
+            ; ToolTip, % "Not found in the documentation files"
+    ; }
     
-	if WinActive("i).*post.*")
-    {
-        outputdebug % "winactive Rtl " . rtl . " Ltr"  . ltr
-        if ltr           
-            Send, {raw}[url=%Match%]%Clipboard%[/url]
-        else if rtl
-            Run, % Match
-    }
-	else
-        Run, % Match
-    Clipboard := clipold
-    clipold :=
-    Sleep, 2*sec
-    ToolTip
- }
-return
+	; if WinActive("i).*post.*")
+    ; {
+        ; outputdebug % "winactive Rtl " . rtl . " Ltr"  . ltr
+        ; if ltr           
+            ; Send, {raw}[url=%Match%]%Clipboard%[/url]
+        ; else if rtl
+            ; Run, % Match
+    ; }
+	; else
+        ; Run, % Match
+    ; Clipboard := clipold
+    ; clipold :=
+    ; Sleep, 2*sec
+    ; ToolTip
+ ; }
+; return
 ;-
 ;+> ; [Alt + LButton] Screen Capture Active Window/Area
-!LButton::
- CoordMode, Mouse, Screen
- rect := False
- MouseGetPos, scXL, scYT
- WinMove, % "SelBox",, %scXL%, %scYT%
- Sleep, 150
- if GetKeyState("LButton", "P")
- {
-    Gui, 3: Show, w1 h1 x%scXL% y%scYT%, % "SelBox"
-    WinSet, Transparent, 120, % "SelBox"
-    While GetKeyState("LButton", "P")
-    {
+; !LButton::
+ ; CoordMode, Mouse, Screen
+ ; rect := False
+ ; MouseGetPos, scXL, scYT
+ ; WinMove, % "SelBox",, %scXL%, %scYT%
+ ; Sleep, 150
+ ; if GetKeyState("LButton", "P")
+ ; {
+    ; Gui, 3: Show, w1 h1 x%scXL% y%scYT%, % "SelBox"
+    ; WinSet, Transparent, 120, % "SelBox"
+    ; While GetKeyState("LButton", "P")
+    ; {
         ; amazing solution by adabo
         ; first we check which direction we are dragging the mouse
         ; then we calculate the width and height and finally show the GUI
-        MouseGetPos, scXR, scYB
-        if (scXL < scXR) and (scYT < scYB) ; direction - right up
-            Gui, 3:Show, % "x"(scXL) "y"(scYT) "w"(scXR - scXL) "h"(scYB - scYT), % "SelBox"
+        ; MouseGetPos, scXR, scYB
+        ; if (scXL < scXR) and (scYT < scYB) ; direction - right up
+            ; Gui, 3:Show, % "x"(scXL) "y"(scYT) "w"(scXR - scXL) "h"(scYB - scYT), % "SelBox"
 
-        if (scXL < scXR) and (scYT > scYB) ; direction - right down
-            Gui, 3:Show, % "x"(scXL) "y"(scYB) "w"(scXR - scXL) "h"(scYT - scYB), % "SelBox"
+        ; if (scXL < scXR) and (scYT > scYB) ; direction - right down
+            ; Gui, 3:Show, % "x"(scXL) "y"(scYB) "w"(scXR - scXL) "h"(scYT - scYB), % "SelBox"
 
-        if (scXL > scXR) and (scYT < scYB) ; direction - left up
-            Gui, 3:Show, % "x"(scXR) "y"(scYT) "w"(scXL - scXR) "h"(scYB - scYT), % "SelBox"
+        ; if (scXL > scXR) and (scYT < scYB) ; direction - left up
+            ; Gui, 3:Show, % "x"(scXR) "y"(scYT) "w"(scXL - scXR) "h"(scYB - scYT), % "SelBox"
 
-        if (scXL > scXR) and (scYT > scYB) ; direction - left down
-            Gui, 3:Show, % "x"(scXR) "y"(scYB) "w"(scXL - scXR) "h"(scYT - scYB), % "SelBox"
+        ; if (scXL > scXR) and (scYT > scYB) ; direction - left down
+            ; Gui, 3:Show, % "x"(scXR) "y"(scYB) "w"(scXL - scXR) "h"(scYT - scYB), % "SelBox"
 
-        WinGetPos,,, guiw, guih, % "SelBox"
-        ToolTip, % guiw "," guih
-        if GetKeyState("RButton", "P")
-        {
-            ToolTip
-            Gui, 3: Show, Hide w1 h1 x0 y0, % "SelBox"
-            return
-        }
-    }
-    ToolTip
-    Gui, 3: Show, Hide w1 h1 x0 y0, % "SelBox"
-    outputdebug, % scXL "-" scXR
-    if (scXL < scXR)
-        CaptureScreen(scXL "," scYT "," scXR "," scYB, 0, scRect := a_temp . "\scRect_" . RName(0,"png"))
-    else
-        CaptureScreen(scXR "," scYB "," scXL "," scYT, 0, scRect := a_temp . "\scRect_" . RName(0,"png"))
-    rect := True
- }
+        ; WinGetPos,,, guiw, guih, % "SelBox"
+        ; ToolTip, % guiw "," guih
+        ; if GetKeyState("RButton", "P")
+        ; {
+            ; ToolTip
+            ; Gui, 3: Show, Hide w1 h1 x0 y0, % "SelBox"
+            ; return
+        ; }
+    ; }
+    ; ToolTip
+    ; Gui, 3: Show, Hide w1 h1 x0 y0, % "SelBox"
+    ; outputdebug, % scXL "-" scXR
+    ; if (scXL < scXR)
+        ; CaptureScreen(scXL "," scYT "," scXR "," scYB, 0, scRect := a_temp . "\scRect_" . RName(0,"png"))
+    ; else
+        ; CaptureScreen(scXR "," scYB "," scXL "," scYT, 0, scRect := a_temp . "\scRect_" . RName(0,"png"))
+    ; rect := True
+ ; }
  PrintScreen::
  if (!rect && scWinHwnd != DeskHwnd)
     CaptureScreen(1, 0, scWin := a_temp . "\scWin_" . RName(0,"png"))
