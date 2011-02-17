@@ -214,4 +214,3 @@ WinSet, Redraw, , ahk_id %A_LoopField%
 s := ""
 return
 }
-

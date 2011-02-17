@@ -6,21 +6,10 @@
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: August 26, 2011
+ * Modification Date: July 05, 2011
  *
  * Description      :
  * ------------------
- * This small program is a set of "tools" that i use regularly.
- *
- * A convenient GUI that serves as a hotkey and hotstring manager allows you to keep all of them
- * in an easy to read list.
- *
- * The Live Code tab allows you to quickly test ahk code without having to save a file even if 
- * Autohotkey is not installed in the computer you are using. Also there are other tools like the Command Detector and the Screen and Forum Tools that improve
- * the way i help other people while in IRC and ahk Forums.
- *
- * I hope other people find it useful. You can modify it and improve it as you like. Feel free 
- * to contact me if you want your changes to be added in the official release.
  *
  * -----------------------------------------------------------------------------------------------
  * License          :       Copyright ©2010-2011 RaptorX <GPLv3>
@@ -41,7 +30,6 @@
  *
  * [GUI Number Index]
  *
- * GUI 01 - First Time Run
  * GUI 01 - AutoHotkey ToolKit [MAIN GUI]
  * GUI 02 - Add Hotkey
  * GUI 03 - Add Hotstring
@@ -136,7 +124,7 @@ class scriptobj
             }
             sparam .= a_loopfield . a_space
         }
-        sparam := RegexReplace(sparam, "\s+$")      ; Remove trailing spaces. Organizing is done
+        sparam := RegexReplace(sparam, "\s+$","")   ; Remove trailing spaces. Organizing is done
 
         Loop, Parse, sparam, %a_space%
         {
@@ -551,9 +539,7 @@ MainMenu(){
     global conf, script
 
     conf.load(script.conf), root:=conf.documentElement,options:=root.firstChild
-    Menu, Tray, Icon, res/AHK-TK.ico
     Menu, iexport, add, Import Hotkeys/Hotstrings, MenuHandler
-    Menu, iexport, disable, Import Hotkeys/Hotstrings
     Menu, iexport, add
     Menu, iexport, add, Export Hotkeys/Hotstrings, MenuHandler
 
@@ -703,7 +689,12 @@ MainGui(){
     Gui, 01: add, Tab2, x0 y0 w800 h400 HWND$tabcont gGuiHandler vtabLast, % "Hotkeys|Hotstrings|Live Code"
     Gui, 01: add, StatusBar, HWND$StatBar
 
-    updateSB()
+    ; Needs to be moved to a function
+    ; also remember to change the number to be displayed by a variable.
+    SB_SetParts(150,150,250,50)
+    SB_SetText("`t" root.selectSingleNode("//Hotkeys/@count").text " Hotkeys currently active",1)
+    SB_SetText("`t" root.selectSingleNode("//Hotstrings/@count").text " Hotstrings currently active",2)
+    SB_SetText("`tv" script.version,4)
 
     _cnt := root.selectSingleNode("//Hotkeys/@count").text
     Gui, 01: tab, Hotkeys
@@ -717,8 +708,9 @@ MainGui(){
     Load("Hotkeys")
 
     Gui, 01: add, Text, x0 y350 w820 0x10 HWND$hkDelim
+
     Gui, 01: font, s8 cGray italic, Verdana
-    Gui, 01: add, Edit, x10 yp+10 w250 HWND$QShk gGuiHandler vQShk, % "Quick Search"
+    Gui, 01: add, Edit, x10 yp+10 w250 HWND$QShk vQShk, % "Quick Search"
     Gui, 01: font
     Gui, 01: add, Button, x+370 yp w75 HWND$hkAdd Default gGuiHandler, % "&Add"
     Gui, 01: add, Button, x+10 yp w75 HWND$hkClose gGuiHandler, % "&Close"
@@ -751,7 +743,7 @@ MainGui(){
 
     Gui, 01: add, Text, x0 y350 w820 0x10 HWND$hsDelim
     Gui, 01: font, s8 cGray italic, Verdana
-    Gui, 01: add, Edit, x10 yp+10 w250 HWND$QShs gGuiHandler vQShs, % "Quick Search"
+    Gui, 01: add, Edit, x10 yp+10 w250 HWND$QShs vQShs, % "Quick Search"
     Gui, 01: font
     Gui, 01: add, Button, x+370 yp w75 HWND$hsAdd Default gGuiHandler, % "&Add"
     Gui, 01: add, Button, x+10 yp w75 HWND$hsClose gGuiHandler, % "&Close"
@@ -773,7 +765,7 @@ MainGui(){
 
     Gui, 01: add, Text, x0 y350 w820 0x10 HWND$lcDelim
     Gui, 01: font, s8 cGray italic, Verdana
-    Gui, 01: add, Edit, x10 yp+10 w250 Disabled HWND$QSlc gGuiHandler vQSlc, % "Quick Search"
+    Gui, 01: add, Edit, x10 yp+10 w250 HWND$QSlc vQSlc, % "Quick Search"
     Gui, 01: font
     Gui, 01: add, Button, x+370 yp w75 HWND$lcRun gGuiHandler, % "&Run"
     Gui, 01: add, Button, x+10 yp w75 HWND$lcClear gGuiHandler, % "&Clear"
@@ -903,7 +895,7 @@ ImportGui(){
     Gui, 04: add, Button, x+10 wp gGuiHandler, % "&Import"
 
     Gui, 04: add, ListView, x10 y+30 w500 r10 HWND$imList Sort Grid AltSubmit gListHandler vimList
-                          , % "Type|Acelerator|Command|Path"
+                          , % "Type|Options|Acelerator|Command|Path"
 
     Gui, 04: add, Text, x0 y+10 w540 0x10 HWND$imDelim
     Gui, 04: add, Button, xp+274 yp+10 w75 HWND$imAccept Default gGuiHandler, % "&Accept"
@@ -1127,7 +1119,7 @@ AboutGui(){
             .  "along with this program.  If not, see "
 
     Gui, 08: color, White, White
-    Gui, 08: add, Picture, x0 y0, % "res\img\AHK-TK_About.png"
+    Gui, 08: add, Picture, x0 y0, % "res\AHK-TK_About.png"
     Gui, 08: add, Text, x0 w450 0x10
     Gui, 08: add, Text, x10 yp+10, % info
     Gui, 08: add, Text, xp+92 yp+27 cBlue gGuiHandler, % script.homepage
@@ -1707,8 +1699,7 @@ GuiHandler(){
                 node.setAttribute("altdrag", _est),node.setAttribute("prtscr", _est)
             node := null
 
-            conf.transformNodeToObject(xsl, conf)
-            conf.save(script.conf), conf.load(script.conf), root:=options:=null             ; Save & Clean
+            conf.save(script.conf), root:=options:=null             ; Save & Clean
 
             Gui, destroy
             Pause                                                   ; UnPause
@@ -1727,7 +1718,6 @@ GuiHandler(){
                 LV_Add("", node.item[a_index-1].selectSingleNode("@title").text)
 
             GuiControl, +Redraw, slList
-            conf.transformNodeToObject(xsl, conf)
             conf.save(script.conf), conf.load(script.conf)          ; Save and Load
             return
         }
@@ -1821,8 +1811,8 @@ GuiHandler(){
             }
             else
             {
-                hsOpt := (hsAE ? "*" : "") (hsDND ? "B0" : "")
-                      .  (hsTIOW ? "?" : "") (hsSR ? "R" : "")
+                _hsOpt := (hsAE ? "*" : "") (hsDND ? "B0" : "")
+                       .  (hsTIOW ? "?" : "") (hsSR ? "R" : "")
                 Add("hotstring")
             }
             return
@@ -1905,6 +1895,7 @@ GuiHandler(){
                     WinActivate, ahk_id %$hwnd1%
                     return
                 }
+
                 if main_toggle := !main_toggle
                     Gui, 01: show
                 else
@@ -2098,8 +2089,6 @@ GuiHandler(){
 
         if (a_guicontrol = "&Accept")
         {
-            Add("Import")
-            
             Gui, %a_gui%: Submit
             WinActivate, ahk_id %$hwnd1%
             Gui, 01: -Disabled
@@ -2371,9 +2360,9 @@ MenuHandler(stat=0){
         ; Menu, Settings, %stat%, Enable Command Helper
         ; Menu, Settings, %stat%, Context Menu Options
 
-        ; Menu, File, %stat%, &Open`tCtrl+O
-        ; Menu, File, %stat%, &Save`tCtrl+S
-        ; Menu, File, %stat%, Save As`tCtrl+Shift+S
+        Menu, File, %stat%, &Open`tCtrl+O
+        Menu, File, %stat%, &Save`tCtrl+S
+        Menu, File, %stat%, Save As`tCtrl+Shift+S
         return
     }
 
@@ -2509,7 +2498,6 @@ MenuHandler(stat=0){
         alwaysontop := ((tog_aot := !tog_aot) ? "+" : "-") "AlwaysOnTop"
         Gui, %a_gui%: %alwaysontop%
         root.setAttribute("alwaysontop", tog_aot)
-        conf.transformNodeToObject(xsl, conf)
         conf.save(script.conf), conf.load(script.conf)          ; Save and Load
         return
     }
@@ -2535,7 +2523,6 @@ MenuHandler(stat=0){
         }
 
         options.selectSingleNode("//@snplib").text := tog_sl
-        conf.transformNodeToObject(xsl, conf)
         conf.save(script.conf), conf.load(script.conf)          ; Save and Load
         return
     }
@@ -2545,7 +2532,6 @@ MenuHandler(stat=0){
         Menu, View, ToggleCheck, %a_thismenuitem%
         SCI_SetWrapMode(tog_lw := !tog_lw, $Sci1)
         options.selectSingleNode("//@linewrap").text := tog_lw
-        conf.transformNodeToObject(xsl, conf)
         conf.save(script.conf), conf.load(script.conf)          ; Save and Load
         return
     }
@@ -2555,7 +2541,6 @@ MenuHandler(stat=0){
         Menu, Settings, ToggleCheck, %a_thismenuitem%
         ; cmdHelper(tog_ech := !tog_ech)
         options.selectSingleNode("//@sci").text := !tog_ech
-        conf.transformNodeToObject(xsl, conf)
         conf.save(script.conf), conf.load(script.conf)          ; Save and Load
         return
     }
@@ -2661,7 +2646,6 @@ ListHandler(sParam=0){
                 GuiControl, +Redraw, slList
             }
         }
-        conf.transformNodeToObject(xsl, conf)
         conf.save(script.conf), conf.load(script.conf)          ; Save and Load
         return
     }
@@ -2700,7 +2684,7 @@ ListHandler(sParam=0){
 
     if (a_guicontrol = "hkList" || a_guicontrol = "shkList")
     {
-        if (a_guievent = "DoubleClick")
+        if (a_guievent = "DoubleClick" && !_selrow)
         {
             if !_selrow
             {
@@ -2782,7 +2766,7 @@ ListHandler(sParam=0){
 
     if (a_guicontrol = "hsList" || a_guicontrol = "shsList")
     {
-        if (a_guievent = "DoubleClick")
+        if (a_guievent = "DoubleClick" && !_selrow)
         {
             if !_selrow
             {
@@ -2883,7 +2867,6 @@ ListHandler(sParam=0){
                 _title := slNewTitle ? slNewTitle : _seltxt
                 node :=  options.selectSingleNode("//Group[@name='" _current "']")
                 node.selectSingleNode("Snippet[@title='" _seltxt "']/@title").text:=_title
-                conf.transformNodeToObject(xsl, conf)
                 conf.save(script.conf), conf.load(script.conf)          ; Save and Load
             }
             Hotkey, *LButton, Off               ; If we finished editing normally then turn off the hotkey.
@@ -3109,8 +3092,8 @@ hotExtract(file, path){
                 subCode := "(Multiline) " RegexReplace(subStr(_code,1,40), "\s+", " ")
                 LV_Add(""
                       , _mlHK ? "Hotkey" : "Hotstring"
-                      , ((_mlHKOPT || _mlHSOPT) ? RegexReplace(_mlHKOPT _mlHSOPT, "^\s+") : "")
-                      . ((_mlHK || _mlHS) ? RegexReplace(_mlHK _mlHS, "^\s+") : "")
+                      , (_mlHKOPT || _mlHSOPT) ? RegexReplace(_mlHKOPT _mlHSOPT, "^\s+") : "-"
+                      , RegexReplace(_mlHK _mlHS, "^\s+")
                       , subCode
                       , path)
 
@@ -3131,7 +3114,6 @@ hotExtract(file, path){
 
         if RegexMatch(a_loopfield, #mLine, ml)
         {
-            ; this process keep old hotkey/hotstring information so i can parse multiline items correctly
             multiline:=True,_mlHK:=mlHK ? mlHK : _mlHK,_mlHS:=mlHS ? mlHS : _mlHS
            ,_mlHKOPT:=mlHKOPT ? mlHKOPT : _mlHKOPT,_mlHSOPT:=mlHSOPT ? mlHSOPT : _mlHSOPT
            continue
@@ -3139,11 +3121,10 @@ hotExtract(file, path){
 
         if RegexMatch(a_loopfield, #sLine, sl)
         {
-            msgbox % slhk " " RegexReplace(slHK slHS, "^\s+")
             LV_Add(""
                   , slHK ? "Hotkey" : "Hotstring"
-                  , ((slHKOPT || slHSOPT) ? RegexReplace(slHKOPT slHSOPT, "^\s+") : "")
-                  . ((slHK || slHS) ? RegexReplace(slHK slHS, "^\s+") : "")
+                  , (slHKOPT || slHSOPT) ? RegexReplace(slHKOPT slHSOPT, "^\s+") : "-"
+                  , RegexReplace(slHK slHS, "^\s+")
                   , slHKCODE slHSCODE
                   , path)
 
@@ -3163,7 +3144,7 @@ hotExtract(file, path){
     return 1
 }
 rcwSet(menu=0){
-    global conf, script, xsl
+    global conf, script
     static names:="L-Ansi|L-Unicode|Basic|IronAHK"
 
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
@@ -3180,7 +3161,6 @@ rcwSet(menu=0){
                 Menu, RCW, uncheck, %a_loopfield%       ; Make sure all others are unchecked
             Menu, RCW, check, %a_loopfield%
             options.selectSingleNode("//RCPaths/@current").text := a_loopfield
-            conf.transformNodeToObject(xsl, conf)
             conf.save(script.conf), conf.load(script.conf)          ; Save and Load
         }
     }

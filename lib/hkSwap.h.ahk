@@ -23,6 +23,7 @@ hkey := "Win + W"
 msgbox % key := hkSwap(hkey, "short") ; Returns #w
 msgbox % key := hkSwap(hkey, 1)       ; Returns #w
 */
+
 hkSwap(byref key, type = 0){
    
     if (type = "long" || type = 0)
