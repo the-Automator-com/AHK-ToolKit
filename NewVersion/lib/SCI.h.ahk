@@ -1,6 +1,6 @@
 ﻿; Title: Scintilla Wrapper for AHK
 
-; Group: Special Functions
+; Group: Helper Functions
 
 /*
     Function: Add
@@ -112,7 +112,7 @@ SCI_Add(hParent, x=5, y=15, w=390, h=270, Styles="", MsgHandler="", DllPath=""){
     return hSci
 }
 
-/*  Group: Text Manipulation
+/*  Group: Text
     Group of funtions that handle the text in the scintilla component.
 
     <http://www.scintilla.org/ScintillaDoc.html#TextRetrievalAndModification>
@@ -306,7 +306,7 @@ SCI_AddText(aStr, len=0, hwnd=0){
     The current selection is not changed and the new text is *not* scrolled into view.
     
     Parameters:
-    SCI_AddText(aStr[, len, hwnd])
+    SCI_AppendText(aStr[, len, hwnd])
 
     aStr    -   The string to be appended to the end  of the current document on the selected component.
     len     -   Lenght of the string that will be added to the component. If 0 or blank it will be calculated
@@ -498,7 +498,7 @@ SCI_ClearDocumentStyle(hwnd=0){
     ; return
 ; }
 
-; Group: Manipulation Set Functions
+; Group: Text Set Functions
 
 /*
     Function: SetText
@@ -633,7 +633,7 @@ SCI_SetLengthForEncode(bytes, hwnd=0){
     return SCI_sendEditor(hwnd, "SCI_SETLENGTHFORENCODE", bytes)
 }
 
-; Group: Manipulation Get Functions
+; Group: Text Get Functions
 
 /*
     Function: GetText
@@ -655,7 +655,7 @@ SCI_SetLengthForEncode(bytes, hwnd=0){
     
     Examples:    
 */
-SCI_GetText(len, Byref vText, hwnd=0){
+SCI_GetText(len=0, Byref vText=0, hwnd=0){
     
     VarSetCapacity(str, len * (a_isunicode ? 2 : 1)), cLen := SCI_sendEditor(hwnd, "SCI_GETTEXT", len, &str)
     vText := StrGet(&str, "CP0")
@@ -691,7 +691,7 @@ SCI_GetText(len, Byref vText, hwnd=0){
     This function gets the read-only flag for the document. If you mark a document as read only, attempts to 
     modify the text cause the *SCN_MODIFYATTEMPTRO* notification.
     
-    Paramters:
+    Parameters:
     
 */
 SCI_GetReadonly(){
@@ -763,6 +763,57 @@ SCI_GetStyledText(){
 SCI_GetStyleBits(){
     
     return
+}
+
+/* Group: Selection and information
+*/
+
+/*
+    Function: GetTextLength
+    <http://www.scintilla.org/ScintillaDoc.html#SCI_GETTEXTLENGTH>
+    
+    Returns the length of the document in bytes.
+    
+    Parameters:
+    SCI_GetTextLength([hwnd])
+    
+    hwnd    -   The hwnd of the control that you want to operate on. Useful for when you have more than 1
+                Scintilla components in the same script. The wrapper will remember the last used hwnd,
+                so you can specify it once and only specify it again when you want to operate on a different
+                component.
+    
+    Returns
+    nLen    -   Length of the document in bytes.
+    
+    Examples
+*/
+SCI_GetTextLength(hwnd=0){
+    
+    return SCI_sendEditor(hwnd, "SCI_GETTEXTLENGTH")
+}
+
+/*
+    Function: GetLength
+    <http://www.scintilla.org/ScintillaDoc.html#SCI_GETLENGTH>
+    
+    Returns the length of the document in bytes.
+    
+    Parameters:
+    SCI_GetLength([hwnd])
+    
+    hwnd    -   The hwnd of the control that you want to operate on. Useful for when you have more than 1
+                Scintilla components in the same script. The wrapper will remember the last used hwnd,
+                so you can specify it once and only specify it again when you want to operate on a different
+                component.
+    
+    Returns
+    nLen    -   Length of the document in bytes.
+    
+    Examples
+*/
+SCI_GetLength(hwnd=0){
+    
+    return SCI_sendEditor(hwnd, "SCI_GETLENGTH")
 }
 
 /* Group: Style Definition
