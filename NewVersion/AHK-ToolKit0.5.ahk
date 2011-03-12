@@ -700,24 +700,25 @@ PreferencesGui(){
     Loop, Parse, vars, |
         _%a_loopfield% := options.selectSingleNode("//@" a_loopfield).text
 
-    Gui, 98: add, GroupBox, x3 y0 w345 h70 HWND$GP_GB1, % "Startup"
-    Gui, 98: add, CheckBox, xp+25 yp+20 HWND$GP_CB1 Checked%_ssi% v_ssi, % "Show splash image"
-    Gui, 98: add, CheckBox, x+70 HWND$GP_CB2 Checked%_sww% v_sww, % "Start with Windows"
-    Gui, 98: add, CheckBox, x28 y+10 HWND$GP_CB3 Checked%_smm% v_smm, % "Start minimized"
-    Gui, 98: add, CheckBox, x+91 HWND$GP_CB4 Checked%_cfu% v_cfu, % "Check for updates"
+    Gui, 98: add, GroupBox, x3 y0 w345 h70, % "Startup"
+    Gui, 98: add, CheckBox, xp+25 yp+20 Checked%_ssi% v_ssi, % "Show splash image"
+    Gui, 98: add, CheckBox, x+70 Checked%_sww% v_sww, % "Start with Windows"
+    Gui, 98: add, CheckBox, x28 y+10 Checked%_smm% v_smm, % "Start minimized"
+    Gui, 98: add, CheckBox, x+91 Checked%_cfu% v_cfu, % "Check for updates"
 
     _mhk := options.selectSingleNode("MainKey").text
     vars := "ctrl|alt|shift|win"
     Loop, Parse, vars, |
         _%a_loopfield% := options.selectSingleNode("MainKey/@" a_loopfield).text
 
-    Gui, 98: add, GroupBox, x3 y+20 w345 h55 HWND$GP_GB2, % "Main GUI Hotkey"
-    Gui, 98: add, CheckBox, xp+10 yp+23 HWND$GP_CB5 Checked%_ctrl% v_ctrl, % "Ctrl"
-    Gui, 98: add, CheckBox, x+10 HWND$GP_CB6 Checked%_alt% v_alt, % "Alt"
-    Gui, 98: add, CheckBox, x+10 HWND$GP_CB7 Checked%_shift% v_shift, % "Shift"
-    Gui, 98: add, CheckBox, x+10 HWND$GP_CB8 Checked%_win% v_win, % "Win"
+    Gui, 98: add, GroupBox, x3 y+20 w345 h55, % "Main GUI Hotkey"
+    Gui, 98: add, CheckBox, xp+10 yp+23 Checked%_ctrl% v_ctrl, % "Ctrl"
+    Gui, 98: add, CheckBox, x+10 Checked%_alt% v_alt, % "Alt"
+    Gui, 98: add, CheckBox, x+10 Checked%_shift% v_shift, % "Shift"
+    Gui, 98: add, CheckBox, x+10 Checked%_win% v_win, % "Win"
     Gui, 98: add, DropDownList, x+10 yp-3 w140 HWND$GP_DDL v_hkddl, % lst:=klist("all^", "mods msb")" None  "
 
+    ; Fixes issue with the DDL selecting "BackSpace" instead of "B"
     if RegexMatch(_mhk, "\bB\b")
         Control,Choose,2,, ahk_id %$GP_DDL%
     else
@@ -725,8 +726,8 @@ PreferencesGui(){
 
     SetHotkeys(lst,$GP_DDL, "Preferences")
 
-    Gui, 98: add, GroupBox, x3 y+26 w345 h100 HWND$GP_GB3, % "Suspend hotkeys on these windows"
-    Gui, 98: add, Edit, xp+10 yp+20 w325 h70 HWND$GP_E1 v_swl, % options.selectSingleNode("SuspWndList").text
+    Gui, 98: add, GroupBox, x3 y+26 w345 h100, % "Suspend hotkeys on these windows"
+    Gui, 98: add, Edit, xp+10 yp+20 w325 h70 v_swl, % options.selectSingleNode("SuspWndList").text
 
     _mods:=(_ctrl ? "^" : null)(_alt ? "!" : null)(_shift ? "+" : null)(_win ? "#" : null)
 
@@ -737,26 +738,50 @@ PreferencesGui(){
 
     ; --
     vars:=_ssi:=_sww:=_smm:=_cfu:=_mods:=_mhk:=_ctrl:=_alt:=_shift:=_win:=null ; Clean
+    Gui, 98: show, x165 y36 w350 h245 NoActivate
     }
 
-    ; { ; Code Detection
-    ; Gui, 98: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
-    ; $hwnd98 := WinExist()
-    ; }
+    { ; Code Detection
+    Gui, 97: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
+    $hwnd97 := WinExist()
+
+    Gui, 97: add, GroupBox, x3 y0 w345 h170, % "Info"
+    Gui, 97: add, Text, xp+10 yp+20 w330
+                      , % "CODET attempts to detect AutoHotkey code copied to the clipboard.`n`n"
+                        . "Due to the fact that some AHK keywords can be found in normal text or other "
+                        . "programming languages there can be false detections.`n`n"
+                        . "It allows you to upload the code to a pastebin service like the ones offered by "
+                        . "www.autohotkey.net or www.pastebin.com.`n`n"
+                        . "You can select the minimum amount of keywords to match (the more the more accurate) "
+                        . "and you can also edit the keyword list to add or delete words as you want to fine tune "
+                        . "CODET to match your needs."
+
+    Gui, 97: add, Text, x0 y+20 w360 0x10
+    Gui, 97: add, GroupBox, x3 yp+10 w345 h50, % "General Preferences"
+    
+    _codStat := options.selectSingleNode("//CoDet/@status").text
+    _codAuto := options.selectSingleNode("//CoDet/@auto").text
+    Gui, 97: add, CheckBox, xp+25 yp+20 Checked%_codStat% v_codStat, % "Enable Command Detection"
+    Gui, 97: add, CheckBox, x+10 Checked%_codAuto% v_codAuto, % "Enable Auto Upload"
+    Gui, 97: show, x165 y36 w350 h245 NoActivate
+    }
 
     ; { ; Command Helper
     ; Gui, 98: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
     ; $hwnd98 := WinExist()
+    ; Gui, 98: show, x165 y36 w350 h245 NoActivate
     ; }
 
     ; { ; Live Code
     ; Gui, 98: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
     ; $hwnd98 := WinExist()
+    ; Gui, 98: show, x165 y36 w350 h245 NoActivate
     ; }
 
     ; { ; Screen Tools
     ; Gui, 98: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
     ; $hwnd98 := WinExist()
+    ; Gui, 98: show, x165 y36 w350 h245 NoActivate
     ; }
 
     Gui, 06: add, Text, x165 y+245 w370 0x10
@@ -766,7 +791,6 @@ PreferencesGui(){
 
     Gui, 01: Default
     Gui, 06: show, w520 h330 Hide, % "Preferences"
-    Gui, 98: show, x165 y36 w350 h245 NoActivate
     return
 }
 SnippetGui(){
@@ -967,6 +991,7 @@ SetHotkeys(list=0, $hwnd=0, title=0){
     return
 
     hkcAction:
+        ; Fixes issue with the DDL selecting "BackSpace" instead of "B"
         if RegexMatch(a_thishotkey, "\bB\b")
             Control,Choose,2,, ahk_id %$lhwnd%
         else
@@ -1401,6 +1426,7 @@ GuiHandler(){
 
         if (a_guicontrol = "&Save")
         {
+            ; [General Preferences]{
             ; Startup
             node := options.firstChild                              ; <-- Startup
                 node.setAttribute("ssi", _ssi),node.setAttribute("sww", _sww)
@@ -1439,8 +1465,25 @@ GuiHandler(){
             node := options.childNodes.item[2]                      ; <-- SuspWndList
                 node.text := _swl
             node := null
+            ;}
+            
+            ; [Code Detection]{
+            ; Status
+            options.selectSingleNode("//CoDet/@status").text := _codStat
+            options.selectSingleNode("//CoDet/@auto").text := _codAuto
+            ;}
+            
             conf.transformNodeToObject(xsl, conf)
             conf.save(script.conf), conf.load(script.conf)          ; Save and Load
+            if conf.xml
+                MsgBox, 0x40
+                      , % "Operation Succeded"
+                      , % "Your settings were saved correctly."
+            else
+                MsgBox, 0x10
+                      , % "Operation Failed"
+                      , % "There was a problem while saving the settings.`n"
+                        . "The configuration file could not be reloaded."
             return
         }
 
@@ -1628,8 +1671,10 @@ MenuHandler(stat=0){
             else if tabLast = Live Code
             {
                 if options.selectSingleNode("//@snplib").text
+                {
                     Gui, 01: +Disabled
                     Gui, 07: show
+                }
                 return
             }
         return
@@ -1835,7 +1880,7 @@ ListHandler(sParam=0){
             Gui, %_gui%: submit, NoHide
         }
 
-         if a_guievent = Normal
+        if (a_guievent = "Normal")
         {
             TV_GetText(selPref, a_eventinfo)
             if selPref
@@ -2143,11 +2188,15 @@ prefControl(pref=0){
     if !pref
         return
 
-    if (pref != $P1)
-        Gui, 98: Hide
-
     if (pref = $P1)
         Gui, 98: show, NoActivate
+    else
+        Gui, 98: hide
+        
+    if (pref = $P1C1)
+        Gui, 97: show, NoActivate
+    else
+        Gui, 97: hide
 }
 defConf(path){
     global script
@@ -2458,6 +2507,11 @@ Esc::
 GuiClose:
     ExitApp
                     </Snippet>
+                    <Snippet title="Version Test">
+version := "AHK Version: " a_ahkversion 
+unicode := "Supports Unicode: " `(a_isunicode ? "Yes" : "No"`)
+Msgbox `% version "``n" unicode
+					</Snippet>
 				</Group>
 			</SnippetLib>
     )
@@ -2861,7 +2915,7 @@ splash(img=0){
     WinSet, Transparent, 0
 
     Gui, 99: add, Picture, x0 y0, % img
-    Gui, 99: show, w500 h200
+    Gui, 99: show, w500 h200 NoActivate
 
     Loop, 255
     {
