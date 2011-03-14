@@ -109,10 +109,14 @@ conf := ComObjCreate("MSXML2.DOMDocument"), xsl := ComObjCreate("MSXML2.DOMDocum
 style =
 (
 <!-- Extracted from: http://www.dpawson.co.uk/xsl/sect2/pretty.html (v2) -->
+<!-- Cdata info from: http://www.altova.com/forum/default.aspx?g=posts&t=1000002342 -->
+<!-- Modified By RaptorX -->
 <xsl:stylesheet version="1.0"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-
-<xsl:output method="xml" indent="yes" />
+                
+<xsl:output method="xml" 
+            indent="yes" 
+            encoding="UTF-8"/>
 
 <xsl:template match="*">
    <xsl:copy>
@@ -124,8 +128,8 @@ style =
 <xsl:template match="comment()|processing-instruction()">
    <xsl:copy />
 </xsl:template>
-
 </xsl:stylesheet>
+<!-- I have to keep the indentation here in this file as i want it to be on the XML file -->
 )
 xsl.loadXML(style), style := null
 if !conf.load(script.conf)
@@ -2313,7 +2317,7 @@ defConf(path){
 				<IronAHK/>
 			</RCPaths>
             <SnippetLib current="Example Snippets">
-				<Group name="Example Snippets" count="3">
+				<Group name="Example Snippets" count="4">
                     <Snippet title="Coord Saver">
 /*
 ************************************************************************************
@@ -2511,7 +2515,7 @@ GuiClose:
 version := "AHK Version: " a_ahkversion 
 unicode := "Supports Unicode: " `(a_isunicode ? "Yes" : "No"`)
 Msgbox `% version "``n" unicode
-					</Snippet>
+                	</Snippet>
 				</Group>
 			</SnippetLib>
     )
