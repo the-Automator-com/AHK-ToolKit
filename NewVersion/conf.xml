@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <AHK-Toolkit version="0.5" alwaysontop="0">
 	<Options>
-		<Startup ssi="0" sww="0" smm="0" cfu="0">
+		<Startup ssi="1" sww="0" smm="0" cfu="0">
 		</Startup>
 		<MainKey ctrl="0" alt="0" shift="0" win="1">`</MainKey>
 		<SuspWndList></SuspWndList>
@@ -100,9 +100,9 @@
 		</CMDHelper>
 		<LiveCode linewrap="1" highlighting="1" url="1" symbols="0" snplib="1">
 			<RCPaths current="L-Ansi">
-				<L-Ansi>D:\Program Files\AutoHotkeyA\AutoHotkey.exe</L-Ansi>
-				<L-Unicode>D:\Program Files\AutoHotkeyW\AutoHotkey.exe</L-Unicode>
-				<Basic>D:\Program Files\AutoHotkeyB\AutoHotkey.exe</Basic>
+				<L-Ansi>C:\Program Files\AutoHotkeyA\AutoHotkey.exe</L-Ansi>
+				<L-Unicode>C:\Program Files\AutoHotkeyW\AutoHotkey.exe</L-Unicode>
+				<Basic>C:\Program Files\AutoHotkeyB\AutoHotkey.exe</Basic>
 				<IronAHK>
 				</IronAHK>
 			</RCPaths>
@@ -110,15 +110,15 @@
 				<Group name="Example Snippets" count="4">
 					<Snippet title="Coord Saver">
 /*
-************************************************************************************
-* This script saves X and Y coordinates in a file every time you click.            *
-* Very useful for quickly determining positions on the screen or to record several *
-* x y positions to be parsed later on by a macro which would click those positions *
-* automatically.                                                                   *
-*                                                                                  *
-* Use the Right Mouse button or the Esc key to exit the application.               *
-************************************************************************************
-*/
+ ************************************************************************************
+ * This script saves X and Y coordinates in a file every time you click.            *
+ * Very useful for quickly determining positions on the screen or to record several *
+ * x y positions to be parsed later on by a macro which would click those positions *
+ * automatically.                                                                   *
+ *                                                                                  *
+ * Use the Right Mouse button or the Esc key to exit the application.               *
+ ************************************************************************************
+ */
 
 CoordMode, Mouse, Screen
 s_file := a_desktop . "\coords.txt"         ; Change as desired
@@ -137,17 +137,17 @@ RButton::
                     </Snippet>
 					<Snippet title="Schedule Shutdown">
 /*
-************************************************************************************
-* All Live Code scripts can make use the variables 'sec' 'min' and 'hour'          *
-*                                                                                  *
-* The following script schedules a shutdown on the specified time.                 *
-* Note that we need to divide by 1000 because the shutown command                  *
-* only accepts seconds while our variables return milliseconds.                    *
-*                                                                                  *
-* Also as we are dividing, time would return a decimal number                      *
-* so we need to get rid of the '.000000' before passing it to the shutdown command *
-************************************************************************************
-*/
+ ************************************************************************************
+ * All Live Code scripts can make use the variables 'sec' 'min' and 'hour'          *
+ *                                                                                  *
+ * The following script schedules a shutdown on the specified time.                 *
+ * Note that we need to divide by 1000 because the shutown command                  *
+ * only accepts seconds while our variables return milliseconds.                    *
+ *                                                                                  *
+ * Also as we are dividing, time would return a decimal number                      *
+ * so we need to get rid of the '.000000' before passing it to the shutdown command *
+ ************************************************************************************
+ */
 
 Gui, add, Groupbox,w235 h50, Shutdown in:
 Gui, add, Edit, xp+10 yp+20 w25 vhh
@@ -171,20 +171,21 @@ GuiHandler:
                     </Snippet>
 					<Snippet title="Text Control - Style Ref.">
 /*
-************************************************************************************
-* This Script is just a demostration of the styles that you can apply to           *
-* Text controls.                                                                   *
-*                                                                                  *
-* To apply a style just write the code like this:                                  *
-* Gui, add, Text, [options] [style]                                                *
-* Ex. Gui, add, Text, w50 h50 x20 y25 0x4                                          *
-*                                                                                  *
-* As you can see this opens tons of posibilities in your Gui Creation and with     *
-* enough creativity you can create cool interfaces!                                *
-* Dont limit yourself to the defaults!                                             * *                                                                                  *
-* **Press Esc to close the Aplication                                              *
-************************************************************************************
-*/
+ ************************************************************************************
+ * This Script is just a demostration of the styles that you can apply to           *
+ * Text controls.                                                                   *
+ *                                                                                  *
+ * To apply a style just write the code like this:                                  *
+ * Gui, add, Text, [options] [style]                                                *
+ * Ex. Gui, add, Text, w50 h50 x20 y25 0x4                                          *
+ *                                                                                  *
+ * As you can see this opens tons of posibilities in your Gui Creation and with     *
+ * enough creativity you can create cool interfaces!                                *
+ * Dont limit yourself to the defaults!                                             *
+ *                                                                                  *
+ * **Press Esc to close the Aplication                                              *
+ ************************************************************************************
+ */
 
 ; --[Main]------------------------------------------------------------------------
 
@@ -302,6 +303,16 @@ GuiClose:
     ExitApp
                     </Snippet>
 					<Snippet title="Version Test">
+/*
+ ************************************************************************************
+ * This Script is just a quick way to determine which version of Autohotkey         *
+ * is being used by the Live Code feature.                                          *
+ *                                                                                  *
+ * It is meant as a way of checking that you set up the correct path to a different *
+ * version of Autohotkey and that the program is accessing that path correctly      *
+ ************************************************************************************
+ */
+ 
 version := "AHK Version: " a_ahkversion
 unicode := "Supports Unicode: " (a_isunicode ? "Yes" : "No")
 Msgbox % version "`n" unicode

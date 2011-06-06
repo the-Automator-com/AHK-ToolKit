@@ -38,6 +38,7 @@
  * GUI 06 - Preferences
  * GUI 07 - Add Snippet
  * GUI 08 - About
+ * GUI 97 - Code Detection
  * GUI 98 - General Preferences
  * GUI 99 - Splash Window
  *
@@ -63,21 +64,18 @@ OnExit, Exit
 ;}
 
 ;[Basic Script Info]{
-script              := object()
-
-script.getparams    := "getparams"
-script.update       := "update"
-script.splash       := "splash"
-script.autostart    := "autostart"
-
-script.name         := "AHK-ToolKit"                                            ; Script Name
-script.version      := "0.5"                                                    ; Script Version
-script.author       := "RaptorX"                                                ; Script Author
-script.email        := "graptorx@gmail.com"                                     ; Author's contact email
-script.homepage     := "http://www.autohotkey.com/forum/topic61379.html#376087" ; Script Homepage
-script.crtdate      := "July 11, 2010"                                          ; Script Creation Date
-script.moddate      := "February 24, 2011"                                      ; Script Modification Date
-script.conf         := "conf.xml"                                               ; Configuration file
+script  := {    getparams   : "getparams"
+               ,update      : "update"
+               ,splash      : "splash"
+               ,autostart   : "autostart"
+               ,name        : "AHK-ToolKit"                                            ; Script Name
+               ,version     : "0.5"                                                    ; Script Version
+               ,author      : "RaptorX"                                                ; Script Author
+               ,email       : "graptorx@gmail.com"                                     ; Author's contact email
+               ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087" ; Script Homepage
+               ,crtdate     : "July 11, 2010"                                          ; Script Creation Date
+               ,moddate     : "February 24, 2011"                                      ; Script Modification Date
+               ,conf        : "conf.xml"   }                                           ; Configuration file
 
 script.getparams()
 ;}
@@ -102,7 +100,7 @@ system.mon.left := monLEFT, system.mon.right := monRIGHT, system.mon.top := monT
 system.wa.left := waLEFT, system.wa.right := waRIGHT, system.wa.top := waTOP, system.wa.bottom := waBOTTOM
 ;--
 ; Cleaning
-defBrowser := monLEFT := monRIGHT := monTOP := monBOTTOM := waLEFT := waRIGHT := waTOP := waBOTTOM := null  ; Set all to null
+defBrowser:=monLEFT:=monRIGHT:=monTOP:=monBOTTOM:=waLEFT:=waRIGHT:=waTOP:=waBOTTOM:=null  ; Set all to null
 ;--
 ; Configuration file objects
 conf := ComObjCreate("MSXML2.DOMDocument"), xsl := ComObjCreate("MSXML2.DOMDocument")
@@ -299,64 +297,64 @@ MainMenu(){
     Menu, iexport, add
     Menu, iexport, add, Export Hotkeys/Hotstrings, MenuHandler
 
-    Menu, File, add, &New`t`tCtrl+N, MenuHandler
-    Menu, File, add, &Open`t`tCtrl+O, MenuHandler
-    Menu, File, disable, &Open`t`tCtrl+O
-    Menu, File, add, &Save`t`tCtrl+S, MenuHandler
-    Menu, File, disable, &Save`t`tCtrl+S
-    Menu, File, add, Save As`t`tCtrl+Shift+S, MenuHandler
-    Menu, File, disable, Save As`t`tCtrl+Shift+S
-    Menu, File, add, Close`t`tCtrl+W, MenuHandler
-    Menu, File, disable, Close`t`tCtrl+W
-    Menu, File, add, Close All`t`tCtrl+Shift+W, MenuHandler
-    Menu, File, disable, Close All`t`tCtrl+Shift+W
-    Menu, File, add, Delete`t`tDEL, MenuHandler
+    Menu, File, add, &New`tCtrl+N, MenuHandler
+    Menu, File, add, &Open`tCtrl+O, MenuHandler
+    Menu, File, disable, &Open`tCtrl+O
+    Menu, File, add, &Save`tCtrl+S, MenuHandler
+    Menu, File, disable, &Save`tCtrl+S
+    Menu, File, add, Save As`tCtrl+Shift+S, MenuHandler
+    Menu, File, disable, Save As`tCtrl+Shift+S
+    Menu, File, add, Close`tCtrl+W, MenuHandler
+    Menu, File, disable, Close`tCtrl+W
+    Menu, File, add, Close All`tCtrl+Shift+W, MenuHandler
+    Menu, File, disable, Close All`tCtrl+Shift+W
+    Menu, File, add, Delete`tDEL, MenuHandler
     Menu, File, add
     Menu, File, add, Import/Export, :iexport
     Menu, File, add
     Menu, File, add, Exit, Exit
 
-    Menu, LO, add, Duplicate Line`t`tCtrl+D, MenuHandler
-    Menu, LO, add, Split Lines`t`tCtrl+I, MenuHandler
-    Menu, LO, add, Join Lines`t`tCtrl+J, MenuHandler
-    Menu, LO, add, Move up current Line`t`tCtrl+Shift+Up, MenuHandler
-    Menu, LO, add, Move down current Line`t`tCtrl+Shift+Down, MenuHandler
+    Menu, LO, add, Duplicate Line`tCtrl+D, MenuHandler
+    Menu, LO, add, Split Lines`tCtrl+I, MenuHandler
+    Menu, LO, add, Join Lines`tCtrl+J, MenuHandler
+    Menu, LO, add, Move up current Line`tCtrl+Shift+Up, MenuHandler
+    Menu, LO, add, Move down current Line`tCtrl+Shift+Down, MenuHandler
 
-    Menu, Convert Case,add, Convert to Lowercase`t`tCtrl+U, MenuHandler
-    Menu, Convert Case,add, Convert to Uppercase`t`tCtrl+Shift+U, MenuHandler
+    Menu, Convert Case,add, Convert to Lowercase`tCtrl+U, MenuHandler
+    Menu, Convert Case,add, Convert to Uppercase`tCtrl+Shift+U, MenuHandler
 
-    Menu, Edit, add, Undo`t`tCtrl+Z, MenuHandler
-    Menu, Edit, disable, Undo`t`tCtrl+Z
-    Menu, Edit, add, Redo`t`tCtrl+Y, MenuHandler
-    Menu, Edit, disable, Redo`t`tCtrl+Y
+    Menu, Edit, add, Undo`tCtrl+Z, MenuHandler
+    Menu, Edit, disable, Undo`tCtrl+Z
+    Menu, Edit, add, Redo`tCtrl+Y, MenuHandler
+    Menu, Edit, disable, Redo`tCtrl+Y
     Menu, Edit, add
-    Menu, Edit, add, Cut`t`tCtrl+X, MenuHandler
-    Menu, Edit, add, Copy`t`tCtrl+C, MenuHandler
-    Menu, Edit, add, Paste`t`tCtrl+V, MenuHandler
-    Menu, Edit, add, Select All`t`tCtrl+A, MenuHandler
+    Menu, Edit, add, Cut`tCtrl+X, MenuHandler
+    Menu, Edit, add, Copy`tCtrl+C, MenuHandler
+    Menu, Edit, add, Paste`tCtrl+V, MenuHandler
+    Menu, Edit, add, Select All`tCtrl+A, MenuHandler
     Menu, Edit, add
     Menu, Edit, add, Convert Case, :Convert Case
     Menu, Edit, add, Line Operations, :LO
-    Menu, Edit, add, Trim Trailing Space`t`tCtrl+Space, MenuHandler
+    Menu, Edit, add, Trim Trailing Space`tCtrl+Space, MenuHandler
     Menu, Edit, add
     Menu, Edit, add, Set Read Only, MenuHandler
 
-    Menu, Search, add, Find...`t`tCtrl+F, MenuHandler
-    Menu, Search, add, Find in Files...`t`tCtrl+Shift+F, MenuHandler
-    Menu, Search, add, Find Next...`t`tF3, MenuHandler
-    Menu, Search, add, Find Previous...`t`tShift+F3, MenuHandler
-    Menu, Search, add, Find && Replace`t`tCtrl+H, MenuHandler
-    Menu, Search, add, Go to Line`t`tCtrl+G, MenuHandler
-    Menu, Search, add, Go to Matching Brace`t`tCtrl+B, MenuHandler
-    Menu, Search, disable, Go to Matching Brace`t`tCtrl+B
+    Menu, Search, add, Find...`tCtrl+F, MenuHandler
+    Menu, Search, add, Find in Files...`tCtrl+Shift+F, MenuHandler
+    Menu, Search, add, Find Next...`tF3, MenuHandler
+    Menu, Search, add, Find Previous...`tShift+F3, MenuHandler
+    Menu, Search, add, Find && Replace`tCtrl+H, MenuHandler
+    Menu, Search, add, Go to Line`tCtrl+G, MenuHandler
+    Menu, Search, add, Go to Matching Brace`tCtrl+B, MenuHandler
+    Menu, Search, disable, Go to Matching Brace`tCtrl+B
 
     Menu, Symbols, add, Show Spaces and TAB, MenuHandler
     Menu, Symbols, add, Show End Of Line, MenuHandler
     Menu, Symbols, add, Show All Characters, MenuHandler
 
-    Menu, Zoom, add, Zoom in`t`tCtrl+Numpad +, MenuHandler
-    Menu, Zoom, add, Zoom out`t`tCtrl+Numpad -, MenuHandler
-    Menu, Zoom, add, Default Zoom`t`tCtrl+=, MenuHandler
+    Menu, Zoom, add, Zoom in`tCtrl+Numpad +, MenuHandler
+    Menu, Zoom, add, Zoom out`tCtrl+Numpad -, MenuHandler
+    Menu, Zoom, add, Default Zoom`tCtrl+=, MenuHandler
 
     Menu, View, add, Always On Top, MenuHandler
     Menu, View, add, Snippet Library, MenuHandler
@@ -381,7 +379,7 @@ MainMenu(){
     Menu, Settings, add, Context Menu Options, MenuHandler
     Menu, Settings, disable, Context Menu Options
     Menu, Settings, add
-    Menu, Settings, add, &Preferences`t`tCtrl+P, MenuHandler
+    Menu, Settings, add, &Preferences`tCtrl+P, MenuHandler
 
     Menu, Help, add, Help, MenuHandler
     Menu, Help, disable, Help
@@ -450,12 +448,13 @@ MainGui(){
     ; Needs to be moved to a function
     ; also remember to change the number to be displayed by a variable.
     SB_SetParts(150,150,250,50)
-    SB_SetText("`t0 Hotkeys currently active",1)
-    SB_SetText("`t0 Hotstrings currently active",2)
+    SB_SetText("`t" root.selectSingleNode("//Hotkeys/@count").text " Hotkeys currently active",1)
+    SB_SetText("`t" root.selectSingleNode("//Hotstrings/@count").text " Hotstrings currently active",2)
     SB_SetText("`tv" script.version,4)
 
+    _cnt := root.selectSingleNode("//Hotkeys/@count").text
     Gui, 01: tab, Hotkeys
-    Gui, 01: add, ListView, w780 h315 HWND$hkList Sort Grid AltSubmit gListHandler vhkList
+    Gui, 01: add, ListView, w780 h315 HWND$hkList Count%_cnt% Sort Grid AltSubmit gListHandler vhkList
                           , % "Type|Program Name|Hotkey|Program Path"
     Gui, 01: add, Text, x0 y350 w820 0x10 HWND$hkDelim
 
@@ -465,9 +464,10 @@ MainGui(){
     Gui, 01: add, Button, x+370 yp w75 HWND$hkAdd Default gGuiHandler, % "&Add"
     Gui, 01: add, Button, x+10 yp w75 HWND$hkClose gGuiHandler, % "&Close"
 
+    _cnt := root.selectSingleNode("//Hotstrings/@count").text
     Gui, 01: Tab, Hotstrings
-    Gui, 01: add, ListView, w780 h205 HWND$hsList Grid AltSubmit gListHandler vhsList
-                          , % "Options|Abbreviation|Expand To"
+    Gui, 01: add, ListView, w780 h205 HWND$hsList Count%_cnt% Grid AltSubmit gListHandler vhsList
+                          , % "Type|Options|Abbreviation|Expand To"
     Gui, 01: add, Groupbox, w780 h105 HWND$hsGbox, % "Quick Add"
     Gui, 01: add, Text, xp+100 yp+20 HWND$hsText1, % "Expand:"
     Gui, 01: font, s8 cGray italic, Verdana
@@ -705,10 +705,10 @@ PreferencesGui(){
         _%a_loopfield% := options.selectSingleNode("//@" a_loopfield).text
 
     Gui, 98: add, GroupBox, x3 y0 w345 h70, % "Startup"
-    Gui, 98: add, CheckBox, xp+25 yp+20 Checked%_ssi% v_ssi, % "Show splash image"
-    Gui, 98: add, CheckBox, x+70 Checked%_sww% v_sww, % "Start with Windows"
-    Gui, 98: add, CheckBox, x28 y+10 Checked%_smm% v_smm, % "Start minimized"
-    Gui, 98: add, CheckBox, x+91 Checked%_cfu% v_cfu, % "Check for updates"
+    Gui, 98: add, CheckBox, xp+25 yp+20 Checked%_ssi% v_ssi gGuiHandler, % "Show splash image"
+    Gui, 98: add, CheckBox, x+70 Checked%_sww% v_sww gGuiHandler, % "Start with Windows"
+    Gui, 98: add, CheckBox, x28 y+10 Checked%_smm% v_smm gGuiHandler, % "Start minimized"
+    Gui, 98: add, CheckBox, x+91 Checked%_cfu% v_cfu gGuiHandler, % "Check for updates"
 
     _mhk := options.selectSingleNode("MainKey").text
     vars := "ctrl|alt|shift|win"
@@ -716,11 +716,12 @@ PreferencesGui(){
         _%a_loopfield% := options.selectSingleNode("MainKey/@" a_loopfield).text
 
     Gui, 98: add, GroupBox, x3 y+20 w345 h55, % "Main GUI Hotkey"
-    Gui, 98: add, CheckBox, xp+10 yp+23 Checked%_ctrl% v_ctrl, % "Ctrl"
-    Gui, 98: add, CheckBox, x+10 Checked%_alt% v_alt, % "Alt"
-    Gui, 98: add, CheckBox, x+10 Checked%_shift% v_shift, % "Shift"
-    Gui, 98: add, CheckBox, x+10 Checked%_win% v_win, % "Win"
-    Gui, 98: add, DropDownList, x+10 yp-3 w140 HWND$GP_DDL v_hkddl, % lst:=klist("all^", "mods msb")" None  "
+    Gui, 98: add, CheckBox, xp+10 yp+23 Checked%_ctrl% v_ctrl gGuiHandler, % "Ctrl"
+    Gui, 98: add, CheckBox, x+10 Checked%_alt% v_alt gGuiHandler, % "Alt"
+    Gui, 98: add, CheckBox, x+10 Checked%_shift% v_shift gGuiHandler, % "Shift"
+    Gui, 98: add, CheckBox, x+10 Checked%_win% v_win gGuiHandler, % "Win"
+    Gui, 98: add, DropDownList, x+10 yp-3 w140 HWND$GP_DDL v_hkddl gGuiHandler
+                , % lst:=klist("all^", "mods msb")" None  "
 
     ; Fixes issue with the DDL selecting "BackSpace" instead of "B"
     if RegexMatch(_mhk, "\bB\b")
@@ -731,7 +732,8 @@ PreferencesGui(){
     SetHotkeys(lst,$GP_DDL, "Preferences")
 
     Gui, 98: add, GroupBox, x3 y+26 w345 h100, % "Suspend hotkeys on these windows"
-    Gui, 98: add, Edit, xp+10 yp+20 w325 h70 v_swl, % options.selectSingleNode("SuspWndList").text
+    Gui, 98: add, Edit, xp+10 yp+20 w325 h70 HWND$GP_E1 v_swl gGuiHandler
+                , % options.selectSingleNode("SuspWndList").text
 
     _mods:=(_ctrl ? "^" : null)(_alt ? "!" : null)(_shift ? "+" : null)(_win ? "#" : null)
 
@@ -752,10 +754,10 @@ PreferencesGui(){
     Gui, 97: add, GroupBox, x3 y0 w345 h170, % "Info"
     Gui, 97: add, Text, xp+10 yp+20 w330
                       , % "CODET attempts to detect AutoHotkey code copied to the clipboard.`n`n"
+                        . "Then it allows you to upload the code to a pastebin service like the ones offered by "
+                        . "www.autohotkey.net or www.pastebin.com.`n`n"
                         . "Due to the fact that some AHK keywords can be found in normal text or other "
                         . "programming languages there can be false detections.`n`n"
-                        . "It allows you to upload the code to a pastebin service like the ones offered by "
-                        . "www.autohotkey.net or www.pastebin.com.`n`n"
                         . "You can select the minimum amount of keywords to match (the more the more accurate) "
                         . "and you can also edit the keyword list to add or delete words as you want to fine tune "
                         . "CODET to match your needs."
@@ -765,8 +767,8 @@ PreferencesGui(){
     
     _codStat := options.selectSingleNode("//CoDet/@status").text
     _codAuto := options.selectSingleNode("//CoDet/@auto").text
-    Gui, 97: add, CheckBox, xp+25 yp+20 Checked%_codStat% v_codStat, % "Enable Command Detection"
-    Gui, 97: add, CheckBox, x+10 Checked%_codAuto% v_codAuto, % "Enable Auto Upload"
+    Gui, 97: add, CheckBox, xp+25 yp+20 Checked%_codStat% v_codStat gGuiHandler, % "Enable Command Detection"
+    Gui, 97: add, CheckBox, x+10 Checked%_codAuto% v_codAuto gGuiHandler, % "Enable Auto Upload"
     Gui, 97: show, x165 y36 w350 h245 NoActivate
     }
 
@@ -789,8 +791,9 @@ PreferencesGui(){
     ; }
 
     Gui, 06: add, Text, x165 y+245 w370 0x10
-    Gui, 06: add, Button, xp+190 yp+10 w75 gGuiHandler, % "&Save"
+    Gui, 06: add, Button, xp+105 yp+10 w75 gGuiHandler, % "&OK"
     Gui, 06: add, Button, x+10 w75 gGuiHandler, % "&Close"
+    Gui, 06: add, Button, x+10 w75 HWND$Apply Disabled gGuiHandler, % "&Apply"
 
 
     Gui, 01: Default
@@ -1002,7 +1005,7 @@ SetHotkeys(list=0, $hwnd=0, title=0){
             Control,ChooseString,%a_thishotkey%,, ahk_id %$lhwnd%
     return
 }
-initSci($hwnd, m0=40, m1=10){
+InitSci($hwnd, m0=40, m1=10){
     global conf, script, $Sci1
 
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
@@ -1011,11 +1014,11 @@ initSci($hwnd, m0=40, m1=10){
     else if ($hwnd != $Sci1)
         SCI_SetWrapMode("SC_WRAP_WORD", $hwnd)
 
-    SCI_SetMarginWidthN(0,m0, hwnd),SCI_SetMarginWidthN(1,m1, $hwnd)
+    SCI_SetMarginWidthN(0,m0, $hwnd),SCI_SetMarginWidthN(1,m1, $hwnd)
 
     SCI_StyleSetfont("STYLE_DEFAULT", "Courier New", $hwnd)
     SCI_StyleSetSize("STYLE_DEFAULT", 10, $hwnd)
-    SCI_StyleClearAll(hwnd)
+    SCI_StyleClearAll($hwnd)
 }
 LoadSnpLib(){
     global
@@ -1051,6 +1054,75 @@ GuiReset(guiNum){
     {
         WinActivate, ahk_id %$hwnd1%
     }
+}
+GuiClose(guiNum){
+    global $hwnd1
+    
+    %guiNum%GuiClose:
+    %guiNum%GuiEscape:
+        Gui, %guiNum%: Hide
+        WinActivate, ahk_id %$hwnd1%
+        Gui, 01: -Disabled
+}
+ApplyPref(){
+    global      ; It accesses hotkey variables and others.
+    
+    conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
+    
+    ; [General Preferences]{
+    ; Startup
+    node := options.firstChild                              ; <-- Startup
+        node.setAttribute("ssi", _ssi),node.setAttribute("sww", _sww)
+        node.setAttribute("smm", _smm),node.setAttribute("cfu", _cfu)
+        script.autostart(_sww)                              ; Save or Delete Registry Entry
+
+    ; Main Hotkey
+    node := options.childNodes.item[1]                      ; <-- MainKey
+        ; Load old hotkey
+        _octrl := node.attributes.item[0].text, _oalt := node.attributes.item[1].text
+        _oshift := node.attributes.item[2].text, _owin := node.attributes.item[3].text
+        _mhk := node.text
+
+        { ; Disable Old Hotkey
+        _mods:=(_octrl ? "^" : null)(_oalt ? "!" : null)(_oshift ? "+" : null)(_owin ? "#" : null)
+        if strLen(_mhk) = 1
+            Hotkey, % _mods "`" _mhk, Off
+        else
+            Hotkey, % _mods _mhk, Off
+        }
+
+        ; Load new hotkey
+        node.text := (_hkddl = "None" ? ("``", _win := 1) : _hkddl)
+        node.setAttribute("ctrl", _ctrl), node.setAttribute("alt", _alt)
+        node.setAttribute("shift", _shift), node.setAttribute("win", _win)
+
+        { ; Enable New Hotkey
+        _mods:=(_ctrl ? "^" : null)(_alt ? "!" : null)(_shift ? "+" : null)(_win ? "#" : null)
+        if strLen(_hkddl) = 1
+            Hotkey, % _mods "`" _hkddl, GuiClose
+        else
+            Hotkey, % _mods _hkddl, GuiClose
+        }
+
+    ; Suspend hotkeys on these windows
+    node := options.childNodes.item[2]                      ; <-- SuspWndList
+        node.text := _swl
+    node := null
+    ;}
+    
+    ; [Code Detection]{
+    ; Status
+    options.selectSingleNode("//CoDet/@status").text := _codStat
+    options.selectSingleNode("//CoDet/@auto").text := _codAuto
+    ;}
+    
+    conf.transformNodeToObject(xsl, conf)
+    conf.save(script.conf), conf.load(script.conf)          ; Save and Load
+    if !conf.xml
+        MsgBox, 0x10
+              , % "Operation Failed"
+              , % "There was a problem while saving the settings.`n"
+                . "The configuration file could not be reloaded."
 }
 
 ; Handlers
@@ -1160,10 +1232,26 @@ GuiHandler(){
 
         if (a_guicontrol = "&Add" && tabLast = "Hotstrings")
         {
-            Gui, 01: +Disabled
-            Gui, 03: show
-            ControlFocus,,ahk_id %$Sci3%
-            return
+            if (inStr(hsExpand, "e.g.") || inStr(hsExpandto, "e.g."))
+            {
+                Gui, 01: +Disabled
+                Gui, 03: show
+                ControlFocus,,ahk_id %$Sci3%
+                return
+            }
+            else
+            {
+                Gui, 01: ListView, hsList
+                _hsOpt := (hsAE ? "*" : "") (hsDND ? "B0" : "")
+                       .  (hsTIOW ? "?" : "") (hsSR ? "r" : "")
+                LV_Add("", "", _hsOpt, hsExpand
+                      , strLen(hsExpandTo) > 40 ? subStr(hsExpandTo,1,40) "..." : hsExpandTo)
+                LV_ModifyCol(0,"AutoHdr")
+                
+                node := root.selectSingleNode("//Hotstrings")
+                node.attributes.item[0].text() += 1 
+                conf.save(script.conf), root := options := null         ; Save & Clean
+            }
         }
 
         if (a_guicontrol = "&Run")
@@ -1268,11 +1356,7 @@ GuiHandler(){
 
         if (a_guicontrol = "&Cancel")
         {
-            2GuiClose:
-            2GuiEscape:
-                Gui, 02: Hide
-                WinActivate, ahk_id %$hwnd1%
-                Gui, 01: -Disabled
+            GuiClose(2)
             return
         }
     }
@@ -1285,20 +1369,15 @@ GuiHandler(){
         else
             initSci($Sci3,0,0)
 
-        if a_guicontrol = &Add
+        if (a_guicontrol = "&Add")
         {
             GoSub, GeneralAdd
             return
         }
 
-        if a_guicontrol = &Cancel
+        if (a_guicontrol = "&Cancel")
         {
-
-            3GuiClose:
-            3GuiEscape:
-                Gui, 03: Hide
-                WinActivate, ahk_id %$hwnd1%
-                Gui, 01: -Disabled
+            GuiClose(3)
             return
         }
     }
@@ -1387,11 +1466,7 @@ GuiHandler(){
 
         if (a_guicontrol = "&Cancel")
         {
-            4GuiClose:
-            4GuiEscape:
-                Gui, 04: Hide
-                WinActivate, ahk_id %$hwnd1%
-                Gui, 01: -Disabled
+            GuiClose(4)
             return
         }
     }
@@ -1410,17 +1485,13 @@ GuiHandler(){
 
         if (a_guicontrol = "&Cancel")
         {
-            5GuiClose:
-            5GuiEscape:
-                Gui, 05: Hide
-                WinActivate, ahk_id %$hwnd1%
-                Gui, 01: -Disabled
+            GuiClose(5)
             return
         }
     }
 
     ; Preferences
-    if (a_gui = 06)
+    if (a_gui = 06 || a_gui > 80)
     {
         Loop, 8
         {
@@ -1428,78 +1499,27 @@ GuiHandler(){
             Gui, %_gui%: submit, NoHide
         }
 
-        if (a_guicontrol = "&Save")
+        if (a_guicontrol = "&OK")
         {
-            ; [General Preferences]{
-            ; Startup
-            node := options.firstChild                              ; <-- Startup
-                node.setAttribute("ssi", _ssi),node.setAttribute("sww", _sww)
-                node.setAttribute("smm", _smm),node.setAttribute("cfu", _cfu)
-                script.autostart(_sww)                              ; Save or Delete Registry Entry
-
-            ; Main Hotkey
-            node := options.childNodes.item[1]                      ; <-- MainKey
-                ; Load old hotkey
-                _octrl := node.attributes.item[0].text, _oalt := node.attributes.item[1].text
-                _oshift := node.attributes.item[2].text, _owin := node.attributes.item[3].text
-                _mhk := node.text
-
-                { ; Disable Old Hotkey
-                _mods:=(_octrl ? "^" : null)(_oalt ? "!" : null)(_oshift ? "+" : null)(_owin ? "#" : null)
-                if strLen(_mhk) = 1
-                    Hotkey, % _mods "`" _mhk, Off
-                else
-                    Hotkey, % _mods _mhk, Off
-                }
-
-                ; Load new hotkey
-                node.text := (_hkddl = "None" ? ("``", _win := 1) : _hkddl)
-                node.setAttribute("ctrl", _ctrl), node.setAttribute("alt", _alt)
-                node.setAttribute("shift", _shift), node.setAttribute("win", _win)
-
-                { ; Enable New Hotkey
-                _mods:=(_ctrl ? "^" : null)(_alt ? "!" : null)(_shift ? "+" : null)(_win ? "#" : null)
-                if strLen(_hkddl) = 1
-                    Hotkey, % _mods "`" _hkddl, GuiClose
-                else
-                    Hotkey, % _mods _hkddl, GuiClose
-                }
-
-            ; Suspend hotkeys on these windows
-            node := options.childNodes.item[2]                      ; <-- SuspWndList
-                node.text := _swl
-            node := null
-            ;}
-            
-            ; [Code Detection]{
-            ; Status
-            options.selectSingleNode("//CoDet/@status").text := _codStat
-            options.selectSingleNode("//CoDet/@auto").text := _codAuto
-            ;}
-            
-            conf.transformNodeToObject(xsl, conf)
-            conf.save(script.conf), conf.load(script.conf)          ; Save and Load
-            if conf.xml
-                MsgBox, 0x40
-                      , % "Operation Succeded"
-                      , % "Your settings were saved correctly."
-            else
-                MsgBox, 0x10
-                      , % "Operation Failed"
-                      , % "There was a problem while saving the settings.`n"
-                        . "The configuration file could not be reloaded."
+            ApplyPref(), GuiClose(6)
             return
         }
 
         if (a_guicontrol = "&Close")
         {
-            6GuiClose:
-            6GuiEscape:
-                Gui, 06: Hide
-                WinActivate, ahk_id %$hwnd1%
-                Gui, 01: -Disabled
+            GuiClose(6) ; , GuiReset()
             return
         }
+        
+        if (a_guicontrol = "&Apply")
+        {
+            Control,disable,,,ahk_id %$Apply%
+            ApplyPref()
+            return
+        }
+        
+        ; Any other control would enable the Apply button.
+        Control,enable,,,ahk_id %$Apply%
     }
 
     ; Add Snippet
@@ -1567,7 +1587,7 @@ GuiHandler(){
                 LV_Add("",slTitle)
             }
 
-            node:=_p:=_pc:=_cd:=_editNode:=null                                ; Clean
+            node:=_p:=_pc:=_cd:=_editNode:=null                     ; Clean
             conf.transformNodeToObject(xsl, conf)
             conf.save(script.conf), conf.load(script.conf)          ; Save and Load
             return
@@ -1575,11 +1595,7 @@ GuiHandler(){
 
         if (a_guicontrol = "&Cancel")
         {
-            7GuiClose:
-            7GuiEscape:
-                Gui, 07: Hide
-                WinActivate, ahk_id %$hwnd1%
-                Gui, 01: -Disabled
+            GuiClose(7)
             return
         }
     }
@@ -1589,11 +1605,7 @@ GuiHandler(){
     {
         if (a_guicontrol = "&Close")
         {
-            8GuiClose:
-            8GuiEscape:
-                Gui, 08: Hide
-                WinActivate, ahk_id %$hwnd1%
-                Gui, 01: -Disabled
+            GuiClose(8)
             return
         }
     }
@@ -1621,11 +1633,11 @@ MenuHandler(stat=0){
         Menu, Settings, %stat%, Enable Command Helper
         ; Menu, Settings, %stat%, Context Menu Options
 
-        Menu, File, %stat%, &Open`t`tCtrl+O
-        Menu, File, %stat%, &Save`t`tCtrl+S
-        Menu, File, %stat%, Save As`t`tCtrl+Shift+S
-        ; Menu, File, %stat%, Close`t`tCtrl+W
-        ; Menu, File, %stat%, Close All`t`tCtrl+Shift+W
+        Menu, File, %stat%, &Open`tCtrl+O
+        Menu, File, %stat%, &Save`tCtrl+S
+        Menu, File, %stat%, Save As`tCtrl+Shift+S
+        ; Menu, File, %stat%, Close`tCtrl+W
+        ; Menu, File, %stat%, Close All`tCtrl+Shift+W
         return
     }
 
@@ -1657,7 +1669,7 @@ MenuHandler(stat=0){
     }
 
     ; Main Menu
-    if (a_thismenuitem = "&New`t`tCtrl+N")
+    if (a_thismenuitem = "&New`tCtrl+N")
     {
         Gui_AddNew:
             Gui, 01: Submit, Nohide
@@ -1684,6 +1696,15 @@ MenuHandler(stat=0){
         return
     }
 
+    if (a_thismenuitem = "Delete`tDEL")
+    {
+        if tabLast = Live Code
+        {
+            ListHandler("Delete")
+            return
+        }
+    }
+    
     if (a_thismenuitem = "Import Hotkeys/Hotstrings")
     {
         Gui, 01: +Disabled
@@ -1765,7 +1786,7 @@ MenuHandler(stat=0){
         return
     }
 
-    if (a_thismenuitem = "&Preferences`t`tCtrl+P")
+    if (a_thismenuitem = "&Preferences`tCtrl+P")
     {
         Gui_Preferences:
             Gui, 01: +Disabled
@@ -1991,9 +2012,9 @@ MsgHandler(wParam,lParam, msg, hwnd){
         DllCall("SetCursor","UInt",hCurs)
         Return
     }
-
     if (msg = WM("COMMAND"))
     {
+        
         if lParam in %hSciL%
             return
         if ((wParam&0xFFFF0000)>>16 = 0x0100)   ; EN_SETFOCUS
@@ -2320,15 +2341,15 @@ defConf(path){
 				<Group name="Example Snippets" count="4">
                     <Snippet title="Coord Saver">
 /*
-************************************************************************************
-* This script saves X and Y coordinates in a file every time you click.            *
-* Very useful for quickly determining positions on the screen or to record several *
-* x y positions to be parsed later on by a macro which would click those positions *
-* automatically.                                                                   *
-*                                                                                  *
-* Use the Right Mouse button or the Esc key to exit the application.               *
-************************************************************************************
-*/
+ ************************************************************************************
+ * This script saves X and Y coordinates in a file every time you click.            *
+ * Very useful for quickly determining positions on the screen or to record several *
+ * x y positions to be parsed later on by a macro which would click those positions *
+ * automatically.                                                                   *
+ *                                                                                  *
+ * Use the Right Mouse button or the Esc key to exit the application.               *
+ ************************************************************************************
+ */
 
 CoordMode, Mouse, Screen
 s_file := a_desktop . "\coords.txt"         ; Change as desired
@@ -2347,17 +2368,17 @@ RButton::
                     </Snippet>
 					<Snippet title="Schedule Shutdown">
 /*
-************************************************************************************
-* All Live Code scripts can make use the variables 'sec' 'min' and 'hour'          *
-*                                                                                  *
-* The following script schedules a shutdown on the specified time.                 *
-* Note that we need to divide by 1000 because the shutown command                  *
-* only accepts seconds while our variables return milliseconds.                    *
-*                                                                                  *
-* Also as we are dividing, time would return a decimal number                      *
-* so we need to get rid of the '.000000' before passing it to the shutdown command *
-************************************************************************************
-*/
+ ************************************************************************************
+ * All Live Code scripts can make use the variables 'sec' 'min' and 'hour'          *
+ *                                                                                  *
+ * The following script schedules a shutdown on the specified time.                 *
+ * Note that we need to divide by 1000 because the shutown command                  *
+ * only accepts seconds while our variables return milliseconds.                    *
+ *                                                                                  *
+ * Also as we are dividing, time would return a decimal number                      *
+ * so we need to get rid of the '.000000' before passing it to the shutdown command *
+ ************************************************************************************
+ */
 
 Gui, add, Groupbox,w235 h50, Shutdown in:
 Gui, add, Edit, xp+10 yp+20 w25 vhh
@@ -2381,20 +2402,21 @@ GuiHandler:
                     </Snippet>
 					<Snippet title="Text Control - Style Ref.">
 /*
-************************************************************************************
-* This Script is just a demostration of the styles that you can apply to           *
-* Text controls.                                                                   *
-*                                                                                  *
-* To apply a style just write the code like this:                                  *
-* Gui, add, Text, [options] [style]                                                *
-* Ex. Gui, add, Text, w50 h50 x20 y25 0x4                                          *
-*                                                                                  *
-* As you can see this opens tons of posibilities in your Gui Creation and with     *
-* enough creativity you can create cool interfaces!                                *
-* Dont limit yourself to the defaults!                                             * *                                                                                  *
-* **Press Esc to close the Aplication                                              *
-************************************************************************************
-*/
+ ************************************************************************************
+ * This Script is just a demostration of the styles that you can apply to           *
+ * Text controls.                                                                   *
+ *                                                                                  *
+ * To apply a style just write the code like this:                                  *
+ * Gui, add, Text, [options] [style]                                                *
+ * Ex. Gui, add, Text, w50 h50 x20 y25 0x4                                          *
+ *                                                                                  *
+ * As you can see this opens tons of posibilities in your Gui Creation and with     *
+ * enough creativity you can create cool interfaces!                                *
+ * Dont limit yourself to the defaults!                                             * 
+ *                                                                                  *
+ * **Press Esc to close the Aplication                                              *
+ ************************************************************************************
+ */
 
 ; --[Main]------------------------------------------------------------------------
 
@@ -2512,6 +2534,16 @@ GuiClose:
     ExitApp
                     </Snippet>
                     <Snippet title="Version Test">
+/*
+ ************************************************************************************
+ * This Script is just a quick way to determine which version of Autohotkey         *
+ * is being used by the Live Code feature.                                          *
+ *                                                                                  *
+ * It is meant as a way of checking that you set up the correct path to a different *
+ * version of Autohotkey and that the program is accessing that path correctly      *
+ ************************************************************************************
+ */
+ 
 version := "AHK Version: " a_ahkversion 
 unicode := "Supports Unicode: " `(a_isunicode ? "Yes" : "No"`)
 Msgbox `% version "``n" unicode
