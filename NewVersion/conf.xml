@@ -4,7 +4,8 @@
 		<Startup ssi="1" sww="0" smm="0" cfu="0">
 		</Startup>
 		<MainKey ctrl="0" alt="0" shift="0" win="1">`</MainKey>
-		<SuspWndList></SuspWndList>
+		<SuspWndList>
+		</SuspWndList>
 		<CoDet status="1" auto="0">
 			<Pastebin current="Autohotkey">
 				<AutoHotkey private="0" nick="">http://www.autohotkey.net/paste/</AutoHotkey>
@@ -98,7 +99,7 @@
 			<TagsKey ctrl="1" alt="0" shift="0" win="0">F2</TagsKey>
 			<HelpPath online="0">D:\Program Files\AutoHotkeyA\AutoHotkey.chm</HelpPath>
 		</CMDHelper>
-		<LiveCode linewrap="1" highlighting="1" url="1" symbols="0" snplib="1">
+		<LiveCode linewrap="1" highlighting="1" url="1" symbols="0" snplib="0">
 			<RCPaths current="L-Ansi">
 				<L-Ansi>C:\Program Files\AutoHotkeyA\AutoHotkey.exe</L-Ansi>
 				<L-Unicode>C:\Program Files\AutoHotkeyW\AutoHotkey.exe</L-Unicode>

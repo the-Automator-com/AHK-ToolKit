@@ -6,7 +6,7 @@
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: February 19, 2011
+ * Modification Date: June 08, 2011
  *
  * Description      :
  * ------------------
@@ -68,14 +68,14 @@ script  := {    getparams   : "getparams"
                ,update      : "update"
                ,splash      : "splash"
                ,autostart   : "autostart"
-               ,name        : "AHK-ToolKit"                                            ; Script Name
-               ,version     : "0.5"                                                    ; Script Version
-               ,author      : "RaptorX"                                                ; Script Author
-               ,email       : "graptorx@gmail.com"                                     ; Author's contact email
-               ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087" ; Script Homepage
-               ,crtdate     : "July 11, 2010"                                          ; Script Creation Date
-               ,moddate     : "February 24, 2011"                                      ; Script Modification Date
-               ,conf        : "conf.xml"   }                                           ; Configuration file
+               ,name        : "AHK-ToolKit"                                             ; Script Name
+               ,version     : "0.5"                                                     ; Script Version
+               ,author      : "RaptorX"                                                 ; Script Author
+               ,email       : "graptorx@gmail.com"                                      ; Author's contact email
+               ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"  ; Script Homepage
+               ,crtdate     : "July 11, 2010"                                           ; Script Creation Date
+               ,moddate     : "June 08, 2011"                                           ; Script Modification Date
+               ,conf        : "conf.xml"   }                                            ; Configuration file
 
 script.getparams()
 ;}
@@ -111,9 +111,9 @@ style =
 <!-- Modified By RaptorX -->
 <xsl:stylesheet version="1.0"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-                
-<xsl:output method="xml" 
-            indent="yes" 
+
+<xsl:output method="xml"
+            indent="yes"
             encoding="UTF-8"/>
 
 <xsl:template match="*">
@@ -129,7 +129,7 @@ style =
 </xsl:stylesheet>
 <!-- I have to keep the indentation here in this file as i want it to be on the XML file -->
 )
-xsl.loadXML(style), style := null
+xsl.loadXML(style), style:=null
 if !conf.load(script.conf)
 {
     if FileExist(script.conf)
@@ -243,6 +243,46 @@ Exit:
 
 ;[Functions]{
 ; Gui related functions
+Add(type){
+    global
+    ; stupid ahk fails if i dont reload the freaking xml file in here again... tired of searching for the reason.
+    conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
+
+    if (type = "hotstring")
+    {
+        Gui, 01: Default
+        Gui, 01: ListView, hsList
+        node := root.selectSingleNode("//Hotstrings")
+
+        if node.selectSingleNode("//hs[expand='" hsExpand "']")
+        {
+            Msgbox, 0x124
+                  , % "Hotstring already present"
+                  , % "The hotstring you are trying to create already exist.`n"
+                    . "Do you want to edit the existing hotstring?"
+            return
+        }
+        else
+        {
+            node.attributes.item[0].text() += 1
+                _c := conf.createElement("hs"), _c.setAttribute("iscode", hsIsCode), _c.setAttribute("opts", _hsOpt)
+                    _cc1 := conf.createElement("expand"), _cc1.text() := hsExpand
+                    _cc2 := conf.createElement("expandto"), _cc2.text() := hsExpandTo
+                    _cc3 := conf.createElement("ifwinactive"), _cc3.text() := inStr(hsIfWin, "e.g.") ? "" : hsIfWin
+                    _cc4 := conf.createElement("ifwinnotactive"), _cc4.text() := inStr(hsIfWinN, "e.g.") ? "" : hsIfWinN
+            Loop 4
+                _c.appendChild(_cc%a_index%)
+            node.appendChild(_c)
+
+            LV_Add("", "", _hsOpt, hsExpand
+              , strLen(hsExpandto) > 40 ? subStr(hsExpandto,1,40) "..." : hsExpandto)
+            LV_ModifyCol(0,"AutoHdr")
+        }
+        conf.transformNodeToObject(xsl, conf)
+        conf.save(script.conf), root:=options:=_c:=_cc1:=_cc2:=_cc3:=_cc4:=null         ; Save & Clean
+        return
+    }
+}
 FirstRun(){
     global
 
@@ -439,7 +479,7 @@ MainGui(){
 
     _aot := (root.attributes.item[1].text ? "+" : "-") "AlwaysOnTop"
     Gui, 01: +LastFound +Resize +MinSize %_aot%
-    $hwnd1 := WinExist(), MainMenu(), _aot := null
+    $hwnd1 := WinExist(), MainMenu(), _aot:=null
 
     Gui, 01: menu, MainMenu
     Gui, 01: add, Tab2, x0 y0 w800 h400 HWND$tabcont gGuiHandler vtabLast, % "Hotkeys|Hotstrings|Live Code"
@@ -475,14 +515,16 @@ MainGui(){
     Gui, 01: font
     Gui, 01: add, Text, x+10 yp+3 HWND$hsText2, % "To:"
     Gui, 01: font, s8 cGray italic, Verdana
-    Gui, 01: add, Edit, x+10 yp-3 w250 HWND$hsExpandTo vhsExpandto, % "e.g. by the way"
+    Gui, 01: add, Edit, x+10 yp-3 w250 HWND$hsExpandto vhsExpandto, % "e.g. by the way"
     Gui, 01: font
     Gui, 01: add, Checkbox, x+10 yp+5 HWND$hsCbox1 vhsIsCode, % "Run as Script"
     Gui, 01: add, CheckBox, x112 y+15 HWND$hsCbox2 Checked vhsAE, % "AutoExpand"
     Gui, 01: add, CheckBox, xp+235 yp HWND$hsCbox3 vhsDND, % "Do not delete typed abbreviation"
     Gui, 01: add, CheckBox, x112 y+10 HWND$hsCbox4 vhsTIOW, % "Trigger inside other words"
     Gui, 01: add, CheckBox, xp+235 yp HWND$hsCbox5 vhsSR, % "Send Raw (do not translate {Enter} or {key})"
-
+    
+    Load("HotStrings")
+    
     Gui, 01: add, Text, x0 y350 w820 0x10 HWND$hsDelim
     Gui, 01: font, s8 cGray italic, Verdana
     Gui, 01: add, Edit, x10 yp+10 w250 HWND$QShs vQShs, % "Quick Search"
@@ -499,11 +541,11 @@ MainGui(){
     _current := options.selectSingleNode("//SnippetLib/@current").text
     _cnt := options.selectSingleNode("//Group[@name='" _current "']/@count").text
     Gui, 01: add, ListView
-                , w145 h270 HWND$slList -Hdr -ReadOnly  
+                , w145 h270 HWND$slList -Hdr -ReadOnly
                 . Count%_cnt% AltSubmit Sort Grid %status% gListHandler vslList
                 , % "Title"
 
-    LoadSnpLib()
+    Load("SnpLib")
 
     Gui, 01: add, Text, x0 y350 w820 0x10 HWND$lcDelim
     Gui, 01: font, s8 cGray italic, Verdana
@@ -525,7 +567,7 @@ MainGui(){
     ; I made it so that the window is a little bit below the tab to avoid overlapping
     ; hence the h422.
     Gui, 01: show, w799 h422 %hide%, % "AutoHotkey Toolkit"
-    
+
     return
 }
 AddHKGui(){
@@ -714,6 +756,8 @@ PreferencesGui(){
     vars := "ctrl|alt|shift|win"
     Loop, Parse, vars, |
         _%a_loopfield% := options.selectSingleNode("MainKey/@" a_loopfield).text
+    _mods:=(_ctrl ? "^" : null)(_alt ? "!" : null)(_shift ? "+" : null)(_win ? "#" : null)
+    _mainhotkey := _mods _mhk
 
     Gui, 98: add, GroupBox, x3 y+20 w345 h55, % "Main GUI Hotkey"
     Gui, 98: add, CheckBox, xp+10 yp+23 Checked%_ctrl% v_ctrl gGuiHandler, % "Ctrl"
@@ -734,8 +778,6 @@ PreferencesGui(){
     Gui, 98: add, GroupBox, x3 y+26 w345 h100, % "Suspend hotkeys on these windows"
     Gui, 98: add, Edit, xp+10 yp+20 w325 h70 HWND$GP_E1 v_swl gGuiHandler
                 , % options.selectSingleNode("SuspWndList").text
-
-    _mods:=(_ctrl ? "^" : null)(_alt ? "!" : null)(_shift ? "+" : null)(_win ? "#" : null)
 
     if strLen(_mhk) = 1
         Hotkey, % _mods "`" _mhk, GuiClose
@@ -764,7 +806,7 @@ PreferencesGui(){
 
     Gui, 97: add, Text, x0 y+20 w360 0x10
     Gui, 97: add, GroupBox, x3 yp+10 w345 h50, % "General Preferences"
-    
+
     _codStat := options.selectSingleNode("//CoDet/@status").text
     _codAuto := options.selectSingleNode("//CoDet/@auto").text
     Gui, 97: add, CheckBox, xp+25 yp+20 Checked%_codStat% v_codStat gGuiHandler, % "Enable Command Detection"
@@ -881,7 +923,7 @@ AboutGui(){
 }
 GuiAttach(guiNum){
     global $tabcont,$hkList,$hkDelim,$QShk,$hkAdd,$hkClose,$StatBar,$slTitle,$slDDL,$slList
-         , $hsList,$hsGbox,$hsText1,$hsExpand,$hsText2,$hsExpandTo,$hsCbox1,$hsCbox2,$hsCbox3,$hsCbox4,$hsCbox5
+         , $hsList,$hsGbox,$hsText1,$hsExpand,$hsText2,$hsExpandto,$hsCbox1,$hsCbox2,$hsCbox3,$hsCbox4,$hsCbox5
          , $Sci1,$Sci2,$Sci3,$Sci4,$hsDelim,$QShs,$hsAdd,$hsClose,$lcDelim,$QSlc,$lcRun,$lcClear,$hk2Delim
          , $hk2Add,$hk2Cancel,$hs2GBox,$hs2Delim,$hs2Add,$hsCancel
          , $imList,$imDelim,$imAccept,$imClear,$imCancel,$slGBox,$slDelim,$slAdd,$slCancel
@@ -898,7 +940,7 @@ GuiAttach(guiNum){
         attach($hkAdd, "x y r2"),attach($hkClose, "x y r2")
 
         ; hotstrings Tab
-        c:="$hsText1|$hsExpand|$hsText2|$hsExpandTo|$hsCbox1|$hsCbox2|$hsCbox3|$hsCbox4|$hsCbox5"
+        c:="$hsText1|$hsExpand|$hsText2|$hsExpandto|$hsCbox1|$hsCbox2|$hsCbox3|$hsCbox4|$hsCbox5"
         Loop, Parse, c, |
             attach(%a_loopfield%, "x.5 y r1")
 
@@ -1020,30 +1062,50 @@ InitSci($hwnd, m0=40, m1=10){
     SCI_StyleSetSize("STYLE_DEFAULT", 10, $hwnd)
     SCI_StyleClearAll($hwnd)
 }
-LoadSnpLib(){
+Load(type){
     global
-    
-    LV_Delete()
-    GuiControl,,slDDL,|
-    
-    GuiControl, -Redraw, slList
 
-    conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
-    current := options.selectSingleNode("//SnippetLib/@current").text
-    node := options.selectSingleNode("//Group[@name='" current "']").childNodes
-    Loop, % node.length
-        LV_Add("", node.item[a_index-1].selectSingleNode("@title").text)
-    
-    GuiControl, +Redraw, slList
-    
-    node := options.selectSingleNode("//SnippetLib").childNodes
-    Loop, % node.length
+    if (type = "Hotstrings")
     {
-        _group := node.item[a_index-1].selectSingleNode("@name").text
-        if  (_group = current)
-            GuiControl,,slDDL, %_group%||
-        else
-            GuiControl,,slDDL, %_group%
+        LV_Delete()
+        GuiControl, -Redraw, hsList
+
+        conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
+        node := options.selectSingleNode("//Hotstrings").childNodes
+        Loop, % node.length
+            LV_Add("","", node.item[a_index-1].selectSingleNode("@opts").text
+                        , node.item[a_index-1].selectSingleNode("expand").text
+                        , node.item[a_index-1].selectSingleNode("expandto").text)
+
+        GuiControl, +Redraw, hsList
+        return
+    }
+    
+    if (type = "SnpLib")
+    {
+        LV_Delete()
+        GuiControl,,slDDL,|
+
+        GuiControl, -Redraw, slList
+
+        conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
+        current := options.selectSingleNode("//SnippetLib/@current").text
+        node := options.selectSingleNode("//Group[@name='" current "']").childNodes
+        Loop, % node.length
+            LV_Add("", node.item[a_index-1].selectSingleNode("@title").text)
+
+        GuiControl, +Redraw, slList
+
+        node := options.selectSingleNode("//SnippetLib").childNodes
+        Loop, % node.length
+        {
+            _group := node.item[a_index-1].selectSingleNode("@name").text
+            if  (_group = current)
+                GuiControl,,slDDL, %_group%||
+            else
+                GuiControl,,slDDL, %_group%
+        }
+        return
     }
 }
 GuiReset(guiNum){
@@ -1057,18 +1119,16 @@ GuiReset(guiNum){
 }
 GuiClose(guiNum){
     global $hwnd1
-    
-    %guiNum%GuiClose:
-    %guiNum%GuiEscape:
-        Gui, %guiNum%: Hide
-        WinActivate, ahk_id %$hwnd1%
-        Gui, 01: -Disabled
+
+    Gui, %guiNum%: Hide
+    WinActivate, ahk_id %$hwnd1%
+    Gui, 01: -Disabled
 }
 ApplyPref(){
     global      ; It accesses hotkey variables and others.
-    
+
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
-    
+
     ; [General Preferences]{
     ; Startup
     node := options.firstChild                              ; <-- Startup
@@ -1109,13 +1169,13 @@ ApplyPref(){
         node.text := _swl
     node := null
     ;}
-    
+
     ; [Code Detection]{
     ; Status
     options.selectSingleNode("//CoDet/@status").text := _codStat
     options.selectSingleNode("//CoDet/@auto").text := _codAuto
     ;}
-    
+
     conf.transformNodeToObject(xsl, conf)
     conf.save(script.conf), conf.load(script.conf)          ; Save and Load
     if !conf.xml
@@ -1152,10 +1212,10 @@ GuiHandler(){
             slControls:=$slTitle "|" $slDDL "|" $slList
             MenuHandler(tabLast = "Live Code" ? "enable" : "disable")
             Control,%action%,,,ahk_id %$Sci1%
-            
+
             if action = show
                 ControlFocus,,ahk_id %$Sci1%
-            
+
             if options.selectSingleNode("//@snplib").text
             {
                 Loop, Parse, slControls, |
@@ -1200,7 +1260,7 @@ GuiHandler(){
                 node.setAttribute("altdrag", _est),node.setAttribute("prtscr", _est)
             node := null
 
-            conf.save(script.conf), root := options := null         ; Save & Clean
+            conf.save(script.conf), root:=options:=null             ; Save & Clean
 
             Gui, destroy
             Pause                                                   ; UnPause
@@ -1213,7 +1273,7 @@ GuiHandler(){
             node := options.selectSingleNode("//Group[@name='" slDDL "']").childNodes
 
             GuiControl, -Redraw, slList
-            
+
             LV_Delete()
             Loop, % node.length
                 LV_Add("", node.item[a_index-1].selectSingleNode("@title").text)
@@ -1241,16 +1301,10 @@ GuiHandler(){
             }
             else
             {
-                Gui, 01: ListView, hsList
                 _hsOpt := (hsAE ? "*" : "") (hsDND ? "B0" : "")
-                       .  (hsTIOW ? "?" : "") (hsSR ? "r" : "")
-                LV_Add("", "", _hsOpt, hsExpand
-                      , strLen(hsExpandTo) > 40 ? subStr(hsExpandTo,1,40) "..." : hsExpandTo)
-                LV_ModifyCol(0,"AutoHdr")
-                
-                node := root.selectSingleNode("//Hotstrings")
-                node.attributes.item[0].text() += 1 
-                conf.save(script.conf), root := options := null         ; Save & Clean
+                       .  (hsTIOW ? "?" : "") (hsSR ? "R" : "")
+                Add("hotstring")
+                return
             }
         }
 
@@ -1316,8 +1370,14 @@ GuiHandler(){
         {
             GuiClose:
             GuiEscape:
+                /*
+                    Bring the window forward with hotkey if it doesnt have focus.
+                    Fixed the issue with losing focus when clicking the tray icon
+                    preventing the normal hide/show behaviour by clicking the icon by
+                    checking the time passed since last hotkey press.
+                */
                 WinGet, winstat, MinMax, ahk_id %$hwnd1%
-                if (!WinActive("ahk_id " $hwnd1) && (winstat != ""))
+                if (!WinActive("ahk_id " $hwnd1) && (winstat != "") && A_TimeSinceThisHotkey < 100)
                 {
                     WinActivate, ahk_id %$hwnd1%
                     return
@@ -1356,7 +1416,9 @@ GuiHandler(){
 
         if (a_guicontrol = "&Cancel")
         {
-            GuiClose(2)
+            2GuiClose:
+            2GuiEscape:
+                GuiClose(2)
             return
         }
     }
@@ -1371,13 +1433,21 @@ GuiHandler(){
 
         if (a_guicontrol = "&Add")
         {
-            GoSub, GeneralAdd
+            hsExpand := hs2Expand, SCI_GetText(SCI_GetLength($Sci3)+1,hsExpandTo), hsIsCode := hs2IsCode, _hsOpt := hsOpt
+            add("hotstring")
+
+            Gui, %a_gui%: Submit
+            WinActivate, ahk_id %$hwnd1%
+            Gui, 01: -Disabled
+
             return
         }
 
         if (a_guicontrol = "&Cancel")
         {
-            GuiClose(3)
+            3GuiClose:
+            3GuiEscape:
+                GuiClose(3)
             return
         }
     }
@@ -1466,7 +1536,9 @@ GuiHandler(){
 
         if (a_guicontrol = "&Cancel")
         {
-            GuiClose(4)
+            4GuiClose:
+            4GuiEscape:
+                GuiClose(4)
             return
         }
     }
@@ -1485,7 +1557,9 @@ GuiHandler(){
 
         if (a_guicontrol = "&Cancel")
         {
-            GuiClose(5)
+            5GuiClose:
+            5GuiEscape:
+                GuiClose(5)
             return
         }
     }
@@ -1507,17 +1581,19 @@ GuiHandler(){
 
         if (a_guicontrol = "&Close")
         {
-            GuiClose(6) ; , GuiReset()
+            6GuiClose:
+            6GuiEscape:
+                GuiClose(6) ; , GuiReset()
             return
         }
-        
+
         if (a_guicontrol = "&Apply")
         {
             Control,disable,,,ahk_id %$Apply%
             ApplyPref()
             return
         }
-        
+
         ; Any other control would enable the Apply button.
         Control,enable,,,ahk_id %$Apply%
     }
@@ -1544,14 +1620,14 @@ GuiHandler(){
                 _groupNode :=  options.selectSingleNode("//Group[@name='" _current "']")    ; Select correct Group
                 _editNode := _groupNode.selectSingleNode("Snippet[@title='" _seltxt "']")
                 _editNode.setAttribute("title", slTitle), _editNode.text := _snip
-                
-                LV_Delete()                
+
+                LV_Delete()
                 GuiControl, -Redraw, slList
-                
+
                 node := options.selectSingleNode("//Group[@name='" slGroup "']").childNodes
                 Loop, % node.length
                     LV_Add("", node.item[a_index-1].selectSingleNode("@title").text)
-                
+
                 GuiControl, +Redraw, slList
             }
             else if (_groupExist)
@@ -1595,7 +1671,9 @@ GuiHandler(){
 
         if (a_guicontrol = "&Cancel")
         {
-            GuiClose(7)
+            7GuiClose:
+            7GuiEscape:
+                GuiClose(7)
             return
         }
     }
@@ -1605,7 +1683,9 @@ GuiHandler(){
     {
         if (a_guicontrol = "&Close")
         {
-            GuiClose(8)
+            8GuiClose:
+            8GuiEscape:
+                GuiClose(8)
             return
         }
     }
@@ -1654,7 +1734,7 @@ MenuHandler(stat=0){
         ListHandler(a_thismenuitem)
         return
     }
-    
+
     if (a_thismenuitem = "Rename")
     {
         Send, {F2}
@@ -1704,7 +1784,7 @@ MenuHandler(stat=0){
             return
         }
     }
-    
+
     if (a_thismenuitem = "Import Hotkeys/Hotstrings")
     {
         Gui, 01: +Disabled
@@ -1740,7 +1820,7 @@ MenuHandler(stat=0){
     {
         slControls:=$slTitle "|" $slDDL "|" $slList
         Menu, View, ToggleCheck, %a_thismenuitem%
-        
+
         if tog_sl := !tog_sl
         {
             ControlMove,,,, % _guiwidth - 160,, ahk_id %$Sci1%
@@ -1824,12 +1904,12 @@ ListHandler(sParam=0){
         GuiControl,07:,slTitle, %_seltxt%
         GuiControl,07: ChooseString,slGroup, %_current%
         SCI_SetText(_editNode.text,$Sci4)
-        
+
         Gui, 01: +Disable
         Gui, 07: Show
         return
     }
-    
+
     if (sParam = "Delete")
     {
         _current := options.selectSingleNode("//SnippetLib/@current").text
@@ -1872,10 +1952,10 @@ ListHandler(sParam=0){
 
                 node := options.selectSingleNode("//Group[@name='" _current "']").childNodes
                 GuiControl, -Redraw, slList
-                
+
                 Loop, % node.length
                     LV_Add("", node.item[a_index-1].selectSingleNode("@title").text)
-                
+
                 GuiControl, +Redraw, slList
             }
         }
@@ -1970,7 +2050,7 @@ ListHandler(sParam=0){
         if (a_guievent = "E" || sParam = "Rename")
         {
             Send, {Delete}                      ; Needed because we cannot append with the input command.
-            
+
             ; Need this hotkey to be able to cancel the renaming process cleanly
             ; by clicking.
             Hotkey, *LButton, CancelInput, On   ; Using On to enable if it is disabled by label below.
@@ -2001,7 +2081,7 @@ MsgHandler(wParam,lParam, msg, hwnd){
     static
     hCurs:=DllCall("LoadCursor","UInt",0,"Int",32649,"UInt") ;IDC_HAND
     global cList1,hList1,cList2,hList2,cList3,hList3,$QShk,$QShs,$QSlc,$Sci1,$Sci2,$Sci3
-         , $hsOpt,$hsExpand,$hs2Expand,$hsExpandTo,$hkIfWin,$hkIfWinN,$hsIfWin,$hsIfWinN
+         , $hsOpt,$hsExpand,$hs2Expand,$hsExpandto,$hkIfWin,$hkIfWinN,$hsIfWin,$hsIfWinN
          , $GP_E1, $GP_DDL
          , hSciL:=$Sci1 "," $Sci2 "," $Sci3
 
@@ -2014,7 +2094,7 @@ MsgHandler(wParam,lParam, msg, hwnd){
     }
     if (msg = WM("COMMAND"))
     {
-        
+
         if lParam in %hSciL%
             return
         if ((wParam&0xFFFF0000)>>16 = 0x0100)   ; EN_SETFOCUS
@@ -2071,7 +2151,7 @@ MsgHandler(wParam,lParam, msg, hwnd){
                 if (lParam = $hsExpand || lParam = $hs2Expand)
                     ControlSetText,, % "e.g. btw", ahk_id %lParam%
 
-                if (lParam = $hsExpandTo)
+                if (lParam = $hsExpandto)
                     ControlSetText,, % "e.g. by the way", ahk_id %lParam%
 
                 if (lParam = $hkIfWin || lParam = $hsIfWin)
@@ -2121,7 +2201,7 @@ hotExtract(file, path, isAccept=0){
               , % "You must select what to import my friend.`nEither hotkeys, hotstrings or both."
         return 0
     }
-    
+
     GuiControl, -Redraw, imList
     Loop, Parse, file, `n,`r
     {
@@ -2217,7 +2297,7 @@ prefControl(pref=0){
         Gui, 98: show, NoActivate
     else
         Gui, 98: hide
-        
+
     if (pref = $P1C1)
         Gui, 97: show, NoActivate
     else
@@ -2412,7 +2492,7 @@ GuiHandler:
  *                                                                                  *
  * As you can see this opens tons of posibilities in your Gui Creation and with     *
  * enough creativity you can create cool interfaces!                                *
- * Dont limit yourself to the defaults!                                             * 
+ * Dont limit yourself to the defaults!                                             *
  *                                                                                  *
  * **Press Esc to close the Aplication                                              *
  ************************************************************************************
@@ -2543,8 +2623,8 @@ GuiClose:
  * version of Autohotkey and that the program is accessing that path correctly      *
  ************************************************************************************
  */
- 
-version := "AHK Version: " a_ahkversion 
+
+version := "AHK Version: " a_ahkversion
 unicode := "Supports Unicode: " `(a_isunicode ? "Yes" : "No"`)
 Msgbox `% version "``n" unicode
                 	</Snippet>
@@ -2711,7 +2791,7 @@ Msgbox `% version "``n" unicode
     )
     FileDelete, %path%
     Sleep, 500
-    
+
     ; Appending tabs because AutoHotkey deletes them at the beginning of the continuation section.
     FileAppend, %template%`n`t`t%template2%`n`t`t`t%template3%`n`t`t`t%template4%, %path%, UTF-8
     return ErrorLevel
