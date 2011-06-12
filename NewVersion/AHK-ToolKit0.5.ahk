@@ -248,24 +248,75 @@ Add(type){
     ; stupid ahk fails if i dont reload the freaking xml file in here again... tired of searching for the reason.
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
 
+    ; if (type = "hotkey")
+    ; {
+        ; Gui, 01: Default
+        ; Gui, 01: ListView, hkList
+        ; node := root.selectSingleNode("//Hotkeys")
+
+        ; if node.selectSingleNode("//hs[expand='" hsExpand "']")
+        ; {
+            ; Msgbox, 0x124
+                  ; , % "Hotstring already present"
+                  ; , % "The hotstring you are trying to create already exist.`n"
+                    ; . "Do you want to edit the existing hotstring?"
+            ; return
+        ; }
+        ; else
+        ; {
+            ; node.attributes.item[0].text() += 1
+                ; _c := conf.createElement("hs"), _c.setAttribute("iscode", hsIsCode), _c.setAttribute("opts", _hsOpt)
+                    ; _cc1 := conf.createElement("expand"), _cc1.text() := hsExpand
+                    ; _cc2 := conf.createElement("expandto"), _cc2.text() := hsExpandTo
+                    ; _cc3 := conf.createElement("ifwinactive"), _cc3.text() := inStr(hsIfWin, "e.g.") ? "" : hsIfWin
+                    ; _cc4 := conf.createElement("ifwinnotactive"), _cc4.text() := inStr(hsIfWinN, "e.g.") ? "" : hsIfWinN
+            ; Loop 4
+                ; _c.appendChild(_cc%a_index%)
+            ; node.appendChild(_c)
+
+            ; LV_Add("", "", _hsOpt, hsExpand
+              ; , strLen(hsExpandto) > 40 ? subStr(hsExpandto,1,40) "..." : hsExpandto)
+            ; LV_ModifyCol(0,"AutoHdr")
+        ; }
+        ; conf.transformNodeToObject(xsl, conf)
+        ; conf.save(script.conf), conf.load(script.conf) root:=options:=_c:=_cc1:=_cc2:=_cc3:=_cc4:=null
+        ; return
+    ; }
+    
     if (type = "hotstring")
     {
         Gui, 01: Default
         Gui, 01: ListView, hsList
         node := root.selectSingleNode("//Hotstrings")
 
-        if node.selectSingleNode("//hs[expand='" hsExpand "']")
+        if (node.selectSingleNode("//hs[expand='" hsExpand "']"))
         {
             Msgbox, 0x124
                   , % "Hotstring already present"
                   , % "The hotstring you are trying to create already exist.`n"
                     . "Do you want to edit the existing hotstring?"
+            
+            if editingHS
+            {
+                editingHS := False, SCI_GetText(SCI_GetLength($Sci3)+1,hsExpandTo)
+                currNode := node.selectSingleNode("//hs[expand='" hsExpand "']")
+                currNode.attributes.getNamedItem("iscode").value := hs2IsCode
+                currNode.attributes.getNamedItem("opts").value := hsOpt
+                currNode.selectSingleNode("./expand").text := hs2Expand
+                currNode.selectSingleNode("./expandto").text := hsExpandTo
+                currNode.selectSingleNode("./ifwinactive").text := inStr(hsIfWin, "e.g.") ? "" : hsIfWin
+                currNode.selectSingleNode("./ifwinnotactive").text := inStr(hsIfWinN, "e.g.") ? "" : hsIfWinN
+            }
+            
+            conf.transformNodeToObject(xsl, conf), updateSB()
+            conf.save(script.conf), conf.load(script.conf) root:=options:=_c:=_cc1:=_cc2:=_cc3:=_cc4:=null
+            Load("Hotstrings")
             return
         }
         else
         {
             node.attributes.item[0].text() += 1
-                _c := conf.createElement("hs"), _c.setAttribute("iscode", hsIsCode), _c.setAttribute("opts", _hsOpt)
+                _c := conf.createElement("hs"), _c.setAttribute("iscode", hsIsCode), _c.setAttribute("opts", hsOpt)
                     _cc1 := conf.createElement("expand"), _cc1.text() := hsExpand
                     _cc2 := conf.createElement("expandto"), _cc2.text() := hsExpandTo
                     _cc3 := conf.createElement("ifwinactive"), _cc3.text() := inStr(hsIfWin, "e.g.") ? "" : hsIfWin
@@ -274,12 +325,12 @@ Add(type){
                 _c.appendChild(_cc%a_index%)
             node.appendChild(_c)
 
-            LV_Add("", "", _hsOpt, hsExpand
+            LV_Add("", "", hsOpt, hsExpand
               , strLen(hsExpandto) > 40 ? subStr(hsExpandto,1,40) "..." : hsExpandto)
             LV_ModifyCol(0,"AutoHdr")
         }
-        conf.transformNodeToObject(xsl, conf)
-        conf.save(script.conf), root:=options:=_c:=_cc1:=_cc2:=_cc3:=_cc4:=null         ; Save & Clean
+        conf.transformNodeToObject(xsl, conf), updateSB()
+        conf.save(script.conf), conf.load(script.conf) root:=options:=_c:=_cc1:=_cc2:=_cc3:=_cc4:=null
         return
     }
 }
@@ -485,21 +536,20 @@ MainGui(){
     Gui, 01: add, Tab2, x0 y0 w800 h400 HWND$tabcont gGuiHandler vtabLast, % "Hotkeys|Hotstrings|Live Code"
     Gui, 01: add, StatusBar, HWND$StatBar
 
-    ; Needs to be moved to a function
-    ; also remember to change the number to be displayed by a variable.
-    SB_SetParts(150,150,250,50)
-    SB_SetText("`t" root.selectSingleNode("//Hotkeys/@count").text " Hotkeys currently active",1)
-    SB_SetText("`t" root.selectSingleNode("//Hotstrings/@count").text " Hotstrings currently active",2)
-    SB_SetText("`tv" script.version,4)
+    updateSB()
 
     _cnt := root.selectSingleNode("//Hotkeys/@count").text
     Gui, 01: tab, Hotkeys
     Gui, 01: add, ListView, w780 h315 HWND$hkList Count%_cnt% Sort Grid AltSubmit gListHandler vhkList
                           , % "Type|Program Name|Hotkey|Program Path"
+    Gui, 01: add, ListView, w780 h315 xp yp HWND$shkList Count%_cnt% Sort Grid AltSubmit gListHandler vshkList
+                          , % "Type|Program Name|Hotkey|Program Path"
+    
+    Load("Hotkeys")
+    
     Gui, 01: add, Text, x0 y350 w820 0x10 HWND$hkDelim
-
     Gui, 01: font, s8 cGray italic, Verdana
-    Gui, 01: add, Edit, x10 yp+10 w250 HWND$QShk vQShk, % "Quick Search"
+    Gui, 01: add, Edit, x10 yp+10 w250 HWND$QShk gGuiHandler vQShk, % "Quick Search"
     Gui, 01: font
     Gui, 01: add, Button, x+370 yp w75 HWND$hkAdd Default gGuiHandler, % "&Add"
     Gui, 01: add, Button, x+10 yp w75 HWND$hkClose gGuiHandler, % "&Close"
@@ -507,6 +557,8 @@ MainGui(){
     _cnt := root.selectSingleNode("//Hotstrings/@count").text
     Gui, 01: Tab, Hotstrings
     Gui, 01: add, ListView, w780 h205 HWND$hsList Count%_cnt% Grid AltSubmit gListHandler vhsList
+                          , % "Type|Options|Abbreviation|Expand To"
+    Gui, 01: add, ListView, w780 h205 xp yp HWND$shsList Count%_cnt% Grid AltSubmit gListHandler vshsList
                           , % "Type|Options|Abbreviation|Expand To"
     Gui, 01: add, Groupbox, w780 h105 HWND$hsGbox, % "Quick Add"
     Gui, 01: add, Text, xp+100 yp+20 HWND$hsText1, % "Expand:"
@@ -527,7 +579,7 @@ MainGui(){
     
     Gui, 01: add, Text, x0 y350 w820 0x10 HWND$hsDelim
     Gui, 01: font, s8 cGray italic, Verdana
-    Gui, 01: add, Edit, x10 yp+10 w250 HWND$QShs vQShs, % "Quick Search"
+    Gui, 01: add, Edit, x10 yp+10 w250 HWND$QShs gGuiHandler vQShs, % "Quick Search"
     Gui, 01: font
     Gui, 01: add, Button, x+370 yp w75 HWND$hsAdd Default gGuiHandler, % "&Add"
     Gui, 01: add, Button, x+10 yp w75 HWND$hsClose gGuiHandler, % "&Close"
@@ -549,7 +601,7 @@ MainGui(){
 
     Gui, 01: add, Text, x0 y350 w820 0x10 HWND$lcDelim
     Gui, 01: font, s8 cGray italic, Verdana
-    Gui, 01: add, Edit, x10 yp+10 w250 HWND$QSlc vQSlc, % "Quick Search"
+    Gui, 01: add, Edit, x10 yp+10 w250 HWND$QSlc gGuiHandler vQSlc, % "Quick Search"
     Gui, 01: font
     Gui, 01: add, Button, x+370 yp w75 HWND$lcRun gGuiHandler, % "&Run"
     Gui, 01: add, Button, x+10 yp w75 HWND$lcClear gGuiHandler, % "&Clear"
@@ -1065,6 +1117,23 @@ InitSci($hwnd, m0=40, m1=10){
 Load(type){
     global
 
+    
+    ; if (type = "Hotkeys")
+    ; {
+        ; LV_Delete()
+        ; GuiControl, -Redraw, hsList
+
+        ; conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
+        ; node := options.selectSingleNode("//Hotstrings").childNodes
+        ; Loop, % node.length
+            ; LV_Add("","", node.item[a_index-1].selectSingleNode("@opts").text
+                        ; , node.item[a_index-1].selectSingleNode("expand").text
+                        ; , node.item[a_index-1].selectSingleNode("expandto").text)
+
+        ; GuiControl, +Redraw, hsList
+        ; return
+    ; }
+    
     if (type = "Hotstrings")
     {
         LV_Delete()
@@ -1260,7 +1329,8 @@ GuiHandler(){
                 node.setAttribute("altdrag", _est),node.setAttribute("prtscr", _est)
             node := null
 
-            conf.save(script.conf), root:=options:=null             ; Save & Clean
+            conf.transformNodeToObject(xsl, conf)
+            conf.save(script.conf), conf.load(script.conf), root:=options:=null             ; Save & Clean
 
             Gui, destroy
             Pause                                                   ; UnPause
@@ -1279,6 +1349,7 @@ GuiHandler(){
                 LV_Add("", node.item[a_index-1].selectSingleNode("@title").text)
 
             GuiControl, +Redraw, slList
+            conf.transformNodeToObject(xsl, conf)
             conf.save(script.conf), conf.load(script.conf)          ; Save and Load
             return
         }
@@ -1301,8 +1372,8 @@ GuiHandler(){
             }
             else
             {
-                _hsOpt := (hsAE ? "*" : "") (hsDND ? "B0" : "")
-                       .  (hsTIOW ? "?" : "") (hsSR ? "R" : "")
+                hsOpt := (hsAE ? "*" : "") (hsDND ? "B0" : "")
+                      .  (hsTIOW ? "?" : "") (hsSR ? "R" : "")
                 Add("hotstring")
                 return
             }
@@ -1377,12 +1448,12 @@ GuiHandler(){
                     checking the time passed since last hotkey press.
                 */
                 WinGet, winstat, MinMax, ahk_id %$hwnd1%
-                if (!WinActive("ahk_id " $hwnd1) && (winstat != "") && A_TimeSinceThisHotkey < 100)
+                if (!WinActive("ahk_id " $hwnd1) && (winstat != "") 
+                && (A_TimeSinceThisHotkey < 100 && A_TimeSinceThisHotkey != -1))
                 {
                     WinActivate, ahk_id %$hwnd1%
                     return
                 }
-
                 if main_toggle := !main_toggle
                     Gui, 01: show
                 else
@@ -1410,7 +1481,7 @@ GuiHandler(){
 
         if (a_guicontrol = "&Add")
         {
-            GoSub, GeneralAdd
+            Add("hotkey")
             return
         }
 
@@ -1433,7 +1504,15 @@ GuiHandler(){
 
         if (a_guicontrol = "&Add")
         {
-            hsExpand := hs2Expand, SCI_GetText(SCI_GetLength($Sci3)+1,hsExpandTo), hsIsCode := hs2IsCode, _hsOpt := hsOpt
+            if inStr(hs2Expand, "e.g.")
+            {
+                Msgbox, 0x10
+                      , % "Error while trying to create new Hotstring"
+                      , % "Please type in the abbreviation that you want to expand"
+                return
+            }
+            
+            hsExpand:=hs2Expand,SCI_GetText(SCI_GetLength($Sci3)+1,hsExpandTo),hsIsCode:=hs2IsCode
             add("hotstring")
 
             Gui, %a_gui%: Submit
@@ -1812,6 +1891,7 @@ MenuHandler(stat=0){
         alwaysontop := ((tog_aot := !tog_aot) ? "+" : "-") "AlwaysOnTop"
         Gui, %a_gui%: %alwaysontop%
         root.setAttribute("alwaysontop", tog_aot)
+        conf.transformNodeToObject(xsl, conf)
         conf.save(script.conf), conf.load(script.conf)          ; Save and Load
         return
     }
@@ -1837,6 +1917,7 @@ MenuHandler(stat=0){
         }
 
         options.selectSingleNode("//@snplib").text := tog_sl
+        conf.transformNodeToObject(xsl, conf)
         conf.save(script.conf), conf.load(script.conf)          ; Save and Load
         return
     }
@@ -1846,6 +1927,7 @@ MenuHandler(stat=0){
         Menu, View, ToggleCheck, %a_thismenuitem%
         SCI_SetWrapMode(tog_lw := !tog_lw, $Sci1)
         options.selectSingleNode("//@linewrap").text := tog_lw
+        conf.transformNodeToObject(xsl, conf)
         conf.save(script.conf), conf.load(script.conf)          ; Save and Load
         return
     }
@@ -1855,6 +1937,7 @@ MenuHandler(stat=0){
         Menu, Settings, ToggleCheck, %a_thismenuitem%
         ; cmdHelper(tog_ech := !tog_ech)
         options.selectSingleNode("//@sci").text := !tog_ech
+        conf.transformNodeToObject(xsl, conf)
         conf.save(script.conf), conf.load(script.conf)          ; Save and Load
         return
     }
@@ -1959,6 +2042,7 @@ ListHandler(sParam=0){
                 GuiControl, +Redraw, slList
             }
         }
+        conf.transformNodeToObject(xsl, conf)
         conf.save(script.conf), conf.load(script.conf)          ; Save and Load
         return
     }
@@ -1997,23 +2081,67 @@ ListHandler(sParam=0){
 
     if (a_guicontrol = "hkList")
     {
-        if (a_guievent = "DoubleClick" && !_selrow)
+        if (a_guievent = "DoubleClick")
         {
-            LV_Modify(0,"-Select"),LV_Modify(0,"-Focus")
-            Gui, 01: +Disabled
-            Gui, 02: show
-            return
+            if !_selrow
+            {
+                LV_Modify(0,"-Select"),LV_Modify(0,"-Focus")
+                Gui, 01: +Disabled
+                Gui, 02: show
+                return
+            }
         }
     }
 
     if (a_guicontrol = "hsList")
     {
-        if (a_guievent = "DoubleClick" && !_selrow)
+        if (a_guievent = "DoubleClick")
         {
-            LV_Modify(0,"-Select"),LV_Modify(0,"-Focus")
-            Gui, 01: +Disabled
+            if !_selrow
+            {
+                LV_Modify(0,"-Select"),LV_Modify(0,"-Focus")
+                Gui, 01: +Disabled
+                Gui, 03: show
+                ControlFocus,,ahk_id %$Sci3%
+                return
+            }
+            editingHS := True
+            LV_GetText(_expand, _selrow, 3)
+            node := root.selectSingleNode("//Hotstrings/hs[expand='" _expand "']")
+            
+            _hs2IsCode := node.attributes.getNamedItem("iscode").value
+            _hsOpt := node.attributes.getNamedItem("opts").value
+            _hs2Expand := node.selectSingleNode("./expand").text
+            _hs2Expandto := node.selectSingleNode("./expandto").text
+            _hsIfWin := node.selectSingleNode("./ifwinactive").text
+            _hsIfWinN := node.selectSingleNode("./ifwinnotactive").text
+            _guivars := "hs2IsCode|hsOpt|hs2Expand|hsIfWin|hsIfWinN"
+            
+            Loop, Parse, _guivars, |
+                GuiControl, 3:, % a_loopfield, % _%a_loopfield%
+            
+            if _hs2IsCode
+                initSci($Sci3)
+            else
+                initSci($Sci3,0,0)
+            
+            SCI_SetText(_hs2Expandto, $Sci3)
             Gui, 03: show
-            ControlFocus,,ahk_id %$Sci3%
+        }
+        
+        if (a_guievent = "K" && a_eventinfo = 46)
+        {
+            node := root.selectSingleNode("//Hotstrings")
+            Loop, % LV_GetCount("Selected")
+            {
+                if !next := LV_GetNext()
+                    break
+                LV_GetText(_expand, next, 3), LV_Delete(next)
+                node.attributes.item[0].text() -= 1
+                node.removeChild(node.selectSingleNode("//hs[expand='" _expand "']"))
+            }
+            conf.transformNodeToObject(xsl, conf), updateSB()
+            conf.save(script.conf), conf.load(script.conf) root:=options:=node:=null         ; Save & Clean
             return
         }
     }
@@ -2062,6 +2190,7 @@ ListHandler(sParam=0){
                 _title := slNewTitle ? slNewTitle : _seltxt
                 node :=  options.selectSingleNode("//Group[@name='" _current "']")
                 node.selectSingleNode("Snippet[@title='" _seltxt "']/@title").text:=_title
+                conf.transformNodeToObject(xsl, conf)
                 conf.save(script.conf), conf.load(script.conf)          ; Save and Load
             }
             Hotkey, *LButton, Off               ; If we finished editing normally then turn off the hotkey.
@@ -2265,7 +2394,7 @@ hotExtract(file, path, isAccept=0){
     return 1
 }
 rcwSet(menu=0){
-    global conf, script
+    global conf, script, xsl
     static names:="L-Ansi|L-Unicode|Basic|IronAHK"
 
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
@@ -2282,6 +2411,7 @@ rcwSet(menu=0){
                 Menu, RCW, uncheck, %a_loopfield%       ; Make sure all others are unchecked
             Menu, RCW, check, %a_loopfield%
             options.selectSingleNode("//RCPaths/@current").text := a_loopfield
+            conf.transformNodeToObject(xsl, conf)
             conf.save(script.conf), conf.load(script.conf)          ; Save and Load
         }
     }
@@ -3176,6 +3306,15 @@ rName(length = "", filext = ""){
 		return RName
 	Else
 		return RName . "." . filext
+}
+updateSB(){
+    global script, root
+    
+    SB_SetParts(150,150,250,50)
+    SB_SetText("`t" root.selectSingleNode("//Hotkeys/@count").text " Hotkeys currently active",1)
+    SB_SetText("`t" root.selectSingleNode("//Hotstrings/@count").text " Hotstrings currently active",2)
+    SB_SetText("`tv" script.version,4)
+    return
 }
 
 ; Storage
