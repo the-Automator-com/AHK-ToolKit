@@ -47,9 +47,11 @@
 
 ;[Includes]{
 #include *i %a_scriptdir%
-#include lib\attach.h.ahk
+#include lib\sci.h.ahk
 #include lib\hash.h.ahk
-#include lib\SCI.h.ahk
+#include lib\klist.h.ahk
+#include lib\attach.h.ahk
+#include lib\hkSwap.h.ahk
 ;}
 
 ;[Directives]{
@@ -193,12 +195,19 @@ GuiSize:        ;{ Gui Size Handler
 4GuiSize:
     if a_gui = 1
     {
+        _lists := "hkList|shkList|hsList|shsList"
         _guiwidth := a_guiwidth, _guiheight:= a_guiheight
         SB_SetParts(150,150,a_guiwidth-370,50)
-        Gui, ListView, hkList
-        LV_ModifyCol(4, "AutoHdr")
-        Gui, ListView, hsList
-        LV_ModifyCol(3, "AutoHdr")
+
+        Loop, Parse, _lists, |
+        {
+            Gui, 01: ListView, % a_loopfield
+            if (a_loopfield = "hkList")
+                LV_ModifyCol(2, "Center"), LV_ModifyCol(3, "Center")
+            Loop, 4
+                LV_ModifyCol(a_index, "AutoHdr")
+        }
+
         if a_eventinfo = 1
         {
             main_toggle := !main_toggle
@@ -211,24 +220,6 @@ GuiSize:        ;{ Gui Size Handler
         LV_ModifyCol(5, "AutoHdr")
     }
 return
-;}
-
-GeneralAdd:     ;{
-    Gui, %a_gui%: Submit
-    WinActivate, ahk_id %$hwnd1%
-    Gui, 01: -Disabled
-
-    GuiReset(a_gui) ; ,savePrefs(), lvAdd(tabLast)
-return
-;}
-
-QSearch:        ;{ Thanks to Adabo
-	LV_Delete()
-	Gui, Submit, NoHide
-	While (A_Index < (FileLine_0 + 1))
-		IfInString, FileLine_%A_Index%, %UserEdit%
-			LV_Add("", A_Index, FileLine_%A_Index%)
-Return
 ;}
 
 Exit:
@@ -248,41 +239,44 @@ Add(type){
     ; stupid ahk fails if i dont reload the freaking xml file in here again... tired of searching for the reason.
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
 
-    ; if (type = "hotkey")
-    ; {
-        ; Gui, 01: Default
-        ; Gui, 01: ListView, hkList
-        ; node := root.selectSingleNode("//Hotkeys")
+    if (type = "hotkey")
+    {
+        Gui, 01: Default
+        Gui, 01: ListView, hkList
+        node := root.selectSingleNode("//Hotkeys")
+        if node.selectSingleNode("//hk[@key='" hkey "']")
+        {
+            Msgbox, 0x124
+                  , % "Hotkey already present"
+                  , % "The Hotkey you are trying to create already exist.`n"
+                    . "Do you want to edit the existing hotkey?"
+            return
+        }
+        else
+        {
+            SCI_GetText(SCI_GetLength($Sci2)+1,_hkscript)
+            node.attributes.item[0].text() += 1
+                _c := conf.createElement("hk")
+                _c.setAttribute("type", hkType), _c.setAttribute("key", hkey)
+                    _cc1 := conf.createElement("name"), _cc1.text() := ""
+                    _cc2 := conf.createElement("path"), _cc2.text() := hkType != "Script" ? hkPath : ""
+                    _cc3 := conf.createElement("script"), _cc3.text() := _hkscript
+                    _cc4 := conf.createElement("ifwinactive"), _cc4.text() := inStr(hkIfWin, "e.g.") ? "" : hkIfWin
+                    _cc5 := conf.createElement("ifwinnotactive"),_cc5.text():=inStr(hkIfWinN, "e.g.")? "" : hkIfWinN
+            Loop 5
+                _c.appendChild(_cc%a_index%)
+            node.appendChild(_c)
 
-        ; if node.selectSingleNode("//hs[expand='" hsExpand "']")
-        ; {
-            ; Msgbox, 0x124
-                  ; , % "Hotstring already present"
-                  ; , % "The hotstring you are trying to create already exist.`n"
-                    ; . "Do you want to edit the existing hotstring?"
-            ; return
-        ; }
-        ; else
-        ; {
-            ; node.attributes.item[0].text() += 1
-                ; _c := conf.createElement("hs"), _c.setAttribute("iscode", hsIsCode), _c.setAttribute("opts", _hsOpt)
-                    ; _cc1 := conf.createElement("expand"), _cc1.text() := hsExpand
-                    ; _cc2 := conf.createElement("expandto"), _cc2.text() := hsExpandTo
-                    ; _cc3 := conf.createElement("ifwinactive"), _cc3.text() := inStr(hsIfWin, "e.g.") ? "" : hsIfWin
-                    ; _cc4 := conf.createElement("ifwinnotactive"), _cc4.text() := inStr(hsIfWinN, "e.g.") ? "" : hsIfWinN
-            ; Loop 4
-                ; _c.appendChild(_cc%a_index%)
-            ; node.appendChild(_c)
+            LV_Add("", hkType, "", hkSwap(hkey, "long")
+                  , hkType != "Script" ? hkPath : strLen(_hkscript) > 40 ? subStr(_hkscript,1,40) "..." : _hkscript)
+            Loop, 4
+                LV_ModifyCol(a_index,"AutoHdr")
+        }
+        conf.transformNodeToObject(xsl, conf), updateSB()
+        conf.save(script.conf), conf.load(script.conf) root:=options:=_c:=_cc1:=_cc2:=_cc3:=_cc4:=_cc5:=null
+        return
+    }
 
-            ; LV_Add("", "", _hsOpt, hsExpand
-              ; , strLen(hsExpandto) > 40 ? subStr(hsExpandto,1,40) "..." : hsExpandto)
-            ; LV_ModifyCol(0,"AutoHdr")
-        ; }
-        ; conf.transformNodeToObject(xsl, conf)
-        ; conf.save(script.conf), conf.load(script.conf) root:=options:=_c:=_cc1:=_cc2:=_cc3:=_cc4:=null
-        ; return
-    ; }
-    
     if (type = "hotstring")
     {
         Gui, 01: Default
@@ -295,7 +289,7 @@ Add(type){
                   , % "Hotstring already present"
                   , % "The hotstring you are trying to create already exist.`n"
                     . "Do you want to edit the existing hotstring?"
-            
+
             if editingHS
             {
                 editingHS := False, SCI_GetText(SCI_GetLength($Sci3)+1,hsExpandTo)
@@ -307,7 +301,7 @@ Add(type){
                 currNode.selectSingleNode("./ifwinactive").text := inStr(hsIfWin, "e.g.") ? "" : hsIfWin
                 currNode.selectSingleNode("./ifwinnotactive").text := inStr(hsIfWinN, "e.g.") ? "" : hsIfWinN
             }
-            
+
             conf.transformNodeToObject(xsl, conf), updateSB()
             conf.save(script.conf), conf.load(script.conf) root:=options:=_c:=_cc1:=_cc2:=_cc3:=_cc4:=null
             Load("Hotstrings")
@@ -320,14 +314,16 @@ Add(type){
                     _cc1 := conf.createElement("expand"), _cc1.text() := hsExpand
                     _cc2 := conf.createElement("expandto"), _cc2.text() := hsExpandTo
                     _cc3 := conf.createElement("ifwinactive"), _cc3.text() := inStr(hsIfWin, "e.g.") ? "" : hsIfWin
-                    _cc4 := conf.createElement("ifwinnotactive"), _cc4.text() := inStr(hsIfWinN, "e.g.") ? "" : hsIfWinN
+                    _cc4 := conf.createElement("ifwinnotactive"),_cc4.text():=inStr(hsIfWinN, "e.g.")? "" : hsIfWinN
             Loop 4
                 _c.appendChild(_cc%a_index%)
             node.appendChild(_c)
 
             LV_Add("", "", hsOpt, hsExpand
               , strLen(hsExpandto) > 40 ? subStr(hsExpandto,1,40) "..." : hsExpandto)
-            LV_ModifyCol(0,"AutoHdr")
+
+            Loop, 4
+                LV_ModifyCol(a_index,"AutoHdr")
         }
         conf.transformNodeToObject(xsl, conf), updateSB()
         conf.save(script.conf), conf.load(script.conf) root:=options:=_c:=_cc1:=_cc2:=_cc3:=_cc4:=null
@@ -529,7 +525,7 @@ MainGui(){
     OnMessage(WM("COMMAND"),"MsgHandler")
 
     _aot := (root.attributes.item[1].text ? "+" : "-") "AlwaysOnTop"
-    Gui, 01: +LastFound +Resize +MinSize %_aot%
+    Gui, 01: +LastFound +Resize +MinSize650x300 %_aot%
     $hwnd1 := WinExist(), MainMenu(), _aot:=null
 
     Gui, 01: menu, MainMenu
@@ -544,9 +540,11 @@ MainGui(){
                           , % "Type|Program Name|Hotkey|Program Path"
     Gui, 01: add, ListView, w780 h315 xp yp HWND$shkList Count%_cnt% Sort Grid AltSubmit gListHandler vshkList
                           , % "Type|Program Name|Hotkey|Program Path"
-    
+
+    GuiControl, hide, shkList
+
     Load("Hotkeys")
-    
+
     Gui, 01: add, Text, x0 y350 w820 0x10 HWND$hkDelim
     Gui, 01: font, s8 cGray italic, Verdana
     Gui, 01: add, Edit, x10 yp+10 w250 HWND$QShk gGuiHandler vQShk, % "Quick Search"
@@ -560,6 +558,9 @@ MainGui(){
                           , % "Type|Options|Abbreviation|Expand To"
     Gui, 01: add, ListView, w780 h205 xp yp HWND$shsList Count%_cnt% Grid AltSubmit gListHandler vshsList
                           , % "Type|Options|Abbreviation|Expand To"
+
+    GuiControl, hide, shsList
+
     Gui, 01: add, Groupbox, w780 h105 HWND$hsGbox, % "Quick Add"
     Gui, 01: add, Text, xp+100 yp+20 HWND$hsText1, % "Expand:"
     Gui, 01: font, s8 cGray italic, Verdana
@@ -574,9 +575,9 @@ MainGui(){
     Gui, 01: add, CheckBox, xp+235 yp HWND$hsCbox3 vhsDND, % "Do not delete typed abbreviation"
     Gui, 01: add, CheckBox, x112 y+10 HWND$hsCbox4 vhsTIOW, % "Trigger inside other words"
     Gui, 01: add, CheckBox, xp+235 yp HWND$hsCbox5 vhsSR, % "Send Raw (do not translate {Enter} or {key})"
-    
+
     Load("HotStrings")
-    
+
     Gui, 01: add, Text, x0 y350 w820 0x10 HWND$hsDelim
     Gui, 01: font, s8 cGray italic, Verdana
     Gui, 01: add, Edit, x10 yp+10 w250 HWND$QShs gGuiHandler vQShs, % "Quick Search"
@@ -613,6 +614,7 @@ MainGui(){
     hide := options.selectSingleNode("//@smm").text ? "Hide" : ("", main_toggle:=1)
 
     current:=cnt:=null
+
     ; I remove one pixel from w800 to cover the delimiter line on the right side
     ;
     ; The attach function redraws the tab on top of the Status bar.
@@ -636,16 +638,13 @@ AddHKGui(){
     Gui, 02: add, Button, x+10 w100 Disabled HWND$hk2Browse gGuiHandler, % "&Browse..."
 
     Gui, 02: add, GroupBox, x10 w350 h70, % "Select Hotkey"
-    ; Gui, 02: add, Edit, xp+10 yp+30 w155, % ""
-    ; Gui, 02: add, CheckBox, x+10 yp+3, % "LWin"
-    ; Gui, 02: add, CheckBox, x+10, % "RWin"
 
     ; SetHotkeys(lst,$hkddl, "Add Hotkey")
-    Gui, 02: add, CheckBox, xp+10 yp+33, % "Ctrl"
-    Gui, 02: add, CheckBox, x+10, % "Alt"
-    Gui, 02: add, CheckBox, x+10, % "Shift"
-    Gui, 02: add, CheckBox, x+10, % "Win"
-    Gui, 02: add, DropDownList, x+10 yp-3 w140, % lst:=klist("all^", "mods msb")" None  "
+    Gui, 02: add, CheckBox, xp+10 yp+33 vhkctrl, % "Ctrl"
+    Gui, 02: add, CheckBox, x+10 vhkalt, % "Alt"
+    Gui, 02: add, CheckBox, x+10 vhkshift, % "Shift"
+    Gui, 02: add, CheckBox, x+10 vhkwin, % "Win"
+    Gui, 02: add, DropDownList, x+10 yp-3 w140 vhkey, % lst:=klist("all^", "mods msb")" None  "
 
     Gui, 02: add, GroupBox, x+20 y6 w395 h145, % "Advanced Options"
     Gui, 02: add, Text,xp+10 yp+15, % "Note: Comma delimited, case insensitive and accepts RegExs"
@@ -654,12 +653,12 @@ AddHKGui(){
     Gui, 02: add, Edit, wp HWND$hkIfWinN vhkIfWinN
                       , % "If window NOT active list (e.g. Notepad++, Firefox, post.*\s)"
     Gui, 02: font
-    Gui, 02: add, Checkbox, xp y+5 vLMod, % "Left mod: only use left modifier key"
-    Gui, 02: add, Checkbox, vRMod, % "Right mod: only use right modifier key"
-    Gui, 02: add, Checkbox, vWild, % "Wildcard: fire with other keys           "
-    Gui, 02: add, Checkbox, x+10 yp-38 vSend, % "Send key to active window"
-    Gui, 02: add, Checkbox, vHook, % "Install hook"
-    Gui, 02: add, Checkbox, vfRel, % "Fire when releasing key"
+    Gui, 02: add, Checkbox, xp y+5 vhkLMod, % "Left mod: only use left modifier key"
+    Gui, 02: add, Checkbox, vhkRMod, % "Right mod: only use right modifier key"
+    Gui, 02: add, Checkbox, vhkWild, % "Wildcard: fire with other keys           "
+    Gui, 02: add, Checkbox, x+10 yp-38 vhkSend, % "Send key to active window"
+    Gui, 02: add, Checkbox, vhkHook, % "Install hook"
+    Gui, 02: add, Checkbox, vhkfRel, % "Fire when releasing key"
 
     $Sci2 := SCI_Add($hwnd2,10,160,750,250,"","","lib\scilexer.dll")
 
@@ -979,6 +978,7 @@ GuiAttach(guiNum){
          , $Sci1,$Sci2,$Sci3,$Sci4,$hsDelim,$QShs,$hsAdd,$hsClose,$lcDelim,$QSlc,$lcRun,$lcClear,$hk2Delim
          , $hk2Add,$hk2Cancel,$hs2GBox,$hs2Delim,$hs2Add,$hsCancel
          , $imList,$imDelim,$imAccept,$imClear,$imCancel,$slGBox,$slDelim,$slAdd,$slCancel
+         , $shsList, $shkList
 
     ; AutoHotkey ToolKit Gui
     if guiNum = 1
@@ -986,6 +986,7 @@ GuiAttach(guiNum){
         ; hotkeys tab
         attach($tabcont, "w h")
         attach($hkList, "w h")
+        attach($shkList, "w h")
         attach($StatBar, "w r1")
         attach($hkDelim, "y w")
         attach($QShk, "y")
@@ -997,6 +998,7 @@ GuiAttach(guiNum){
             attach(%a_loopfield%, "x.5 y r1")
 
         attach($hsList, "w h r2")
+        attach($shsList, "w h r2")
         attach($hsGbox, "y w r2")
 
         attach($hsDelim, "y w")
@@ -1117,39 +1119,50 @@ InitSci($hwnd, m0=40, m1=10){
 Load(type){
     global
 
-    
-    ; if (type = "Hotkeys")
-    ; {
-        ; LV_Delete()
-        ; GuiControl, -Redraw, hsList
+    if (type = "Hotkeys")
+    {
+        Gui, 01: ListView, hkList
 
-        ; conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
-        ; node := options.selectSingleNode("//Hotstrings").childNodes
-        ; Loop, % node.length
-            ; LV_Add("","", node.item[a_index-1].selectSingleNode("@opts").text
-                        ; , node.item[a_index-1].selectSingleNode("expand").text
-                        ; , node.item[a_index-1].selectSingleNode("expandto").text)
+        LV_Delete()
+        GuiControl, -Redraw, hkList
 
-        ; GuiControl, +Redraw, hsList
-        ; return
-    ; }
-    
+        conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
+        node := options.selectSingleNode("//Hotkeys").childNodes
+        Loop, % node.length
+        {
+            _path := node.item[a_index-1].selectSingleNode("path").text
+            _script := node.item[a_index-1].selectSingleNode("script").text
+            LV_Add("", node.item[a_index-1].selectSingleNode("@type").text
+                     , ""
+                     , hkSwap(node.item[a_index-1].selectSingleNode("@key").text, "long")
+                     , _path ? _path : (strLen(_script) > 40 ? subStr(_script, 1, 40) "..." : _script))
+        }
+        LV_ModifyCol(2, "Center"), LV_ModifyCol(3, "Center")
+        GuiControl, +Redraw, hkList
+        return
+    }
+
     if (type = "Hotstrings")
     {
+        Gui, 01: ListView, hsList
+
         LV_Delete()
         GuiControl, -Redraw, hsList
 
         conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
         node := options.selectSingleNode("//Hotstrings").childNodes
         Loop, % node.length
+        {
+            _expandto := node.item[a_index-1].selectSingleNode("expandto").text
             LV_Add("","", node.item[a_index-1].selectSingleNode("@opts").text
                         , node.item[a_index-1].selectSingleNode("expand").text
-                        , node.item[a_index-1].selectSingleNode("expandto").text)
+                        , strLen(_expandto) > 40 ? subStr(_expandto, 1, 40) "..." : _expandto)
+        }
 
         GuiControl, +Redraw, hsList
         return
     }
-    
+
     if (type = "SnpLib")
     {
         LV_Delete()
@@ -1287,6 +1300,7 @@ GuiHandler(){
 
             if options.selectSingleNode("//@snplib").text
             {
+                ; msgbox % action
                 Loop, Parse, slControls, |
                     Control,%action%,,,ahk_id %a_loopfield%
             }
@@ -1354,6 +1368,70 @@ GuiHandler(){
             return
         }
 
+        if (a_guicontrol = "QShk" && tabLast = "Hotkeys")
+        {
+            if (QShk && QShk != "Quick Search")
+            {
+                GuiControl, show, shkList
+                GuiControl, hide, hkList
+                Gui, 01: ListView, shkList
+                LV_Delete()     ; Delete contents of shsList to avoid creating double results
+
+                Gui, 01: ListView, hkList
+                Loop, % LV_GetCount()
+                {
+                    Gui, 01: ListView, hkList
+                    ; LV_GetText(_type, a_index, 1), LV_GetText(_opts, a_index, 2)
+                    ; LV_GetText(_expand, a_index, 3), LV_GetText(_expandto, a_index, 4)
+                    ; if (inStr(_expand, QShs) || inStr(_expandto, QShs))
+                    ; {
+                        ; Gui, 01: ListView, shsList
+                        ; LV_Add("", _type, _opts, _expand, _expandto)
+                    ; }
+                }
+            }
+            else
+            {
+                GuiControl, show, hkList
+                GuiControl, hide, shkList
+                Gui, 01: ListView, shkList
+                LV_Delete()
+            }
+            return
+        }
+
+        if (a_guicontrol = "QShs" && tabLast = "Hotstrings")
+        {
+            if (QShs && QShs != "Quick Search")
+            {
+                GuiControl, show, shsList
+                GuiControl, hide, hsList
+                Gui, 01: ListView, shsList
+                LV_Delete()     ; Delete contents of shsList to avoid creating double results
+
+                Gui, 01: ListView, hsList
+                Loop, % LV_GetCount()
+                {
+                    Gui, 01: ListView, hsList
+                    LV_GetText(_type, a_index, 1), LV_GetText(_opts, a_index, 2)
+                    LV_GetText(_expand, a_index, 3), LV_GetText(_expandto, a_index, 4)
+                    if (inStr(_expand, QShs) || inStr(_expandto, QShs))
+                    {
+                        Gui, 01: ListView, shsList
+                        LV_Add("", _type, _opts, _expand, _expandto)
+                    }
+                }
+            }
+            else
+            {
+                GuiControl, show, hsList
+                GuiControl, hide, shsList
+                Gui, 01: ListView, shsList
+                LV_Delete()
+            }
+            return
+        }
+
         if (a_guicontrol = "&Add" && tabLast = "Hotkeys")
         {
             Gui, 01: +Disabled
@@ -1368,15 +1446,14 @@ GuiHandler(){
                 Gui, 01: +Disabled
                 Gui, 03: show
                 ControlFocus,,ahk_id %$Sci3%
-                return
             }
             else
             {
                 hsOpt := (hsAE ? "*" : "") (hsDND ? "B0" : "")
                       .  (hsTIOW ? "?" : "") (hsSR ? "R" : "")
                 Add("hotstring")
-                return
             }
+            return
         }
 
         if (a_guicontrol = "&Run")
@@ -1448,7 +1525,7 @@ GuiHandler(){
                     checking the time passed since last hotkey press.
                 */
                 WinGet, winstat, MinMax, ahk_id %$hwnd1%
-                if (!WinActive("ahk_id " $hwnd1) && (winstat != "") 
+                if (!WinActive("ahk_id " $hwnd1) && (winstat != "")
                 && (A_TimeSinceThisHotkey < 100 && A_TimeSinceThisHotkey != -1))
                 {
                     WinActivate, ahk_id %$hwnd1%
@@ -1481,7 +1558,24 @@ GuiHandler(){
 
         if (a_guicontrol = "&Add")
         {
+            if inStr(hkey, "None")
+            {
+                Msgbox, 0x10
+                      , % "Error while trying to create new Hotkey"
+                      , % "Please select the key that you want to use as a hotkey."
+                return
+            }
+
+            hkey := (hkHook ? "$" : "") (hkSend ? "~" : "") (hkWild ? "*" : "") (hkLMod ? "<" : "")
+                 .  (hkRMod ? ">" : "") (hkctrl ? "^" : "") (hkalt  ? "!" : "") (hkshift ? "+": "")
+                 .  (hkwin  ? "#" : "") hkey (hkfRel ? " UP": "")
+            hkType := hkType = 1 ? "Script" : hkType = 2 ? "File" : hkType = 3 ? "Folder" : ""
+            
             Add("hotkey")
+
+            Gui, %a_gui%: Submit
+            WinActivate, ahk_id %$hwnd1%
+            Gui, 01: -Disabled
             return
         }
 
@@ -1511,7 +1605,7 @@ GuiHandler(){
                       , % "Please type in the abbreviation that you want to expand"
                 return
             }
-            
+
             hsExpand:=hs2Expand,SCI_GetText(SCI_GetLength($Sci3)+1,hsExpandTo),hsIsCode:=hs2IsCode
             add("hotstring")
 
@@ -1603,7 +1697,6 @@ GuiHandler(){
 
         if (a_guicontrol = "&Accept")
         {
-            GoSub, GeneralAdd
             return
         }
 
@@ -1910,6 +2003,7 @@ MenuHandler(stat=0){
         }
         else
         {
+            ; msgbox true
             ControlMove,,,, % _guiwidth - 10,, ahk_id %$Sci1%
             attach($Sci1, "w h r2")
             Loop, Parse, slControls, |
@@ -1977,6 +2071,7 @@ ListHandler(sParam=0){
     Gui, 01: ListView, %a_guicontrol%
     _selrow := LV_GetNext(), LV_GetText(_seltxt, _selrow)
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
+    ; tooltip % a_guicontrol " " a_guievent
 
     if (sParam = "Edit")
     {
@@ -2091,6 +2186,27 @@ ListHandler(sParam=0){
                 return
             }
         }
+
+        if (a_guievent = "K" && a_eventinfo = 46)
+        {
+            node := root.selectSingleNode("//Hotkeys")
+            Loop, % LV_GetCount("Selected")
+            {
+                if !next := LV_GetNext()
+                    break
+                LV_GetText(_hkey, next, 3), LV_Delete(next)
+                
+                if node.attributes.item[0].text() <= 0
+                    node.attributes.item[0].text() := 0
+                else
+                    node.attributes.item[0].text() -= 1
+                node.removeChild(node.selectSingleNode("//hk[@key='" hkSwap(_hkey, "short") "']"))
+            }
+            conf.transformNodeToObject(xsl, conf), updateSB()
+            conf.save(script.conf), conf.load(script.conf) root:=options:=node:=null         ; Save & Clean
+            return
+        }
+
     }
 
     if (a_guicontrol = "hsList")
@@ -2108,7 +2224,7 @@ ListHandler(sParam=0){
             editingHS := True
             LV_GetText(_expand, _selrow, 3)
             node := root.selectSingleNode("//Hotstrings/hs[expand='" _expand "']")
-            
+
             _hs2IsCode := node.attributes.getNamedItem("iscode").value
             _hsOpt := node.attributes.getNamedItem("opts").value
             _hs2Expand := node.selectSingleNode("./expand").text
@@ -2116,19 +2232,19 @@ ListHandler(sParam=0){
             _hsIfWin := node.selectSingleNode("./ifwinactive").text
             _hsIfWinN := node.selectSingleNode("./ifwinnotactive").text
             _guivars := "hs2IsCode|hsOpt|hs2Expand|hsIfWin|hsIfWinN"
-            
+
             Loop, Parse, _guivars, |
                 GuiControl, 3:, % a_loopfield, % _%a_loopfield%
-            
+
             if _hs2IsCode
                 initSci($Sci3)
             else
                 initSci($Sci3,0,0)
-            
+
             SCI_SetText(_hs2Expandto, $Sci3)
             Gui, 03: show
         }
-        
+
         if (a_guievent = "K" && a_eventinfo = 46)
         {
             node := root.selectSingleNode("//Hotstrings")
@@ -2137,7 +2253,11 @@ ListHandler(sParam=0){
                 if !next := LV_GetNext()
                     break
                 LV_GetText(_expand, next, 3), LV_Delete(next)
-                node.attributes.item[0].text() -= 1
+                
+                if node.attributes.item[0].text() <= 0
+                    node.attributes.item[0].text() := 0
+                else
+                    node.attributes.item[0].text() -= 1
                 node.removeChild(node.selectSingleNode("//hs[expand='" _expand "']"))
             }
             conf.transformNodeToObject(xsl, conf), updateSB()
@@ -2226,7 +2346,8 @@ MsgHandler(wParam,lParam, msg, hwnd){
 
         if lParam in %hSciL%
             return
-        if ((wParam&0xFFFF0000)>>16 = 0x0100)   ; EN_SETFOCUS
+
+        if (wParam>>16 = 0x0100)    ; EN_SETFOCUS
         {
             if (lParam = $GP_E1)
             {
@@ -2240,12 +2361,14 @@ MsgHandler(wParam,lParam, msg, hwnd){
                 Gui, %a_gui%: font, s8 cBlack norm
                 GuiControl, font, % getID(lParam, cList%a_gui%, hList%a_gui%)
             }
-            if (inStr(sText, "e.g. ") || lParam = $QShk || lParam = $QShs || lParam = $QSlc)
+
+            if (inStr(sText, "e.g. ") || inStr(sText, "Quick Search"))
                 ControlSetText,,, ahk_id %lParam%
+
             return
         }
 
-        if ((wParam&0xFFFF0000)>>16 = 0x0200) ; EN_KILLFOCUS
+        if (wParam>>16 = 0x0200)    ; EN_KILLFOCUS
         {
             if (lParam = $GP_E1)
             {
@@ -2255,7 +2378,7 @@ MsgHandler(wParam,lParam, msg, hwnd){
 
             ControlGetText,cText,, ahk_id %lParam%
 
-            if ((!cText && inStr(sText, "e.g. ")) || lParam = $QShk || lParam = $QShs || lParam = $QSlc)
+            if (!cText && (inStr(sText, "e.g. ") || inStr(sText, "Quick Search")))
             {
                 if a_gui
                 {
@@ -2273,6 +2396,9 @@ MsgHandler(wParam,lParam, msg, hwnd){
                     Gui, %a_gui%: font, s8 cGray italic, Verdana
                     GuiControl, font, % getID(lParam, cList%a_gui%, hList%a_gui%)
                 }
+
+                if (lParam = $QShk || lParam = $QShs)
+                    ControlSetText,, % "Quick Search", ahk_id %lParam%
 
                 if (lParam = $hsOpt)
                     ControlSetText,, % "e.g. rc*", ahk_id %lParam%
@@ -3195,99 +3321,6 @@ autostart(status){
                  , AutoHotkey Toolkit
     }
 }
-klist(inc="all", exc="", sep=" "){
-    Static lPunct,$reRF,vAll,vLower,vUpper,vNum,vAlnum,vPunct,msb,mods,fkeys,npad,kbd,nil=
-
-    if strLen(sep) > 1
-        return  False     ; You can only specify 1 character as the separator
-
-    ; List of keyboard and mouse names as defined in "List of Keys, Mouse Buttons, and Joystick Controls".
-    vNum  :="0 1 2 3 4 5 6 7 8 9 "
-    vLower:="a b c d e f g h i j k l m n o p q r s t u v w x y z "
-    vUpper:="A B C D E F G H I J K L M N O P Q R S T U V W X Y Z "
-    vAlnum:= (RegexMatch(inc, "(all|alphanum)\^") ? vUpper : vLower) vNum
-    vPunct:="! "" # $ % & ' ( ) * + , - . / : `; < = > ? @ [ \ ] ^ `` { | } ~ "
-    msb   :="LButton RButton MButton WheelDown WheelUp "
-    mods  :="AppsKey LWin RWin LControl RControl LShift RShift LAlt RAlt Control Alt Shift "
-    fkeys :="F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12 F13 F14 F15 F16 F17 F18 F19 F20 F21 F22 F23 F24 "
-    npad  :="NumLock Numpad0 Numpad1 Numpad2 Numpad3 Numpad4 Numpad5 Numpad6 Numpad7 Numpad8 "
-          . "Numpad9 NumpadIns NumpadEnd NumpadDown NumpadPgDn NumpadLeft NumpadClear NumpadRight NumpadHome "
-          . "NumpadUp NumpadPgUp NumpadDot NumpadDel NumpadDiv NumpadMult NumpadAdd NumpadSub NumpadEnter "
-    kbd   :="Space Tab Enter Escape Backspace Delete Insert Home End PgUp PgDn Up Down Left Right "
-          . "ScrollLock CapsLock PrintScreen CtrlBreak Pause Break Sleep "
-    vAll  := RegexReplace(RegexReplace(vPunct vAlnum msb mods fkeys npad kbd , "\s", sep),"\" sep "$")
-    kwords:= "lower|upper|num|punct|alphanum|msb|mods|fkeys|npad|kbd"
-    $reRF :="(\s?)+(?P<Start>[a-zA-Z0-9])-(?P<End>[a-zA-Z0-9])(\s?)+"
-    lPunct:=",,,!,"",#,$,%,&,',(,),*,+,-,.,/,:,;,<,=,>,?,@,[,\,],^,``,{,|,},~" ; as a list for the if [in] command
-    if (inStr(inc, "all") && !exc)
-        return vAll
-
-    While(RegexMatch(exc, kwords, match)){
-        exc := RegexReplace(exc, "\b" match "\b(\s?)+"
-                           , match = "alphanum" ? vAlnum    : nil
-                           . match = "lower"    ? vLower    : nil
-                           . match = "upper"    ? vUpper    : nil
-                           . match = "num"      ? vNum      : nil
-                           . match = "punct"    ? vPunct    : nil
-                           . match = "msb"      ? msb       : nil
-                           . match = "mods"     ? mods      : nil
-                           . match = "fkeys"    ? fkeys     : nil
-                           . match = "npad"     ? npad      : nil
-                           . match = "kbd"      ? kbd       : nil)
-    }
-
-    ; Advanced including options.
-    ; This little loop allows excluding ranges like "1-5" or "a-d".
-    ; The rage should always be positive i. e. ranges like "6-1" or "h-b" are not allowed.
-    While(Regexmatch(inc, $reRF, r)){
-        Loop % asc(rEnd) - asc(rStart) + 1 ; the + 1 is to include the last character in range.
-            lst .= chr(a_index + asc(rStart) - 1) a_space
-
-        inc := RegexReplace(inc, $reRF, "", "", 1)
-    }
-
-    ; This will include user specified keys and will replace keywords by their respective lists.
-    lst .= inc a_space
-        . (inStr(inc,"all") ? vAlnum vPunct msb mods fkeys npad kbd : nil)
-        . (inStr(inc,"alphanum") && !inStr(exc, "alphanum") ? vAlnum : nil)
-        . (inStr(inc, "lower") && !inStr(inc,"alphanum") && !inStr(exc, "lower") ? vLower : nil)
-        . (inStr(inc, "upper") && !inStr(inc,"alphanum") && !inStr(exc, "upper") ? vUpper : nil)
-        . (RegexMatch(inc,"\bnum\b") && !RegexMatch(exc,"\bnum\b") ? vNum : nil)
-        . (inStr(inc, "punct") && !inStr(exc, "punct") ? vPunct : nil)
-        . (inStr(inc, "msb") && !inStr(exc, "msb") ? msb : nil)
-        . (inStr(inc, "fkeys") && !inStr(exc, "fkeys") ? fkeys : nil)
-        . (inStr(inc, "npad") && !inStr(exc, "npad") ? npad : nil)
-        . (inStr(inc,"kbd") && !inStr(exc,"kbd") ? kbd : nil)
-        . (inStr(inc,"mods^") && !inStr(exc,"mods") ? mods : inStr(inc,"mods") && !inStr(exc,"mods") ? nil
-        . RegexReplace(mods, "(AppsKey|LControl|RControl|LShift|RShift|LAlt|RAlt)(\s?)+") : nil)
-
-    ; Advanced excluding options.
-    ; This little loop allows excluding ranges like "1-5" or "a-d".
-    ; The rage should always be positive i. e. ranges like "6-1" or "h-b" are not allowed.
-    While(Regexmatch(exc, $reRF, r)){
-        Loop % asc(rEnd) - asc(rStart) + 1    ; the + 1 is to include the last character in range.
-            StringReplace,lst,lst,% chr(a_index + asc(rStart) - 1) a_space
-
-        exc := RegexReplace(exc, $reRF, "", "", 1)
-    }
-
-    ; Remove excluded keys from list.
-    Loop, Parse, exc, %a_space%
-    {
-        ; needed Regex to avoid deleting "NumpadEnter" when trying to delete "Enter" and such.
-        if strLen(a_loopfield) > 1
-            lst := RegexReplace(lst, "i)\b" a_loopfield "\b\s?")
-        else if a_loopfield in %lPunct%
-            lst := a_loopfield ? RegexReplace(lst, "\" a_loopfield "\s?") : lst
-        else if (a_loopfield != "")
-            lst := RegexReplace(lst, "\b" a_loopfield "\b\s?")
-    }
-
-    ; Cleaning.
-    lst := RegexReplace(lst,"(\s?)+[a-zA-Z0-9]-[a-zA-Z0-9](\s?)+") ; remove ranges from include.
-    lst := RegexReplace(lst,"i)(all\^?|lower|upper|\bnum\b|alphanum\^?|punct|msb|mods\^?|fkeys|npad|kbd)(\s?)+")
-    return RegexReplace(RegexReplace(lst, "\s", sep), "\" sep "$")
-} ; Function End.
 rName(length = "", filext = ""){
 	if !length
 		Random, length, 8, 15
@@ -3309,7 +3342,7 @@ rName(length = "", filext = ""){
 }
 updateSB(){
     global script, root
-    
+
     SB_SetParts(150,150,250,50)
     SB_SetText("`t" root.selectSingleNode("//Hotkeys/@count").text " Hotkeys currently active",1)
     SB_SetText("`t" root.selectSingleNode("//Hotstrings/@count").text " Hotstrings currently active",2)

@@ -99,8 +99,8 @@
 			<TagsKey ctrl="1" alt="0" shift="0" win="0">F2</TagsKey>
 			<HelpPath online="0">D:\Program Files\AutoHotkeyA\AutoHotkey.chm</HelpPath>
 		</CMDHelper>
-		<LiveCode linewrap="1" highlighting="1" url="1" symbols="0" snplib="1">
-			<RCPaths current="L-Ansi">
+		<LiveCode linewrap="1" highlighting="1" url="1" symbols="0" snplib="0">
+			<RCPaths current="Basic">
 				<L-Ansi>C:\Program Files\AutoHotkeyA\AutoHotkey.exe</L-Ansi>
 				<L-Unicode>C:\Program Files\AutoHotkeyW\AutoHotkey.exe</L-Unicode>
 				<Basic>C:\Program Files\AutoHotkeyB\AutoHotkey.exe</Basic>
@@ -491,23 +491,22 @@ Msgbox % version "`n" unicode
 		</ScrTools>
 	</Options>
 	<Hotkeys count="1">
-		<hk type="File" opts="" key="#c">
+		<hk type="Script" key="^Space">
 			<name>
 			</name>
 			<path>
 			</path>
+			<script>asdf</script>
 			<ifwinactive>
 			</ifwinactive>
 			<ifwinnotactive>
 			</ifwinnotactive>
-			<script>
-			</script>
 		</hk>
 	</Hotkeys>
-	<Hotstrings count="0">
-		<hs iscode="0" opts="*">
+	<Hotstrings count="1">
+		<hs iscode="0" opts="*R">
 			<expand>btw</expand>
-			<expandto>by the way</expandto>
+			<expandto>by the ways</expandto>
 			<ifwinactive></ifwinactive>
 			<ifwinnotactive></ifwinnotactive>
 		</hs>
