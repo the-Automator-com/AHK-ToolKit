@@ -327,9 +327,7 @@ class scriptobj
                      , AutoHotkey Toolkit
         }
     }
-}
-
-script := new scriptobj, script.getparams()
+} script := new scriptobj, script.getparams()
 ;}
 
 ;[General Variables]{
@@ -2688,7 +2686,7 @@ getID(hwnd, controls, handles){
         if (a_index = match)
             return a_loopfield
 }
-hotExtract(file, path, isAccept=0){
+hotExtract(file, path){
     global imHK, imHS
 
     ; This variable contains the regex for importing multiline hotkeys and hotstrings.
