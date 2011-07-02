@@ -1861,7 +1861,7 @@ GuiHandler(){
             }
 
             hsExpand:=hs2Expand,SCI_GetText(SCI_GetLength($Sci3)+1,hsExpandTo),hsIsCode:=hs2IsCode
-            add("hotstring")
+            Add("hotstring")
 
             Gui, %a_gui%: Submit
             WinActivate, ahk_id %$hwnd1%
@@ -1898,14 +1898,14 @@ GuiHandler(){
         if (a_guicontrol = "&Browse...")
         {
             Gui, 04: +OwnDialogs
-            if imType = 1
+            if (imType = 1)
                 FileSelectFolder, im, *%a_mydocuments%, 3, % "Select the folder"
-            else if imType = 2
+            else if (imType = 2)
             {
                 FileSelectFile, im, M3, %a_mydocuments%, % "Select the file"
                 Loop, Parse, im, `n, `r
                 {
-                    if a_index = 1
+                    if (a_index = 1)
                     {
                         path:=a_loopfield "\", _im:=""
                         continue
@@ -1915,7 +1915,7 @@ GuiHandler(){
                 im := _im
             }
 
-            if im
+            if (im)
                 GuiControl, 04:, imPath, % RegexReplace(im, "\n", "|")
             else
                 GuiControl, 04:, imPath, %a_mydocuments%
@@ -1951,6 +1951,7 @@ GuiHandler(){
 
         if (a_guicontrol = "&Accept")
         {
+            
             return
         }
 
@@ -2689,6 +2690,9 @@ getID(hwnd, controls, handles){
 hotExtract(file, path){
     global imHK, imHS
 
+    Gui, 04: Default
+    Gui, 04: ListView, imList
+    
     ; This variable contains the regex for importing multiline hotkeys and hotstrings.
     ; This ternary checks if imHK is set, if it is it checks if imHS is also set.
     ; If imHK is not set then we check if imHS is set by itself or not.
