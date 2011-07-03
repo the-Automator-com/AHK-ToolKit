@@ -441,7 +441,7 @@ return
 
 GuiSize:        ;{ Gui Size Handler
 4GuiSize:
-    if a_gui = 1
+    if (a_gui = 1)
     {
         _lists := "hkList|shkList|hsList|shsList"
         _guiwidth := a_guiwidth, _guiheight:= a_guiheight
@@ -506,7 +506,7 @@ Add(type){
             node.attributes.item[0].text() += 1
                 _c := conf.createElement("hk")
                 _c.setAttribute("type", hkType), _c.setAttribute("key", hkey)
-                    _cc1 := conf.createElement("name"), _cc1.text() := ""
+                    _cc1 := conf.createElement("name"), _cc1.text() := hkName
                     _cc2 := conf.createElement("path"), _cc2.text() := hkType != "Script" ? hkPath : ""
                     _cc3 := conf.createElement("script"), _cc3.text() := _hkscript
                     _cc4 := conf.createElement("ifwinactive"), _cc4.text() := inStr(hkIfWin, "e.g.") ? "" : hkIfWin
@@ -515,7 +515,7 @@ Add(type){
                 _c.appendChild(_cc%a_index%)
             node.appendChild(_c)
 
-            LV_Add("", hkType, "", hkSwap(hkey, "long")
+            LV_Add("", hkType, hkName, hkSwap(hkey, "long")
                   , hkType != "Script" ? hkPath : strLen(_hkscript) > 40 ? subStr(_hkscript,1,40) "..." : _hkscript)
             Loop, 4
                 LV_ModifyCol(a_index,"AutoHdr")
@@ -878,7 +878,10 @@ AddHKGui(){
     Gui, 02: +LastFound +Resize +MinSize +Owner1 +DelimiterSpace
     $hwnd2 := WinExist()
 
-    Gui, 02: add, GroupBox, w350 h70, % "Hotkey Type"
+    Gui, 02: add, GroupBox, w240 h55, % "Hotkey Name"
+    Gui, 02: add, Edit, x20 yp+20 w220 HWND$hkName vhkName
+    
+    Gui, 02: add, GroupBox, xp-10 yp+40 w350 h70, % "Hotkey Type"
     Gui, 02: add, Radio, xp+10 yp+20 Checked gGuiHandler vhkType, % "Script"
     Gui, 02: add, Radio, x+20 gGuiHandler, % "File"
     Gui, 02: add, Radio,x+20 gGuiHandler, % "Folder"
@@ -887,14 +890,14 @@ AddHKGui(){
 
     Gui, 02: add, GroupBox, x10 w350 h70, % "Select Hotkey"
 
-    ; SetHotkeys(lst,$hkddl, "Add Hotkey")
+    SetHotkeys(lst,$hkddl, "Add Hotkey")
     Gui, 02: add, CheckBox, xp+10 yp+33 vhkctrl, % "Ctrl"
     Gui, 02: add, CheckBox, x+10 vhkalt, % "Alt"
     Gui, 02: add, CheckBox, x+10 vhkshift, % "Shift"
     Gui, 02: add, CheckBox, x+10 vhkwin, % "Win"
     Gui, 02: add, DropDownList, x+10 yp-3 w140 vhkey, % lst:=klist("all^", "mods msb")" None  "
 
-    Gui, 02: add, GroupBox, x+20 y6 w395 h145, % "Advanced Options"
+    Gui, 02: add, GroupBox, x+20 y6 w395 h205, % "Advanced Options"
     Gui, 02: add, Text,xp+10 yp+15, % "Note: Comma delimited, case insensitive and accepts RegExs"
     Gui, 02: font, s8 cGray italic, Verdana
     Gui, 02: add, Edit, w375 HWND$hkIfWin vhkIfWin, % "If window active list (e.g. Winamp, Notepad, Fire.*)"
@@ -904,11 +907,11 @@ AddHKGui(){
     Gui, 02: add, Checkbox, xp y+5 vhkLMod, % "Left mod: only use left modifier key"
     Gui, 02: add, Checkbox, vhkRMod, % "Right mod: only use right modifier key"
     Gui, 02: add, Checkbox, vhkWild, % "Wildcard: fire with other keys           "
-    Gui, 02: add, Checkbox, x+10 yp-38 vhkSend, % "Send key to active window"
+    Gui, 02: add, Checkbox, vhkSend, % "Send key to active window"
     Gui, 02: add, Checkbox, vhkHook, % "Install hook"
     Gui, 02: add, Checkbox, vhkfRel, % "Fire when releasing key"
-
-    $Sci2 := SCI_Add($hwnd2,10,160,750,250,"","","lib\scilexer.dll")
+    
+    $Sci2 := SCI_Add($hwnd2,10,220,750,250,"","","lib\scilexer.dll")
 
     Gui, 02: add, Text, x0 y+280 w785 0x10 HWND$hk2Delim
     Gui, 02: add, Button, x600 yp+10 w75 HWND$hk2Add Default gGuiHandler, % "&Add"
@@ -918,7 +921,8 @@ AddHKGui(){
     WinGet, cList2, ControlList
     WinGet, hList2, ControlListHWND
 
-    Gui, 02: show, w770 h470 Hide, % "Add Hotkey"
+    Gui, 02: show, w770 h520 ; Hide, % "Add Hotkey"
+    pause
     return
 }
 AddHSGui(){
@@ -1381,7 +1385,7 @@ Load(type){
             _path := node.item[a_index-1].selectSingleNode("path").text
             _script := node.item[a_index-1].selectSingleNode("script").text
             LV_Add("", node.item[a_index-1].selectSingleNode("@type").text
-                     , ""
+                     , node.item[a_index-1].selectSingleNode("name").text
                      , hkSwap(node.item[a_index-1].selectSingleNode("@key").text, "long")
                      , _path ? _path : (strLen(_script) > 40 ? subStr(_script, 1, 40) "..." : _script))
         }
@@ -1806,7 +1810,28 @@ GuiHandler(){
 
         if (a_guicontrol = "&Browse...")
         {
+            Gui, 02: +OwnDialogs
             
+            if (hkType = 2) ; File
+                FileSelectFile, _path, 1, %a_programfiles%, % "Please select the file to launch."
+                                        , % "(*.exe; *.ahk)"
+            else if (hkType = 3) ; Folder
+                FileSElectFolder, _path, *%a_programfiles%, 3, % "Please select the file to launch."
+            
+            StringSplit, _name, _path, \
+            
+            if (_name0)
+            {
+                _name := RegexReplace(_name%_name0%, "im)\.[^\/:*?""<>|]{1,3}$")
+                StringUpper,_name, _name, T
+                GuiControl, 02:, hkPath, % _path
+                GuiControl, 02:, hkName, % _name
+            }
+            else
+            {
+                GuiControl, 02:, hkName,
+                GuiControl, 02:, hkPath, %a_programfiles%
+            }
             return
         }
         
@@ -3351,9 +3376,10 @@ rName(length = "", filext = ""){
 		return RName . "." . filext
 }
 updateSB(){
-    global script, root
+    global script, root, $hwnd1
 
-    SB_SetParts(150,150,250,50)
+    WinGetPos,,, _w,, ahk_id %$hwnd1%
+    SB_SetParts(150,150,_w - 378,50) ; including 8 pixes for the borders.
     SB_SetText("`t" root.selectSingleNode("//Hotkeys/@count").text " Hotkeys currently active",1)
     SB_SetText("`t" root.selectSingleNode("//Hotstrings/@count").text " Hotstrings currently active",2)
     SB_SetText("`tv" script.version,4)

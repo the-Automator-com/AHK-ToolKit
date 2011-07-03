@@ -94,7 +94,7 @@
             notimers interrupt priority waitclose OnClipboardChange OnGUIClose OnGUIEscape OnGUICancel
             </Keywords>
 		</CoDet>
-		<CMDHelper global="1" sci="0" forum="1" tags="1">
+		<CMDHelper global="1" sci="1" forum="1" tags="1">
 			<HelpKey ctrl="1" alt="0" shift="0" win="0">F1</HelpKey>
 			<TagsKey ctrl="1" alt="0" shift="0" win="0">F2</TagsKey>
 			<HelpPath online="0">D:\Program Files\AutoHotkeyA\AutoHotkey.chm</HelpPath>
@@ -490,23 +490,79 @@ Msgbox % version "`n" unicode
 			</Imagebin>
 		</ScrTools>
 	</Options>
-	<Hotkeys count="1">
-		<hk type="Script" key="^Space">
-			<name>
-			</name>
-			<path>
-			</path>
-			<script>asdf</script>
+	<Hotkeys count="7">
+		<hk type="File" key="#W">
+			<name>Winamp</name>
+			<path>C:\Program Files\Winamp\winamp.exe</path>
+			<script>
+			</script>
 			<ifwinactive>
 			</ifwinactive>
 			<ifwinnotactive>
 			</ifwinnotactive>
 		</hk>
+		<hk type="File" key="#1">
+			<name>Firefox</name>
+			<path>C:\Program Files\Mozilla Firefox\firefox.exe</path>
+			<script>
+			</script>
+			<ifwinactive>
+			</ifwinactive>
+			<ifwinnotactive>
+			</ifwinnotactive>
+		</hk>
+		<hk type="File" key="#N">
+			<name>Notepad++</name>
+			<path>C:\Program Files\Notepad++\notepad++.exe</path>
+			<script>
+			</script>
+			<ifwinactive>
+			</ifwinactive>
+			<ifwinnotactive>
+			</ifwinnotactive>
+		</hk>
+		<hk type="File" key="#I">
+			<name>Ultraiso</name>
+			<path>C:\Program Files\UltraISO\UltraISO.exe</path>
+			<script>
+			</script>
+			<ifwinactive>
+			</ifwinactive>
+			<ifwinnotactive>
+			</ifwinnotactive>
+		</hk>
+		<hk type="File" key="#S">
+			<name>Skype</name>
+			<path>C:\Program Files\Skype\Phone\Skype.exe</path>
+			<script>
+			</script>
+			<ifwinactive>
+			</ifwinactive>
+			<ifwinnotactive>
+			</ifwinnotactive>
+		</hk>
+		<hk type="File" key="#-">
+			<name>Ccleaner</name>
+			<path>C:\Program Files\CCleaner\CCleaner.exe</path>
+			<script>
+			</script>
+			<ifwinactive>
+			</ifwinactive>
+			<ifwinnotactive>
+			</ifwinnotactive>
+		</hk>
+		<hk type="File" key="#V">
+			<name>Vlc</name>
+			<path>C:\Program Files\VideoLAN\VLC\vlc.exe</path>
+			<script></script>
+			<ifwinactive></ifwinactive>
+			<ifwinnotactive></ifwinnotactive>
+		</hk>
 	</Hotkeys>
 	<Hotstrings count="1">
 		<hs iscode="0" opts="*R">
 			<expand>btw</expand>
-			<expandto>by the ways</expandto>
+			<expandto>by the way</expandto>
 			<ifwinactive>
 			</ifwinactive>
 			<ifwinnotactive>
