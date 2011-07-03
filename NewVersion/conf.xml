@@ -3,7 +3,7 @@
 	<Options>
 		<Startup ssi="1" sww="0" smm="0" cfu="0">
 		</Startup>
-		<MainKey ctrl="0" alt="0" shift="0" win="1">`</MainKey>
+		<MainKey ctrl="0" alt="0" shift="0" win="1">Right</MainKey>
 		<SuspWndList>
 		</SuspWndList>
 		<CoDet status="1" auto="0">
@@ -494,79 +494,36 @@ Msgbox % version "`n" unicode
 		<hk type="File" key="#W">
 			<name>Winamp</name>
 			<path>C:\Program Files\Winamp\winamp.exe</path>
-			<script>
-			</script>
-			<ifwinactive>
-			</ifwinactive>
-			<ifwinnotactive>
-			</ifwinnotactive>
 		</hk>
 		<hk type="File" key="#1">
 			<name>Firefox</name>
 			<path>C:\Program Files\Mozilla Firefox\firefox.exe</path>
-			<script>
-			</script>
-			<ifwinactive>
-			</ifwinactive>
-			<ifwinnotactive>
-			</ifwinnotactive>
 		</hk>
 		<hk type="File" key="#N">
 			<name>Notepad++</name>
 			<path>C:\Program Files\Notepad++\notepad++.exe</path>
-			<script>
-			</script>
-			<ifwinactive>
-			</ifwinactive>
-			<ifwinnotactive>
-			</ifwinnotactive>
 		</hk>
 		<hk type="File" key="#I">
 			<name>Ultraiso</name>
 			<path>C:\Program Files\UltraISO\UltraISO.exe</path>
-			<script>
-			</script>
-			<ifwinactive>
-			</ifwinactive>
-			<ifwinnotactive>
-			</ifwinnotactive>
 		</hk>
 		<hk type="File" key="#S">
 			<name>Skype</name>
 			<path>C:\Program Files\Skype\Phone\Skype.exe</path>
-			<script>
-			</script>
-			<ifwinactive>
-			</ifwinactive>
-			<ifwinnotactive>
-			</ifwinnotactive>
 		</hk>
 		<hk type="File" key="#-">
 			<name>Ccleaner</name>
 			<path>C:\Program Files\CCleaner\CCleaner.exe</path>
-			<script>
-			</script>
-			<ifwinactive>
-			</ifwinactive>
-			<ifwinnotactive>
-			</ifwinnotactive>
 		</hk>
 		<hk type="File" key="#V">
 			<name>Vlc</name>
 			<path>C:\Program Files\VideoLAN\VLC\vlc.exe</path>
-			<script></script>
-			<ifwinactive></ifwinactive>
-			<ifwinnotactive></ifwinnotactive>
 		</hk>
 	</Hotkeys>
 	<Hotstrings count="1">
 		<hs iscode="0" opts="*R">
 			<expand>btw</expand>
 			<expandto>by the way</expandto>
-			<ifwinactive>
-			</ifwinactive>
-			<ifwinnotactive>
-			</ifwinnotactive>
 		</hs>
 	</Hotstrings>
 </AHK-Toolkit>
