@@ -476,6 +476,7 @@ return
 ;}
 
 Exit:
+    Process,Close, %hslPID%
     if FileExist(a_temp "\ahkl.bak")
         FileDelete, %a_temp%\ahkl.bak
 
@@ -1333,10 +1334,10 @@ Add(type){
                 currNode := node.selectSingleNode("//hs[expand='" hsExpand "']")
                 currNode.attributes.getNamedItem("iscode").value := hs2IsCode
                 currNode.attributes.getNamedItem("opts").value := hsOpt
-                currNode.selectSingleNode("./expand").text := hs2Expand
-                currNode.selectSingleNode("./expandto").text := hsExpandTo
-                currNode.selectSingleNode("./ifwinactive").text := inStr(hsIfWin, "e.g.") ? "" : hsIfWin
-                currNode.selectSingleNode("./ifwinnotactive").text := inStr(hsIfWinN, "e.g.") ? "" : hsIfWinN
+                currNode.selectSingleNode("expand").text := hs2Expand
+                currNode.selectSingleNode("expandto").text := hsExpandTo
+                currNode.selectSingleNode("ifwinactive").text := inStr(hsIfWin, "e.g.") ? "" : hsIfWin
+                currNode.selectSingleNode("ifwinnotactive").text := inStr(hsIfWinN, "e.g.") ? "" : hsIfWinN
             }
             conf.transformNodeToObject(xsl, conf), updateSB()
             conf.save(script.conf), conf.load(script.conf) root:=options:=_c:=_cc1:=_cc2:=_cc3:=_cc4:=null
@@ -1356,12 +1357,37 @@ Add(type){
                     _c.appendChild(_cc%a_index%)
             node.appendChild(_c)
 
-            LV_Add("", "", hsOpt, hsExpand
-              , strLen(hsExpandto) > 40 ? subStr(hsExpandto,1,40) "..." : hsExpandto)
-
+            if RegexMatch(hsExpandTo, "(\n|\r)")
+            {
+                if (hsIsCode)
+                    _code := "`n:" hsOpt ":" hsExpand "::`n" hsExpandTo "`nreturn`n"
+                else
+                    _code := "`n:" hsOpt ":" hsExpand "::`n(`n" hsExpandTo "`n)`nreturn`n"                    
+            }
+            else
+            {
+                if (hsIsCode)
+                    _code := "`n:" hsOpt ":" hsExpand "::`n" hsExpandTo "`nreturn`n"
+                else
+                    _code := "`n:" hsOpt ":" hsExpand "::" hsExpandTo "`n"
+            }
+            hsExpandTo := RegexReplace(hsExpandTo, "(\n|\r)", " [``n] ")
+            
+            LV_Add("", ""
+                     , hsOpt
+                     , hsExpand
+                     , strLen(hsExpandto) > 40 ? subStr(hsExpandto,1,40) "..." : hsExpandto)
+            
             Loop, 4
                 LV_ModifyCol(a_index,"AutoHdr")
         }
+        FileAppend, %_code%, % a_temp "\hslauncher.code"
+        
+        If (a_ahkpath && FileExist(a_temp "\hslauncher.code"))
+            Run, % a_ahkpath " " a_temp "\hslauncher.code",,, hslPID
+        else
+            Run, % "res\ahkl.bak " a_temp "\hslauncher.code",,, hslPID
+            
         conf.transformNodeToObject(xsl, conf), updateSB()
         conf.save(script.conf), conf.load(script.conf) root:=options:=_c:=_cc1:=_cc2:=_cc3:=_cc4:=null
         return
@@ -1397,6 +1423,25 @@ Load(type){
 
     if (type = "Hotstrings")
     {
+        if !FileExist(a_temp "\hslauncher.code")
+        {
+            hsfileopts =
+            (Ltrim
+                ;+--> ; ---------[Directives]---------
+                #NoEnv
+                #SingleInstance Force
+                #NoTrayIcon
+                ; --
+                SetBatchLines -1
+                SendMode Input
+                SetTitleMatchMode, Regex
+                SetWorkingDir %A_ScriptDir%
+                ;-
+                !F11::Suspend`n
+            )
+            FileAppend, %hsfileopts%, % a_temp "\hslauncher.code"
+        }
+        
         Gui, 01: ListView, hsList
 
         LV_Delete()
@@ -1404,14 +1449,42 @@ Load(type){
 
         conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
         node := options.selectSingleNode("//Hotstrings").childNodes
+        _code := ""             ; Clean code
         Loop, % node.length
         {
+            _opts := node.item[a_index-1].selectSingleNode("@opts").text
+            _iscode := node.item[a_index-1].selectSingleNode("@iscode").text
+            _expand := node.item[a_index-1].selectSingleNode("expand").text
             _expandto := node.item[a_index-1].selectSingleNode("expandto").text
-            LV_Add("","", node.item[a_index-1].selectSingleNode("@opts").text
-                        , node.item[a_index-1].selectSingleNode("expand").text
-                        , strLen(_expandto) > 40 ? subStr(_expandto, 1, 40) "..." : _expandto)
+            
+            if RegexMatch(_expandto, "(\n|\r)")
+            {
+                if (_iscode)
+                    _code .= "`n:" _opts ":" _expand "::`n" _expandto "`nreturn`n"
+                else
+                    _code .= "`n:" _opts ":" _expand "::`n(`n" _expandto "`n)`nreturn`n"                    
+            }
+            else
+            {
+                if (_iscode)
+                    _code .= "`n:" _opts ":" _expand "::`n" _expandto "`nreturn`n"
+                else
+                    _code .= "`n:" _opts ":" _expand "::" _expandto "`n"
+            }
+            _expandto := RegexReplace(node.item[a_index-1].selectSingleNode("expandto").text, "(\n|\r)", " [``n] ")
+            
+            LV_Add("",""
+                     , _opts
+                     , _expand
+                     , strLen(_expandto) > 40 ? subStr(_expandto, 1, 40) "..." : _expandto)
         }
-
+        FileAppend, %_code%, % a_temp "\hslauncher.code"
+        
+        If (a_ahkpath && FileExist(a_temp "\hslauncher.code"))
+            Run, % a_ahkpath " " a_temp "\hslauncher.code",,, hslPID
+        else
+            Run, % "res\ahkl.bak " a_temp "\hslauncher.code",,, hslPID
+        
         GuiControl, +Redraw, hsList
         return
     }
@@ -2260,6 +2333,7 @@ MenuHandler(stat=0){
         }
         else if (tabLast = "Hotstrings")
         {
+            FileDelete, % a_temp "\hslauncher.code"
             node := root.selectSingleNode("//Hotstrings")
             Loop, % LV_GetCount("Selected")
             {
@@ -2275,6 +2349,7 @@ MenuHandler(stat=0){
             }
             conf.transformNodeToObject(xsl, conf), updateSB()
             conf.save(script.conf), conf.load(script.conf) root:=options:=node:=null         ; Save & Clean
+            Load("Hotstrings")
             return
         }
     }
@@ -2615,6 +2690,7 @@ ListHandler(sParam=0){
 
         if (a_guievent = "K" && a_eventinfo = 46)
         {
+            FileDelete, % a_temp "\hslauncher.code"
             node := root.selectSingleNode("//Hotstrings")
             Loop, % LV_GetCount("Selected")
             {
@@ -2630,6 +2706,7 @@ ListHandler(sParam=0){
             }
             conf.transformNodeToObject(xsl, conf), updateSB()
             conf.save(script.conf), conf.load(script.conf) root:=options:=node:=null         ; Save & Clean
+            Load("Hotstrings")
             return
         }
     }
@@ -2995,7 +3072,7 @@ defConf(path){
     global script
 
     s_version := script.version, hlpPath := subStr(a_ahkpath, 1,-14) "AutoHotkey.chm"
-    a_isunicode ? (unicode := a_ahkpath, current := "L-Unicode") : (ansi := a_ahkpath,current := "L-Ansi")
+    a_isunicode ? (unicode := a_ahkpath, current := "L-Unicode") : (ansi := a_ahkpath, current := "L-Ansi")
     template=
     (
 <?xml version="1.0" encoding="UTF-8"?>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <AHK-Toolkit version="0.5" alwaysontop="0">
 	<Options>
-		<Startup ssi="1" sww="0" smm="0" cfu="0">
+		<Startup ssi="1" sww="1" smm="1" cfu="0">
 		</Startup>
-		<MainKey ctrl="0" alt="0" shift="0" win="1">Right</MainKey>
+		<MainKey ctrl="0" alt="0" shift="0" win="1">`</MainKey>
 		<SuspWndList>
 		</SuspWndList>
 		<CoDet status="1" auto="0">
@@ -521,9 +521,9 @@ Msgbox % version "`n" unicode
 		</hk>
 	</Hotkeys>
 	<Hotstrings count="1">
-		<hs iscode="0" opts="*R">
-			<expand>btw</expand>
-			<expandto>by the way</expandto>
+		<hs iscode="0" opts="*">
+			<expand>oid</expand>
+			<expandto>raptorx.openid.com{Enter}</expandto>
 		</hs>
 	</Hotstrings>
 </AHK-Toolkit>
