@@ -490,11 +490,7 @@ Msgbox % version "`n" unicode
 			</Imagebin>
 		</ScrTools>
 	</Options>
-	<Hotkeys count="7">
-		<hk type="File" key="#W">
-			<name>Winamp</name>
-			<path>C:\Program Files\Winamp\winamp.exe</path>
-		</hk>
+	<Hotkeys count="11">
 		<hk type="File" key="#1">
 			<name>Firefox</name>
 			<path>C:\Program Files\Mozilla Firefox\firefox.exe</path>
@@ -519,11 +515,47 @@ Msgbox % version "`n" unicode
 			<name>Vlc</name>
 			<path>C:\Program Files\VideoLAN\VLC\vlc.exe</path>
 		</hk>
+		<hk type="File" key="#C">
+			<name>Chaoslauncher</name>
+			<path>E:\games\Starcraft\Chaoslauncher\Chaoslauncher.exe</path>
+		</hk>
+		<hk type="File" key="#W">
+			<name>Winamp</name>
+			<path>C:\Program Files\Winamp\winamp.exe</path>
+		</hk>
+		<hk type="File" key="#M">
+			<name>Msnmsgr</name>
+			<path>C:\Program Files\Windows Live\Messenger\msnmsgr.exe</path>
+		</hk>
+		<hk type="File" key="#0">
+			<name>Revo Uninstaller</name>
+			<path>C:\Program Files\Revo Uninstaller\Revouninstaller.exe</path>
+		</hk>
+		<hk type="File" key="#P">
+			<name>Photoshop</name>
+			<path>C:\Program Files\Adobe\Adobe Photoshop CS4\Photoshop.exe</path>
+		</hk>
 	</Hotkeys>
-	<Hotstrings count="1">
+	<Hotstrings count="5">
 		<hs iscode="0" opts="*">
 			<expand>oid</expand>
 			<expandto>raptorx.openid.com{Enter}</expandto>
+		</hs>
+		<hs iscode="0" opts="*B0">
+			<expand>[quote]</expand>
+			<expandto>[/quote]{Left 8}</expandto>
+		</hs>
+		<hs iscode="0" opts="*B0">
+			<expand>[code]</expand>
+			<expandto>[/code]{Left 7}</expandto>
+		</hs>
+		<hs iscode="1" opts="*">
+			<expand>&amp;apos;time</expand>
+			<expandto>Send %a_mmmm% %a_dd%, %a_yyyy%</expandto>
+		</hs>
+		<hs iscode="0" opts="*R">
+			<expand>&amp;apos;""</expand>
+			<expandto>"$(FULL_CURRENT_PATH)"</expandto>
 		</hs>
 	</Hotstrings>
 </AHK-Toolkit>
