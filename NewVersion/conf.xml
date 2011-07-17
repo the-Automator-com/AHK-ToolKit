@@ -303,8 +303,7 @@ Esc::
 GuiClose:
     ExitApp
                     </Snippet>
-					<Snippet title="Version Test">
-/*
+					<Snippet title="Version Test">/*
  ************************************************************************************
  * This Script is just a quick way to determine which version of Autohotkey         *
  * is being used by the Live Code feature.                                          *
@@ -316,8 +315,7 @@ GuiClose:
  
 version := "AHK Version: " a_ahkversion
 unicode := "Supports Unicode: " (a_isunicode ? "Yes" : "No")
-Msgbox % version "`n" unicode
-                	</Snippet>
+Msgbox % version "`n" unicode</Snippet>
 				</Group>
 			</SnippetLib>
 			<Keywords>

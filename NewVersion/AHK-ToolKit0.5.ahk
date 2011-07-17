@@ -743,16 +743,16 @@ MainGui(){
     Gui, 01: add, Button, x+10 yp w75 HWND$hsClose gGuiHandler, % "&Close"
 
     Gui, 01: Tab, Live Code
-    options.selectSingleNode("//@snplib").text ? (w:=640, status:=null) : (w:=790, status:="Hidden")
+    options.selectSingleNode("//@snplib").text ? w:=640 : w:=790
     $Sci1 := SCI_Add($hwnd1,5,25,w,320,"hidden","","lib\scilexer.dll")
-    Gui, 01: add, Text, x650 y25 w145 h17 HWND$slTitle Center Border %status%, % "Snippet Library"
-
-    Gui, 01: add, DropDownList, xp y+5 w145 HWND$slDDL %status% gGuiHandler Sort vslDDL
+    
+    Gui, 01: add, Text, x650 y25 w145 h17 HWND$slTitle Center Border Hidden, % "Snippet Library"
+    Gui, 01: add, DropDownList, xp y+5 w145 HWND$slDDL Hidden gGuiHandler Sort vslDDL
     _current := options.selectSingleNode("//SnippetLib/@current").text
     _cnt := options.selectSingleNode("//Group[@name='" _current "']/@count").text
     Gui, 01: add, ListView
                 , w145 h270 HWND$slList -Hdr -ReadOnly
-                . Count%_cnt% AltSubmit Sort Grid %status% gListHandler vslList
+                . Count%_cnt% AltSubmit Sort Grid Hidden gListHandler vslList
                 , % "Title"
 
     Load("SnpLib")
@@ -1648,15 +1648,12 @@ GuiHandler(){
             MenuHandler(tabLast = "Live Code" ? "enable" : "disable")
             Control,%action%,,,ahk_id %$Sci1%
 
-            if action = show
+            if (action = "show")
                 ControlFocus,,ahk_id %$Sci1%
 
-            if options.selectSingleNode("//@snplib").text
-            {
-                ; msgbox % action
+            if options.selectSingleNode("//@snplib").text != 0
                 Loop, Parse, slControls, |
                     Control,%action%,,,ahk_id %a_loopfield%
-            }
             return
         }
 
@@ -2431,7 +2428,6 @@ MenuHandler(stat=0){
         }
         else
         {
-            ; msgbox true
             ControlMove,,,, % _guiwidth - 10,, ahk_id %$Sci1%
             attach($Sci1, "w h r2")
             Loop, Parse, slControls, |
