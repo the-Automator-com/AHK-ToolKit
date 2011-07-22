@@ -161,7 +161,7 @@ class scriptobj
                     debug ? debug("* Canceled. ExitApp [1]", 2)
                     ExitApp
                 }
-                FileInstall,AHK-Toolkit.ahk, %instloc%
+                FileInstall,AHK-ToolKit.ahk, %instloc%
                 if (!ErrorLevel){
                     debug ? debug("* Source code successfully copied")
                     MsgBox, 0x40
@@ -205,8 +205,8 @@ class scriptobj
         if a_thismenuitem = Check for Updates
             Progress, 50,,, % "Updating..."
 
-        logurl := rfile = "github" ? "https://www.github.com/" script.author 
-                                   . "/" script.name "/raw/master/Changelog.txt" : logurl
+        logurl := rfile = "github" ? "https://raw.github.com/" script.author 
+                                   . "/" script.name "/master/Changelog.txt" : logurl
 
         RunWait %ComSpec% /c "Ping -n 1 google.com" ,, Hide  ; Check if we are connected to the internet
         if connected := !ErrorLevel
@@ -287,7 +287,7 @@ class scriptobj
     }
     splash(img=0){
         global
-
+        
         Gui, 99: -Caption +LastFound +Border +AlwaysOnTop +Owner
         $hwnd := WinExist()
         WinSet, Transparent, 0
@@ -414,7 +414,7 @@ if !conf.load(script.conf)
 script.autostart(options.selectSingleNode("//@sww").text)
 
 if options.selectSingleNode("//@cfu").text
-    ; script.update(script.version)
+    script.update(script.version)
 
 if options.selectSingleNode("//@ssi").text
     script.splash("res\img\AHK-TK_Splash.png")
@@ -1039,7 +1039,7 @@ PreferencesGui(){
     ; Gui, 98: show, x165 y36 w350 h245 NoActivate
     ;}
     
-    Gui, 06: add, Text, x165 y+245 w370 0x10
+    Gui, 06: add, Text, x165 y+8 w370 0x10                          ; y is 10 - 2px of the Picture control.
     Gui, 06: add, Button, xp+105 yp+10 w75 gGuiHandler, % "&OK"
     Gui, 06: add, Button, x+10 w75 gGuiHandler, % "&Close"
     Gui, 06: add, Button, x+10 w75 HWND$Apply Disabled gGuiHandler, % "&Apply"
@@ -1850,8 +1850,10 @@ GuiHandler(){
 
                 %_code%
 
-                ^Esc::ExitApp
             )
+            if !InStr(_code, "^Esc::ExitApp")
+                live_script .= "^Esc::ExitApp"
+            
             FileAppend, %live_code%, %lcfPath%
 
             rcw := options.selectSingleNode("//RCPaths/@current").text
@@ -2082,7 +2084,9 @@ GuiHandler(){
 
         if (a_guicontrol = "&Accept")
         {
-            
+            Gui, %a_gui%: Submit
+            WinActivate, ahk_id %$hwnd1%
+            Gui, 01: -Disabled
             return
         }
 
@@ -2106,13 +2110,93 @@ GuiHandler(){
     {
         if (a_guicontrol = "&Browse...")
         {
-            Gui, 01: +OwnDialogs
-            FileSelectFile,exFile, S24
+            Gui, 05: +OwnDialogs
+            FileSelectFile, exFile
+                          , S24
                           , % a_mydocuments "\export_" subStr(a_now,1,8) ".ahk"
                           , % "Save File as...", *.ahk; *.txt
             return
         }
 
+        if (a_guicontrol = "&Export")
+        {
+            if FileExist(exPath)
+            {
+                Msgbox, 0x124
+                      , % "The file exists"
+                      , % "The filename that you selected appears already exist.`n"
+                        . "Do you want to append to the existing file?"
+
+                IfMsgbox No
+                    return
+            }
+            
+            if (exHK)
+            {
+                node := root.selectSingleNode("//Hotkeys")
+                FileAppend, % "; Hotkeys Exported with AutoHotkey Toolkit v" script.version "`n", %exPath%
+                Loop % node.attributes.item[0].text
+                {
+                    _hk := node.selectSingleNode("//hk[" a_index - 1 "]/@key").text
+                    _hk := RegexReplace(_hk, "&apos;", "'")
+                    _path := node.selectSingleNode("//hk[" a_index - 1 "]/path").text
+                    _script := node.selectSingleNode("//hk[" a_index - 1 "]/script").text
+                    _ifWin := node.selectSingleNode("//hk[" a_index - 1 "]/ifwinactive").text "`n"
+                    _ifWinN := node.selectSingleNode("//hk[" a_index - 1 "]/ifwinnotactive").text "`n"
+                    
+                    if (node.selectSingleNode("//hk[" a_index - 1 "]/@type").text = "Script")
+                        _code := (_ifWin != "`n" ? "#IfWinActive " _ifWin : "") 
+                              .  (_ifWinN != "`n" ? "#IfWinNotActive " _ifWinN : "")
+                              .   _hk "::`n" _script "`nreturn`n"
+                              .  (_ifWin != "`n" ? "#IfWinActive" : "")
+                              .  (_ifWinN != "`n" ? "#IfWinNotActive" : "")
+                    else
+                        _code := (_ifWin != "`n" ? "#IfWinActive " _ifWin : "") 
+                              .  (_ifWinN != "`n" ? "#IfWinNotActive " _ifWinN : "") 
+                              .   _hk "::Run, " _path
+                              .  (_ifWin != "`n" ? "#IfWinActive" : "")
+                              .  (_ifWinN != "`n" ? "#IfWinNotActive" : "")
+
+                    FileAppend, %_code%`n, %exPath%
+                }
+            }
+            
+            if (exHS)
+            {
+                node := root.selectSingleNode("//Hotstrings")
+                FileAppend, % "; Hotstrings Exported with AutoHotkey Toolkit v" script.version "`n", %exPath%
+                Loop % node.attributes.item[0].text
+                {
+                    _opts := node.selectSingleNode("//hs[" a_index - 1 "]/@opts").text
+                    _expand := node.selectSingleNode("//hs[" a_index - 1 "]/expand").text
+                    _expand := RegexReplace(_expand, "&apos;", "'")
+                    _expandto := node.selectSingleNode("//hs[" a_index - 1 "]/expandto").text
+                    _ifWin := node.selectSingleNode("//hs[" a_index - 1 "]/ifwinactive").text "`n"
+                    _ifWinN := node.selectSingleNode("//hs[" a_index - 1 "]/ifwinnotactive").text "`n"
+                    
+                    if (node.selectSingleNode("//hs[" a_index - 1 "]/@iscode").text)
+                        _code := (_ifWin != "`n" ? "#IfWinActive " _ifWin : "") 
+                              .  (_ifWinN != "`n" ? "#IfWinNotActive " _ifWinN : "")
+                              .   ":" _opts ":" _expand "::`n" _expandto "`nreturn`n"
+                              .  (_ifWin != "`n" ? "#IfWinActive" : "")
+                              .  (_ifWinN != "`n" ? "#IfWinNotActive" : "")
+                    else
+                        _code := (_ifWin != "`n" ? "#IfWinActive " _ifWin : "") 
+                              .  (_ifWinN != "`n" ? "#IfWinNotActive " _ifWinN : "") 
+                              .   ":" _opts ":" _expand "::" _expandto
+                              .  (_ifWin != "`n" ? "#IfWinActive" : "")
+                              .  (_ifWinN != "`n" ? "#IfWinNotActive" : "")
+
+                    FileAppend, %_code%`n, %exPath%
+                }
+            }
+            
+            Gui, %a_gui%: Submit
+            WinActivate, ahk_id %$hwnd1%
+            Gui, 01: -Disabled
+            return
+        }
+        
         if (a_guicontrol = "&Cancel")
         {
             5GuiClose:
@@ -2842,8 +2926,11 @@ HotkeyHandler(hk){
 
             %_script%
 
-            ^Esc::ExitApp
         )
+        
+        if !InStr(_script, "^Esc::ExitApp")
+            live_script .= "^Esc::ExitApp"
+            
         FileAppend, %live_script%, %lcfPath%
 
         rcw := options.selectSingleNode("//RCPaths/@current").text

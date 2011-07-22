@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <AHK-Toolkit version="0.5" alwaysontop="0">
 	<Options>
-		<Startup ssi="1" sww="1" smm="1" cfu="0">
+		<Startup ssi="1" sww="0" smm="1" cfu="1">
 		</Startup>
 		<MainKey ctrl="0" alt="0" shift="0" win="1">`</MainKey>
-		<SuspWndList>
-		</SuspWndList>
+		<SuspWndList></SuspWndList>
 		<CoDet status="1" auto="0">
 			<Pastebin current="Autohotkey">
 				<AutoHotkey private="0" nick="">http://www.autohotkey.net/paste/</AutoHotkey>
@@ -488,7 +487,7 @@ Msgbox % version "`n" unicode</Snippet>
 			</Imagebin>
 		</ScrTools>
 	</Options>
-	<Hotkeys count="11">
+	<Hotkeys count="12">
 		<hk type="File" key="#1">
 			<name>Firefox</name>
 			<path>C:\Program Files\Mozilla Firefox\firefox.exe</path>
@@ -533,8 +532,43 @@ Msgbox % version "`n" unicode</Snippet>
 			<name>Photoshop</name>
 			<path>C:\Program Files\Adobe\Adobe Photoshop CS4\Photoshop.exe</path>
 		</hk>
+		<hk type="Script" key="#F12">
+			<name>SC Ally Script</name>
+			<script>#NoTrayIcon
+
+mid_scrw  :=  a_screenwidth / 2         ; Middle of the screen (width)
+mid_scrh  :=  a_screenheight / 2        ; Middle of the screen (heigth)
+
+#IfWinActive ahk_class SWarClass
+^+a::
+ if !nick
+    Inputbox, nick
+            , % "Set your ally"
+            , % "Pease enter the nick of your ally"
+            ,
+            , 210
+            , 120
+            , % mid_scrw - (210/2)
+            , % mid_scrh - (120/2)
+ else
+    SendInput, /ally %nick% {Enter}
+
+ IfWinNotActive ahk_class SWarClass
+    WinActivate
+ else
+    WinMaximize
+return
+
+^+z::
+ nick :=
+ Gosub, ^+a
+return
+#IfWinActive
+
+^Esc::ExitApp</script>
+		</hk>
 	</Hotkeys>
-	<Hotstrings count="5">
+	<Hotstrings count="6">
 		<hs iscode="0" opts="*">
 			<expand>oid</expand>
 			<expandto>raptorx.openid.com{Enter}</expandto>
@@ -549,11 +583,15 @@ Msgbox % version "`n" unicode</Snippet>
 		</hs>
 		<hs iscode="1" opts="*">
 			<expand>&amp;apos;time</expand>
-			<expandto>Send %a_mmmm% %a_dd%, %a_yyyy%</expandto>
+			<expandto>SendInput %a_mmmm% %a_dd%, %a_yyyy%</expandto>
 		</hs>
 		<hs iscode="0" opts="*R">
 			<expand>&amp;apos;""</expand>
 			<expandto>"$(FULL_CURRENT_PATH)"</expandto>
+		</hs>
+		<hs iscode="1" opts="*">
+			<expand>[url]</expand>
+			<expandto>SendInput [url=%clipboard%][/url]{Left 6}</expandto>
 		</hs>
 	</Hotstrings>
 </AHK-Toolkit>
