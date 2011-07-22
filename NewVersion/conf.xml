@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <AHK-Toolkit version="0.5" alwaysontop="0">
 	<Options>
-		<Startup ssi="1" sww="0" smm="1" cfu="1">
+		<Startup ssi="1" sww="1" smm="1" cfu="0">
 		</Startup>
 		<MainKey ctrl="0" alt="0" shift="0" win="1">`</MainKey>
 		<SuspWndList></SuspWndList>
