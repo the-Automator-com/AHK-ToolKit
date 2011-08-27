@@ -80,14 +80,14 @@ OnExit, Exit
 ;[Basic Script Info]{
 class scriptobj
 {
-    var name        := "AHK-ToolKit"                                             ; Script Name
-    var version     := "0.5"                                                     ; Script Version
-    var author      := "RaptorX"                                                 ; Script Author
-    var email       := "graptorx@gmail.com"                                      ; Author's contact email
-    var homepage    := "http://www.autohotkey.com/forum/topic61379.html#376087"  ; Script Homepage
-    var crtdate     := "July 11, 2010"                                           ; Script Creation Date
-    var moddate     := "July 05, 2011"                                           ; Script Modification Date
-    var conf        := "conf.xml"                                                ; Configuration file
+    name        := "AHK-ToolKit"                                             ; Script Name
+    version     := "0.5"                                                     ; Script Version
+    author      := "RaptorX"                                                 ; Script Author
+    email       := "graptorx@gmail.com"                                      ; Author's contact email
+    homepage    := "http://www.autohotkey.com/forum/topic61379.html#376087"  ; Script Homepage
+    crtdate     := "July 11, 2010"                                           ; Script Creation Date
+    moddate     := "July 05, 2011"                                           ; Script Modification Date
+    conf        := "conf.xml"                                                ; Configuration file
 
     getparams(){
         global
