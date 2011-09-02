@@ -1,152 +1,76 @@
-commit b887e7356a4f42f5b66f62e42546ffe011ac6d48
+commit 3131ef7c870119deaef8b3e9d02febadcb1a852c
 Author: RaptorX <graptorx@gmail.com>
-Date:   Fri Aug 26 17:01:41 2011 +0200
+Date:   Fri Sep 2 18:11:34 2011 +0200
+
+    AHK-TK v0.5.2
+    
+    Changed:
+    
+    + Add RunAs code to make sure script is run as Admin in Win7/Vista
+    + Add feature to open file that contains the selected hotkey/hostring while importing
+    + Add Import function
+    * Fix Tray Icon
+    * Fix export path error
+    * Fix main List View title
+    * Fix Import List View titles
+    * Fix add file/folder GUI to display correct path when editing a hotkey
+    * Fix Live Code not appending the ^Esc hotkey to exit the app
+    * Fix width of hints on Snippet Library example codes
+    * Fix Import function (problem with multiline imports)
+
+commit f05f8a10fb25e7afc78a3379aacf4fe831deb7e9
+Author: RaptorX <graptorx@gmail.com>
+Date:   Fri Sep 2 18:09:26 2011 +0200
+
+    AHK-TK v0.5.1
+    
+    Changes:
+    
+    * Fix Class Object Error on AHK_L 1.1.02.03 (syntax change)
+    * Fix minor spelling errors
+
+commit 5dc5f93a3098e7f06b358b2c51f784778ea6dbdb
+Author: RaptorX <graptorx@gmail.com>
+Date:   Thu Feb 17 17:09:25 2011 +0100
 
     AHK-TK v0.5
     
     Changes:
     
+    + Add Function GuiClose()
+    + Add Function ApplyPref()
     + Add Description
-    * Disable all non-working features
-
-commit 74d876d5806ac6c4d7109e95bd21038c8546889e
-Author: RaptorX <graptorx@gmail.com>
-Date:   Fri Jul 22 21:08:19 2011 +0200
-
-    * Renamed main file
-
-commit 4ae0a21850a1c85b57224e04f7e4e95b614efda1
-Author: RaptorX <graptorx@gmail.com>
-Date:   Fri Jul 22 21:06:12 2011 +0200
-
-    * Add functionality to export hotkeys
+    + Add Hotstrings listview and xml functionality
+    + Add Add() function
+    + Add Load() function
+    + Add Hotkey functionality
+    + Add scriptobj class
+    + Add functionality to Browse button on Gui 02
+    + Add Name field on Gui 02
+    + Add functionality to add hotkeys
+    + Add hotstrings functionality
+    + Add functionality to export hotkeys
     
+    * Fix classes definition to conform to latest version of AHK_L
+    * fixed xml
+    * Fix minor errors
+    * Fix hotExtract() function
+    * Fix minor errors
+    * Fix problem with Snippet Library showing when it was hidden
     * Fix splash issue
     * Fix update issue
-
-commit 7459081e39cfe0f712f4c2055b1950b2a4843326
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Jul 17 02:43:54 2011 +0200
-
-    * Fix problem with Snippet Library showing when it was hidden
-
-commit 2e5fd126ed6df54e04729555993670b394512747
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Jul 17 02:13:21 2011 +0200
-
-    * Moved files to img folder
-
-commit 73d23ac7b2cf3a0dea20c6f09bed6a3b5c900947
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Jul 17 02:12:04 2011 +0200
-
-    * New Changes
-
-commit 95de6dd39bbb46e7589a5e961bac4ddd4d17aff3
-Author: RaptorX <graptorx@gmail.com>
-Date:   Mon Jul 4 23:07:27 2011 +0200
-
-    * Add hotstrings functionality
-
-commit c2d6e649b8ad400bc5d371d3767b8453ffc92b0b
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Jul 3 23:30:18 2011 +0200
-
-    * Add functionality to add hotkeys
-
-commit 66ed5c022d3d39f60120e4668b261f193377c08d
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Jul 3 02:53:03 2011 +0200
-
-    * Add functionality to Browse button on Gui 02
-    
-    * Add Name field on Gui 02
-
-commit 719f17f344fe5d594947837af5bba169720ec74c
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Jul 3 00:18:50 2011 +0200
-
-    * Remove duplicate functions
-
-commit f7f7cb426203c325008f5a61d52e7ef9c2c0bd73
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Jul 3 00:12:29 2011 +0200
-
-    * Fix minor errors
-
-commit 3ce138a3e11c1f22ac52c4507785f067a9f134b0
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sat Jul 2 21:19:09 2011 +0200
-
-    * Fix hotExtract() function
-
-commit 89444ebdd79fa102f1a6996e14cb9498bf1a6ed3
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sat Jul 2 20:53:48 2011 +0200
-
-    * Add scriptobj class
-
-commit a928367358de5c804a1ae1207f6cc06fd1bbfe5d
-Author: RaptorX <graptorx@gmail.com>
-Date:   Thu Jun 30 19:58:14 2011 +0200
-
-    * Add Hotkey functionality
-
-commit 1e54605e77d60d5a137ca9a52e5b93ad23ee9940
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Jun 12 16:34:15 2011 +0200
-
-    * Add updateSB() function
-    * Add Load() function
-    * Add functionality for hotstrings. Save, Edit, Delete and Load hotstrings
-
-commit 095d287efd719d2fdb685331d5f68392d3b681b9
-Author: RaptorX <graptorx@gmail.com>
-Date:   Fri Jun 10 12:15:42 2011 +0200
-
-    * Add Hotstrings listview and xml functionality
-    
-    * Add Add() function
-    * Add Load() function
-    * Fix minor errors
-
-commit 0f4bd627f65d7ef612c67e415b966d42dfef7fed
-Author: RaptorX <graptorx@gmail.com>
-Date:   Mon Jun 6 22:53:13 2011 +0200
-
-    * Fix classes definition to conform to latest version of AHK_L
-    
-    * Remove double tabs on menu item names
-    * Add Function GuiClose()
-    * Add Function ApplyPref()
     * Minor fixes
-
-commit 655894163b4d3e2b727ceb8692d032dd6a209b47
-Author: RaptorX <graptorx@gmail.com>
-Date:   Mon Mar 14 22:56:51 2011 +0100
-
-    * fixed xml
-
-commit 6751c35395b4ffae58cd56ebbe9a01f9cc045d07
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Mar 13 00:31:00 2011 +0100
-
-    + Command Detection Preferences
-
-commit 89968e97ee10cad9620b89177c6371de0966b6d6
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sat Mar 12 21:41:34 2011 +0100
-
-    + Snippets Library finished
-
-commit 51237035c1909ee900039cccf74ae29685b4033f
-Author: RaptorX <graptorx@gmail.com>
-Date:   Thu Feb 17 17:09:25 2011 +0100
-
-    AHK-TK --
     
-    Changed:
-    ** New Version GUI almost completed
+    - Remove double tabs on menu item names
+    - Remove duplicate functions
+    
+    * Disable all non-working features
+    * New Version GUI almost completed
+    * Snippets Library finished
+    * Command Detection Preferences
+    * New Changes
+    * Moved files to img folder
+    * Renamed main file
 
 commit 24305d18a1097d4e81d334422f1c2bd9a219f752
 Author: RaptorX <graptorx@gmail.com>

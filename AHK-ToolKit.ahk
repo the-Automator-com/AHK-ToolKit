@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.5.1
+ * Script Version   : 0.5.2
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: August 28, 2011
+ * Modification Date: September 01, 2011
  *
  * Description      :
  * ------------------
@@ -16,7 +16,8 @@
  * in an easy to read list.
  *
  * The Live Code tab allows you to quickly test ahk code without having to save a file even if 
- * Autohotkey is not installed in the computer you are using. Also there are other tools like the Command Detector and the Screen and Forum Tools that improve
+ * Autohotkey is not installed in the computer you are using. 
+ * Also there are other tools like the Command Detector and the Screen and Forum Tools that improve
  * the way i help other people while in IRC and ahk Forums.
  *
  * I hope other people find it useful. You can modify it and improve it as you like. Feel free 
@@ -75,18 +76,19 @@ SendMode, Input
 SetWorkingDir, %a_scriptdir%
 OnExit, Exit
 ; --
+TrayMenu() ; This function is here so that Tray Icon is shown early.
 ;}
 
 ;[Basic Script Info]{
 class scriptobj
 {
     name        := "AHK-ToolKit"                                             ; Script Name
-    version     := "0.5.1"                                                   ; Script Version
+    version     := "0.5.2"                                                   ; Script Version
     author      := "RaptorX"                                                 ; Script Author
     email       := "graptorx@gmail.com"                                      ; Author's contact email
     homepage    := "http://www.autohotkey.com/forum/topic61379.html#376087"  ; Script Homepage
     crtdate     := "July 11, 2010"                                           ; Script Creation Date
-    moddate     := "August 28, 2011"                                         ; Script Modification Date
+    moddate     := "September 01, 2011"                                      ; Script Modification Date
     conf        := "conf.xml"                                                ; Configuration file
 
     getparams(){
@@ -350,6 +352,27 @@ hour        := 60*min  	            ; 1 hour
 ;}
 
 ;[User Configuration]{
+
+; Trying to fix the issues that result from the script not being run as admin under Win7/Vista
+if !a_isadmin
+{
+    If a_iscompiled
+       DllCall(ShellExecute,"Uint", 0
+                           , "Str", "RunAs"
+                           , "Str", a_scriptfullpath
+                           , "Str", params 
+                           , "Str", a_workingdir
+                           ,"Uint", 1)
+    Else
+       DllCall(ShellExecute,"Uint", 0
+                           , "Str", "RunAs"
+                           , "Str", a_ahkpath
+                           , "Str", """" a_scriptfullpath """" a_space params
+                           , "Str", a_workingdir
+                           ,"Uint", 1)
+    ExitApp
+}
+    
 system := object(), system.mon := object(), system.wa := object()
 
 RegRead,defBrowser,HKCR,.html                               ; Get default browswer
@@ -427,11 +450,11 @@ script.autostart(options.selectSingleNode("//@sww").text)
 
 if options.selectSingleNode("//@cfu").text
     script.update(script.version)
-
+    
 if options.selectSingleNode("//@ssi").text
     script.splash("res\img\AHK-TK_Splash.png")
-
-TrayMenu(), CreateGui()
+    
+CreateGui()
 Return                      ; [End of Auto-Execute area]
 ;}
 
@@ -540,6 +563,7 @@ FirstRun(){
     Pause
 }
 TrayMenu(){
+    Menu, Tray, Icon, res/AHK-TK.ico
     Menu, Tray, NoStandard
     Menu, Tray, Click, 1
     Menu, Tray, add, % "Show Main Gui", GuiClose
@@ -551,9 +575,8 @@ MainMenu(){
     global conf, script
 
     conf.load(script.conf), root:=conf.documentElement,options:=root.firstChild
-    Menu, Tray, Icon, res/AHK-TK.ico
     Menu, iexport, add, Import Hotkeys/Hotstrings, MenuHandler
-    Menu, iexport, disable, Import Hotkeys/Hotstrings
+    ; Menu, iexport, disable, Import Hotkeys/Hotstrings
     Menu, iexport, add
     Menu, iexport, add, Export Hotkeys/Hotstrings, MenuHandler
 
@@ -708,7 +731,7 @@ MainGui(){
     _cnt := root.selectSingleNode("//Hotkeys/@count").text
     Gui, 01: tab, Hotkeys
     Gui, 01: add, ListView, w780 h315 HWND$hkList Count%_cnt% Sort Grid AltSubmit gListHandler vhkList
-                          , % "Type|Program Name|Hotkey|Program Path"
+                          , % "Type|Program Name|Hotkey|Program Path / Script Preview"
     Gui, 01: add, ListView, w780 h315 xp yp HWND$shkList Count%_cnt% Sort Grid AltSubmit gListHandler vshkList
                           , % "Type|Program Name|Hotkey|Program Path"
 
@@ -1261,6 +1284,7 @@ SetHotkeys(list=0, $hwnd=0, title=0){
         ; The Hotkey command allow the hotkeys to run the labels inside the MenuHandler function
         ; sad but true
         Hotkey, IfWinActive, ahk_id %$hwnd%
+        Hotkey, ^i, Gui_Import          ; Ctrl + I
         Hotkey, ^n, Gui_AddNew          ; Ctrl + N
         Hotkey, ^p, Gui_Preferences     ; Ctrl + P
         Hotkey, IfWinActive
@@ -1327,13 +1351,15 @@ Add(type){
         else
         {
             Hotkey, % RegexReplace(hkey, "&apos;", "'"), HotkeyHandler, On
+            ; _code comes from import
             SCI_GetText(SCI_GetLength($Sci2)+1,_hkscript)
             node.attributes.item[0].text() += 1
                 _c := conf.createElement("hk")
-                _c.setAttribute("type", hkType), _c.setAttribute("key", hkey)
+                _c.setAttribute("type", hkType), _c.setAttribute("key", opts hkey) ; opts comes from import
                     _cc1 := conf.createElement("name"), _cc1.text := hkName
-                    _cc2 := conf.createElement("path"), _cc2.text := hkType != "Script" ? hkPath : ""
-                    _cc3 := conf.createElement("script"), _cc3.text := _hkscript
+                    _cc2 := conf.createElement("path"), _cc2.text := hkType != "Script" ?(!hkPath ? _code : hkPath) 
+                                                                                        : ""
+                    _cc3 := conf.createElement("script"), _cc3.text := !_hkscript ? _code : _hkscript
                     _cc4 := conf.createElement("ifwinactive"), _cc4.text := inStr(hkIfWin, "e.g.") ? "" : hkIfWin
                     _cc5 := conf.createElement("ifwinnotactive"),_cc5.text:=inStr(hkIfWinN, "e.g.")? "" : hkIfWinN
             Loop 5
@@ -1341,10 +1367,14 @@ Add(type){
                     _c.appendChild(_cc%a_index%)
             node.appendChild(_c)
 
+            _code := RegexReplace(_code, "(\n|\r)", "[``n]")
+            _hkscript := RegexReplace(_hkscript, "(\n|\r)", "[``n]")
+            
             LV_Add("", hkType
                      , hkName
                      , hkSwap(RegexReplace(hkey, "&apos;", "'"), "long")
-                     , hkType!= "Script" ? hkPath : strLen(_hkscript)>40 ? subStr(_hkscript,1,40) "..." : _hkscript)
+                     , hkType != "Script" ? hkPath _code
+                     : strLen(_hkscript _code)>40 ? subStr(_hkscript _code,1,40) "..." : _hkscript _code)
             Loop, 4
                 LV_ModifyCol(a_index,"AutoHdr")
         }
@@ -1389,7 +1419,8 @@ Add(type){
         else
         {
             node.attributes.item[0].text() += 1
-                _c := conf.createElement("hs"), _c.setAttribute("iscode", hsIsCode), _c.setAttribute("opts", hsOpt)
+                _c := conf.createElement("hs"), _c.setAttribute("iscode", hsIsCode)
+                _c.setAttribute("opts", opts hsOpt) ; opts comes from import
                     _cc1 := conf.createElement("expand"), _cc1.text() := RegexReplace(hsExpand, "\'", "&apos;")
                     _cc2 := conf.createElement("expandto"), _cc2.text() := hsExpandTo
                     _cc3 := conf.createElement("ifwinactive"), _cc3.text() := inStr(hsIfWin, "e.g.") ? "" : hsIfWin
@@ -1414,10 +1445,10 @@ Add(type){
                     _code := "`n:" hsOpt ":" hsExpand "::" hsExpandTo "`n"
             }
             
-            hsExpandTo := RegexReplace(hsExpandTo, "(\n|\r)", " [``n] ")
+            hsExpandTo := RegexReplace(hsExpandTo, "(\n|\r)", "[``n]")
             
             LV_Add("", hsIsCode ? "Script" : "Text"
-                     , hsOpt
+                     , opts hsOpt ; opts comes from import
                      , hsExpand
                      , strLen(hsExpandto) > 40 ? subStr(hsExpandto,1,40) "..." : hsExpandto)
             
@@ -1451,8 +1482,9 @@ Load(type){
         Loop, % node.length
         {
             _path := node.item[a_index-1].selectSingleNode("path").text
-            _script := node.item[a_index-1].selectSingleNode("script").text
+            _script := RegexReplace(node.item[a_index-1].selectSingleNode("script").text, "(\n|\r)", "[``n]")
             _hk := RegexReplace(node.item[a_index-1].selectSingleNode("@key").text, "&apos;", "'")
+            
             LV_Add("", node.item[a_index-1].selectSingleNode("@type").text
                      , node.item[a_index-1].selectSingleNode("name").text
                      , hkSwap(_hk, "long")
@@ -1480,7 +1512,7 @@ Load(type){
                 SetBatchLines -1
                 SendMode Input
                 SetTitleMatchMode, Regex
-                SetWorkingDir %A_ScriptDir%
+                SetWorkingDir %a_scriptdir%
                 ;-
                 !F11::Suspend`n
             )
@@ -1517,7 +1549,7 @@ Load(type){
                     _code .= "`n:" _opts ":" _expand "::" _expandto "`n"
             }
             
-            _expandto := RegexReplace(node.item[a_index-1].selectSingleNode("expandto").text, "(\n|\r)", " [``n] ")
+            _expandto := RegexReplace(node.item[a_index-1].selectSingleNode("expandto").text, "(\n|\r)", "[``n]")
             
             LV_Add("", _iscode ? "Script" : "Text"
                      , _opts
@@ -1870,7 +1902,7 @@ GuiHandler(){
 
             )
             if !InStr(_code, "^Esc::ExitApp")
-                live_script .= "^Esc::ExitApp"
+                live_code .= "^Esc::ExitApp"
             
             FileAppend, %live_code%, %lcfPath%
 
@@ -1904,7 +1936,7 @@ GuiHandler(){
                 */
                 WinGet, winstat, MinMax, ahk_id %$hwnd1%
                 if (!WinActive("ahk_id " $hwnd1) && (winstat != "")
-                && (A_TimeSinceThisHotkey < 100 && A_TimeSinceThisHotkey != -1))
+                && (a_timesincethishotkey < 100 && a_timesincethishotkey != -1))
                 {
                     WinActivate, ahk_id %$hwnd1%
                     return
@@ -2102,7 +2134,22 @@ GuiHandler(){
 
         if (a_guicontrol = "&Accept")
         {
-            Add("Import")
+            hkName := "Imported"
+            Loop % LV_GetCount()
+            {
+                Gui, 04: Default
+                Gui, 04: ListView, imList
+                LV_GetText(hkType, a_index, 1), LV_GetText(opts, a_index, 2), LV_GetText(hkey, a_index, 3)
+                LV_GetTExt(_code, a_index, 4), _code:=RegexReplace(_code, "Run\,\s", ""), hsExpand:=hkey
+                hsExpandTo := _code := RegexReplace(_code, "\(Multiline\)\s", "", hsIsCode)
+                
+                if (hkType = "Hotstring")
+                    Add("hotstring")
+                else
+                    Add("hotkey")
+            }
+            Load("Hotstrings")
+            hkName:=hkType:=opts:=hkey:=hsexpand:=hsexpandto:=_code:=hsIsCode:=null
             
             Gui, %a_gui%: Submit
             WinActivate, ahk_id %$hwnd1%
@@ -2135,6 +2182,8 @@ GuiHandler(){
                           , S24
                           , % a_mydocuments "\export_" subStr(a_now,1,8) ".ahk"
                           , % "Save File as...", *.ahk; *.txt
+            if (exFile)
+                GuiControl, 05:, exPath, %exFile%
             return
         }
 
@@ -2488,8 +2537,9 @@ MenuHandler(stat=0){
 
     if (a_thismenuitem = "Import Hotkeys/Hotstrings")
     {
-        Gui, 01: +Disabled
-        Gui, 04: show
+        Gui_Import:
+            Gui, 01: +Disabled
+            Gui, 04: show
         return
     }
 
@@ -2672,6 +2722,19 @@ ListHandler(sParam=0){
 
     if (a_guicontrol = "imList")
     {
+        if (a_guievent = "DoubleClick")
+        {
+            LV_GetText(_search, _selrow, 4), LV_GetText(_file, _selrow, 5)
+            Run, Notepad %_file%
+            winwaitactive
+            if !inStr(_search, "Multiline")
+            {
+                SetKeyDelay, 200
+                Send ^{Home}{F3}%_search%{Enter}{Esc}
+                SetKeyDelay, -1
+            }
+        }
+        
         if (a_guievent = "K" && a_eventinfo = 46)
         {
             Loop, % LV_GetCount("Selected")
@@ -3075,7 +3138,7 @@ getID(hwnd, controls, handles){
             return a_loopfield
 }
 hotExtract(file, path){
-    global imHK, imHS
+    global imHK, imHS, _code
 
     Gui, 04: Default
     Gui, 04: ListView, imList
@@ -3110,11 +3173,11 @@ hotExtract(file, path){
         {
             if inStr(a_loopfield, "return")
             {
-                subCode := "(Multiline) " RegexReplace(subStr(_code,1,40), "\s+", " ")
+                subCode := "(Multiline) " _code ; RegexReplace(subStr(_code,1,40), "\s+", " ")
                 LV_Add(""
-                      , _mlHK ? "Hotkey" : "Hotstring"
+                      , _mlHK ? "Script" : "Hotstring" 
                       , ((_mlHKOPT || _mlHSOPT) ? RegexReplace(_mlHKOPT _mlHSOPT, "^\s+") : "")
-                      . ((_mlHK || _mlHS) ? RegexReplace(_mlHK _mlHS, "^\s+") : "")
+                      , ((_mlHK || _mlHS) ? RegexReplace(_mlHK _mlHS, "^\s+") : "")
                       , subCode
                       , path)
 
@@ -3130,7 +3193,7 @@ hotExtract(file, path){
                 multiline:=False,_code:="",_mlHK:="",_mlHS:="",_mlHKOPT:="",_mlHSOPT:=""
             }
             else
-                _code .= RegexReplace(a_loopfield, "^\s+") "`n"
+                _code .= a_loopfield "`n"
         }
 
         if RegexMatch(a_loopfield, #mLine, ml)
@@ -3143,11 +3206,11 @@ hotExtract(file, path){
 
         if RegexMatch(a_loopfield, #sLine, sl)
         {
-            msgbox % slhk " " RegexReplace(slHK slHS, "^\s+")
             LV_Add(""
-                  , slHK ? "Hotkey" : "Hotstring"
+                  , ((RegexMatch(slHKCODE slHSCODE, "Run(,\s)?(.*)", mtype) && !slHSCODE) ? null
+                  . (instr(FileExist(mtype2), "D") ? "Folder" : "File") : slHS ? "Hotstring" : "Script")
                   , ((slHKOPT || slHSOPT) ? RegexReplace(slHKOPT slHSOPT, "^\s+") : "")
-                  . ((slHK || slHS) ? RegexReplace(slHK slHS, "^\s+") : "")
+                  , ((slHK || slHS) ? RegexReplace(slHK slHS, "^\s+") : "")
                   , slHKCODE slHSCODE
                   , path)
 
@@ -3330,14 +3393,14 @@ defConf(path){
 				<Group name="Example Snippets" count="4">
                     <Snippet title="Coord Saver">
 /*
- ************************************************************************************
- * This script saves X and Y coordinates in a file every time you click.            *
- * Very useful for quickly determining positions on the screen or to record several *
- * x y positions to be parsed later on by a macro which would click those positions *
- * automatically.                                                                   *
- *                                                                                  *
- * Use the Right Mouse button or the Esc key to exit the application.               *
- ************************************************************************************
+ *********************************************************************
+ * This script saves X and Y coordinates in a file when you click.   *
+ * It is very useful for quickly determining positions on the screen *
+ * or to record several x - y positions to be parsed later on by     *
+ * a macro which would click those positions automatically.          *
+ *                                                                   *
+ * Use the Right Mouse button or Esc to exit the application.        *
+ *********************************************************************
  */
 
 CoordMode, Mouse, Screen
@@ -3357,16 +3420,17 @@ RButton::
                     </Snippet>
 					<Snippet title="Schedule Shutdown">
 /*
- ************************************************************************************
- * All Live Code scripts can make use the variables 'sec' 'min' and 'hour'          *
- *                                                                                  *
- * The following script schedules a shutdown on the specified time.                 *
- * Note that we need to divide by 1000 because the shutown command                  *
- * only accepts seconds while our variables return milliseconds.                    *
- *                                                                                  *
- * Also as we are dividing, time would return a decimal number                      *
- * so we need to get rid of the '.000000' before passing it to the shutdown command *
- ************************************************************************************
+ *********************************************************************
+ * All Live Code scripts can make use the variables                  *
+ * 'sec' 'min' and 'hour'                                            *
+ * The following script schedules a shutdown on the specified time.  *
+ * Note that we need to divide by 1000 because the shutown command   *
+ * only accepts seconds while our variables return milliseconds.     *
+ *                                                                   *
+ * Also as we are dividing, time would return a decimal number       *
+ * so we need to get rid of the '.000000' before passing it to the   *
+ * shutdown command                                                  *
+ *********************************************************************
  */
 
 Gui, add, Groupbox,w235 h50, Shutdown in:
@@ -3391,20 +3455,20 @@ GuiHandler:
                     </Snippet>
 					<Snippet title="Text Control - Style Ref.">
 /*
- ************************************************************************************
- * This Script is just a demostration of the styles that you can apply to           *
- * Text controls.                                                                   *
- *                                                                                  *
- * To apply a style just write the code like this:                                  *
- * Gui, add, Text, [options] [style]                                                *
- * Ex. Gui, add, Text, w50 h50 x20 y25 0x4                                          *
- *                                                                                  *
- * As you can see this opens tons of posibilities in your Gui Creation and with     *
- * enough creativity you can create cool interfaces!                                *
- * Dont limit yourself to the defaults!                                             *
- *                                                                                  *
- * **Press Esc to close the Aplication                                              *
- ************************************************************************************
+ *********************************************************************
+ * This Script is just a demostration of the styles that you can     *
+ * apply to text controls.                                           *
+ *                                                                   *
+ * To apply a style just write the code like this:                   *
+ * Gui, add, Text, [options] [style]                                 *
+ * Ex. Gui, add, Text, w50 h50 x20 y25 0x4                           *
+ *                                                                   *
+ * As you can see this opens tons of posibilities in your            *
+ * Gui Creation and with enough creativity you can create cool       *
+ * interfaces! Dont limit yourself to the defaults!                  *
+ *                                                                   *
+ * **Press Esc to close the Aplication.                              *
+ *********************************************************************
  */
 
 ; --[Main]------------------------------------------------------------------------
@@ -3524,13 +3588,15 @@ GuiClose:
                     </Snippet>
                     <Snippet title="Version Test">
 /*
- ************************************************************************************
- * This Script is just a quick way to determine which version of Autohotkey         *
- * is being used by the Live Code feature.                                          *
- *                                                                                  *
- * It is meant as a way of checking that you set up the correct path to a different *
- * version of Autohotkey and that the program is accessing that path correctly      *
- ************************************************************************************
+ *********************************************************************
+ * This Script is just a quick way to determine which version of     *
+ * Autohotkey is being used by the Live Code feature.                *
+ *                                                                   *
+ * It is meant as a way of checking that you set up the correct      *
+ * path to a different version of Autohotkey and that the program    *
+ * is accessing that path correctly.                                 *
+ *                                                                   *
+ *********************************************************************
  */
 
 version := "AHK Version: " a_ahkversion
