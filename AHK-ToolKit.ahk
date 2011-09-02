@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.5
+ * Script Version   : 0.5.1
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: August 26, 2011
+ * Modification Date: August 28, 2011
  *
  * Description      :
  * ------------------
@@ -56,7 +56,7 @@
  *
  * =============================================================================================== *
  */
-
+ 
 ;[Includes]{
 #include *i %a_scriptdir%
 #include lib\sci.h.ahk
@@ -80,14 +80,14 @@ OnExit, Exit
 ;[Basic Script Info]{
 class scriptobj
 {
-    var name        := "AHK-ToolKit"                                             ; Script Name
-    var version     := "0.5"                                                     ; Script Version
-    var author      := "RaptorX"                                                 ; Script Author
-    var email       := "graptorx@gmail.com"                                      ; Author's contact email
-    var homepage    := "http://www.autohotkey.com/forum/topic61379.html#376087"  ; Script Homepage
-    var crtdate     := "July 11, 2010"                                           ; Script Creation Date
-    var moddate     := "July 05, 2011"                                           ; Script Modification Date
-    var conf        := "conf.xml"                                                ; Configuration file
+    name        := "AHK-ToolKit"                                             ; Script Name
+    version     := "0.5.1"                                                   ; Script Version
+    author      := "RaptorX"                                                 ; Script Author
+    email       := "graptorx@gmail.com"                                      ; Author's contact email
+    homepage    := "http://www.autohotkey.com/forum/topic61379.html#376087"  ; Script Homepage
+    crtdate     := "July 11, 2010"                                           ; Script Creation Date
+    moddate     := "August 28, 2011"                                         ; Script Modification Date
+    conf        := "conf.xml"                                                ; Configuration file
 
     getparams(){
         global
@@ -1112,7 +1112,7 @@ AboutGui(){
     info2   := "Creation Date`t  : " script.crtdate "`n"
             .  "Modification Date : " script.moddate
 
-    licence := "Copyright ©2010-2011 " script.author " <GPLv3>`n`n"
+    License := "Copyright ©2010-2011 " script.author " <GPLv3>`n`n"
             .  "This program is free software: you can redistribute it and/or modify it`n"
             .  "under the terms of the GNU General Public License as published by`n"
             .  "the Free Software Foundation, either version 3 of  the  License,`n"
@@ -1130,11 +1130,15 @@ AboutGui(){
     Gui, 08: add, Picture, x0 y0, % "res\img\AHK-TK_About.png"
     Gui, 08: add, Text, x0 w450 0x10
     Gui, 08: add, Text, x10 yp+10, % info
-    Gui, 08: add, Text, xp+92 yp+27 cBlue gGuiHandler, % script.homepage
+    Gui, 08: font, cBlue underline
+    Gui, 08: add, Text, xp+92 yp+27 gGuiHandler, % script.homepage
+    Gui, 08: font
     Gui, 08: add, Text, x10 y+10, % info2
-    Gui, 08: add, GroupBox, x10 y+10 w400 h220, % "Licence"
-    Gui, 08: add, Text, xp+20 yp+20, % licence
-    Gui, 08: add, Text, xp+169 yp+169 cBlue gGuiHandler, % "http://www.gnu.org/licenses/gpl-3.0.txt"
+    Gui, 08: add, GroupBox, x10 y+10 w400 h220, % "License"
+    Gui, 08: add, Text, xp+20 yp+20, % License
+    Gui, 08: font, cBlue underline
+    Gui, 08: add, Text, xp+169 yp+169  gGuiHandler, % "http://www.gnu.org/licenses/gpl-3.0.txt"
+    Gui, 08: font
     Gui, 08: add, Text, x0 y+30 w450 0x10
     Gui, 08: add, Button, xp+250 yp+10 w75 Disabled gGuiHandler, % "Credits"
     Gui, 08: add, Button, x+10 w75 gGuiHandler, % "&Close"
