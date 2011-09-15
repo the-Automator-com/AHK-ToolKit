@@ -1,4 +1,21 @@
-commit 3131ef7c870119deaef8b3e9d02febadcb1a852c
+commit 1237d3d62967a8977ada1aa92d229a73d836e906
+Author: RaptorX <graptorx@gmail.com>
+Date:   Fri Sep 16 00:16:38 2011 +0200
+
+    AHK-TK v0.5.3
+    
+    Changed:
+    
+    * Fix reset preferences gui
+    * Fix reset gui after import
+    * Fix add() function to add snippets
+    * Fix reset gui after adding snippet
+    * Fix reset gui after adding hotstrings
+    * Fix reset gui after adding hotkeys
+    * Fix problem while adding new hotkey due to _code variable being global
+    * Fix reset gui after adding inline hotstrings
+
+commit 47e97bfd153e74a30ec93e38cbb8ce31ea5c5c9a
 Author: RaptorX <graptorx@gmail.com>
 Date:   Fri Sep 2 18:11:34 2011 +0200
 
@@ -9,6 +26,7 @@ Date:   Fri Sep 2 18:11:34 2011 +0200
     + Add RunAs code to make sure script is run as Admin in Win7/Vista
     + Add feature to open file that contains the selected hotkey/hostring while importing
     + Add Import function
+    
     * Fix Tray Icon
     * Fix export path error
     * Fix main List View title
