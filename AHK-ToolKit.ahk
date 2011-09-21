@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.5.4
+ * Script Version   : 0.5.5
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: September 21, 2011
+ * Modification Date: September 22, 2011
  *
  * Description      :
  * ------------------
@@ -83,12 +83,12 @@ TrayMenu() ; This function is here so that Tray Icon is shown early.
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.5.4"
+           ,version     : "0.5.5"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "September 21, 2011"
+           ,moddate     : "September 22, 2011"
            ,conf        : "conf.xml"}, script.getparams()
 ;}
 
@@ -118,7 +118,6 @@ if !a_isadmin
                            , "Str", """" a_scriptfullpath """" a_space params
                            , "Str", a_workingdir
                            ,"Uint", 1)
-    ExitApp
 }
 
 system := object(), system.mon := object(), system.wa := object()
