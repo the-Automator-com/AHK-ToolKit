@@ -150,9 +150,9 @@
             RegexMatch(logurl, "v(.*)", Version)
             if (rfile = "github"){
                 if (a_iscompiled)
-                    rfile := "http://github.com/downloads/" script.author "/" script.name "-" Version "-Compiled.zip"
+                    rfile := "https://github.com/downloads/" script.author "/" script.name "-Latest-Compiled.zip"
                 else
-                    rfile := "http://github.com/" script.author "/" script.name "/zipball/latest"
+                    rfile := "https://github.com/" script.author "/" script.name "/zipball/latest"
             }
             debug ? debug("* Local Version: " lversion " Remote Version: " Version1)
             if (Version1 > lversion){
