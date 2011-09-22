@@ -1,4 +1,16 @@
-commit 2bb23f1b9e5d88ba11c6b88c3ee28c379f700e80
+commit bc86fe3dfd4d67a59a82dbcdf1348b30ab5044d4
+Author: RaptorX <graptorx@gmail.com>
+Date:   Thu Sep 22 09:11:47 2011 +0200
+
+    AHK-TK v0.5.6
+    
+    Changed:
+    
+    + Add run selected code hotkey [Ctrl + Alt + LButton]
+    * Fix Tray Icon tooltip to display current version
+    * Fix issue with Live Code editor not sending standard edit hotkey commands
+
+commit fdd0226a9ae101d94f6cb16cd7db623ee6cba274
 Author: RaptorX <graptorx@gmail.com>
 Date:   Thu Sep 22 00:33:52 2011 +0200
 
@@ -391,24 +403,6 @@ Date:   Sat Aug 14 01:23:03 2010 +0200
     
     * Add selected command to online documentation
     * Add selected command to tags if in ahk forum
-    
-    ToDo:
-    
-    * Options Gui / Functionality
-    * Add Hotkey commands functionality
-    * Add Hashing functions
-
-commit 4c932191009ed9d6e2b575544164ea7ba44c0326
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sat Aug 14 01:23:03 2010 +0200
-
-    AHK-TK v0.4.5e
-    
-    Changed:
-    
-    * Fixed problems introduced by last commit because of changed variables
-    * Moved the SWW label to be run outside of ReadXML
-    * Changed lib path to complete path instead of variable
     
     ToDo:
     

@@ -2,7 +2,7 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.5.5
+ * Script Version   : 0.5.6
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
@@ -77,19 +77,19 @@ SendMode, Input
 SetWorkingDir, %a_scriptdir%
 OnExit, Exit
 ; --
-TrayMenu() ; This function is here so that Tray Icon is shown early.
 ;}
 
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.5.5"
+           ,version     : "0.5.6"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
            ,moddate     : "September 22, 2011"
-           ,conf        : "conf.xml"}, script.getparams()
+           ,conf        : "conf.xml"}, script.getparams(), TrayMenu()   ; This function is here so that 
+                                                                        ; the Tray Icon is shown early.
 ;}
 
 ;[General Variables]{
@@ -310,7 +310,10 @@ FirstRun(){
     Pause
 }
 TrayMenu(){
+    global script
+    
     Menu, Tray, Icon, res/AHK-TK.ico
+    Menu, Tray, Tip, % script.name " v" script.version
     Menu, Tray, NoStandard
     Menu, Tray, Click, 1
     Menu, Tray, add, % "Show Main Gui", GuiClose
@@ -350,21 +353,21 @@ MainMenu(){
     Menu, Convert Case,add, Convert to Lowercase`tCtrl+U, MenuHandler
     Menu, Convert Case,add, Convert to Uppercase`tCtrl+Shift+U, MenuHandler
 
-    Menu, Edit, add, Undo`tCtrl+Z, MenuHandler
-    Menu, Edit, disable, Undo`tCtrl+Z
-    Menu, Edit, add, Redo`tCtrl+Y, MenuHandler
-    Menu, Edit, disable, Redo`tCtrl+Y
+    ; Menu, Edit, add, Undo`tCtrl+Z, MenuHandler
+    ; Menu, Edit, disable, Undo`tCtrl+Z
+    ; Menu, Edit, add, Redo`tCtrl+Y, MenuHandler
+    ; Menu, Edit, disable, Redo`tCtrl+Y
     Menu, Edit, add
-    Menu, Edit, add, Cut`tCtrl+X, MenuHandler
-    Menu, Edit, add, Copy`tCtrl+C, MenuHandler
-    Menu, Edit, add, Paste`tCtrl+V, MenuHandler
-    Menu, Edit, add, Select All`tCtrl+A, MenuHandler
-    Menu, Edit, add
-    Menu, Edit, add, Convert Case, :Convert Case
-    Menu, Edit, add, Line Operations, :LO
-    Menu, Edit, add, Trim Trailing Space`tCtrl+Space, MenuHandler
-    Menu, Edit, add
-    Menu, Edit, add, Set Read Only, MenuHandler
+    ; Menu, Edit, add, Cut`tCtrl+X, MenuHandler
+    ; Menu, Edit, add, Copy`tCtrl+C, MenuHandler
+    ; Menu, Edit, add, Paste`tCtrl+V, MenuHandler
+    ; Menu, Edit, add, Select All`tCtrl+A, MenuHandler
+    ; Menu, Edit, add
+    ; Menu, Edit, add, Convert Case, :Convert Case
+    ; Menu, Edit, add, Line Operations, :LO
+    ; Menu, Edit, add, Trim Trailing Space`tCtrl+Space, MenuHandler
+    ; Menu, Edit, add
+    ; Menu, Edit, add, Set Read Only, MenuHandler
 
     Menu, Search, add, Find...`tCtrl+F, MenuHandler
     Menu, Search, add, Find in Files...`tCtrl+Shift+F, MenuHandler
@@ -425,6 +428,7 @@ MainMenu(){
     Menu, MainMenu, add, Settings, :Settings
     Menu, MainMenu, add, Help, :Help
 
+    rcwSet()
 
     if root.selectSingleNode("//@alwaysontop").text
         Menu, View, check, Always On Top
@@ -434,8 +438,6 @@ MainMenu(){
 
     if options.selectSingleNode("//@linewrap").text
         Menu, View, check, Line Wrap
-
-    rcwSet()
 
     if options.selectSingleNode("//@sci").text
         Menu, Settings, check, Enable Command Helper
@@ -1723,55 +1725,7 @@ GuiHandler(){
 
         if (a_guicontrol = "&Run")
         {
-            lcfPath := a_temp . "\" . rName(5, "code")        ; Random Live Code Path
-
-            if a_gui = 1
-                SCI_GetText(SCI_GetLength($Sci1)+1, _code)
-            else
-                _code := Clipboard
-
-            if !InStr(_code,"Gui")
-                _code .= "`n`nExitApp"
-            else if !InStr(_code,"GuiClose")
-            {
-                if !InStr(_code,"return")
-                    _code .= "`nreturn"
-                _code .= "`n`nGuiClose:`nExitApp"
-            }
-
-            live_code =
-            (Ltrim
-                ;[Directives]{
-                #NoEnv
-                #SingleInstance Force
-                ; --
-                SetBatchLines -1
-                SendMode Input
-                SetWorkingDir %a_scriptdir%
-                ; --
-                ;}
-
-                sec         :=  1000               ; 1 second
-                min         :=  sec * 60           ; 1 minute
-                hour        :=  min * 60           ; 1 hour
-
-                %_code%
-
-            )
-            if !InStr(_code, "^Esc::ExitApp")
-                live_code .= "^Esc::ExitApp"
-
-            FileAppend, %live_code%, %lcfPath%
-
-            rcw := options.selectSingleNode("//RCPaths/@current").text
-            ahkpath := options.selectSingleNode("//RCPaths/" rcw).text
-            if !ahkpath
-            {
-                ahkpath := a_temp "\ahkl.bak"
-                FileInstall, res\ahkl.bak, %ahkpath%
-            }
-
-            Run, %ahkpath% %lcfPath%
+            lcRun(a_gui)
             return
         }
 
@@ -3600,7 +3554,58 @@ updateSB(){
     SB_SetText("`tv" script.version,4)
     return
 }
+lcRun(_gui=0){
+    global $Sci1, options
+    lcfPath := a_temp . "\" . rName(5, "code")        ; Random Live Code Path
 
+    if _gui = 01
+        SCI_GetText(SCI_GetLength($Sci1)+1, _code)
+    else
+        _code := Clipboard
+
+    if !InStr(_code,"Gui")
+        _code .= "`n`nExitApp"
+    else if !InStr(_code,"GuiClose")
+    {
+        if !InStr(_code,"return")
+            _code .= "`nreturn"
+        _code .= "`n`nGuiClose:`nExitApp"
+    }
+
+    live_code =
+    (Ltrim
+        ;[Directives]{
+        #NoEnv
+        #SingleInstance Force
+        ; --
+        SetBatchLines -1
+        SendMode Input
+        SetWorkingDir %a_scriptdir%
+        ; --
+        ;}
+
+        sec         :=  1000               ; 1 second
+        min         :=  sec * 60           ; 1 minute
+        hour        :=  min * 60           ; 1 hour
+
+        %_code%
+
+    )
+    if !InStr(_code, "^Esc::ExitApp")
+        live_code .= "^Esc::ExitApp"
+
+    FileAppend, %live_code%, %lcfPath%
+
+    ahkpath := options.selectSingleNode("//RCPaths/" options.selectSingleNode("//RCPaths/@current").text).text
+    if !ahkpath
+    {
+        ahkpath := a_temp "\ahkl.bak"
+        FileInstall, res\ahkl.bak, %ahkpath%
+    }
+
+    Run, %ahkpath% %lcfPath%
+    return
+}
 ; Storage
 WM(var){
     static
@@ -3616,4 +3621,8 @@ WM(var){
 
 ;[Hotkeys/Hotstrings]{
 ^CtrlBreak::Reload
+^!LButton::                                                             ; Run Selected Code [Ctrl + Alt + LButton]
+    Send, ^c
+    lcRun()
+return
 ;}
