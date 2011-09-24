@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.5.7
+ * Script Version   : 0.6
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: September 23, 2011
+ * Modification Date: December 26, 2011
  *
  * Description      :
  * ------------------
@@ -51,7 +51,11 @@
  * GUI 06 - Preferences
  * GUI 07 - Add Snippet
  * GUI 08 - About
- * GUI 97 - Code Detection
+ * GUI 09 - Paste Upload
+ * GUI 94 - Code Detection Popup
+ * GUI 95 - Code Detection Pastebin Preferences
+ * GUI 96 - Code Detection Keywords Preferences
+ * GUI 97 - Code Detection Preferences
  * GUI 98 - General Preferences
  * GUI 99 - Splash Window
  *
@@ -62,6 +66,7 @@
 #include *i %a_scriptdir%
 #include lib\scriptobj.h.ahk
 #include lib\sci.h.ahk
+#include lib\curl.h.ahk
 #include lib\hash.h.ahk
 #include lib\klist.h.ahk
 #include lib\attach.h.ahk
@@ -72,8 +77,9 @@
 #NoEnv
 #SingleInstance Force
 ; --
-SetBatchLines, -1
 SendMode, Input
+SetBatchLines, -1
+CoordMode, Tooltip, Screen
 SetWorkingDir, %a_scriptdir%
 OnExit, Exit
 ; --
@@ -82,18 +88,18 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.5.7"
+           ,version     : "0.6"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "September 23, 2011"
-           ,conf        : "conf.xml"}, script.getparams(), TrayMenu()   ; This function is here so that 
+           ,moddate     : "December 26, 2011"
+           ,conf        : "conf.xml"}, script.getparams(), TrayMenu()   ; This function is here so that
                                                                         ; the Tray Icon is shown early.
 ;}
 
 ;[General Variables]{
-null        := ""
+null        := "", Clipboard := null
 sec         := 1000 	            ; 1 second
 min         := 60*sec  	            ; 1 minute
 hour        := 60*min  	            ; 1 hour
@@ -206,27 +212,27 @@ Return                      ; [End of Auto-Execute area]
 ;}
 
 ;[Labels]{
-GuiHandler:     ;{
+GuiHandler:         ;{
     GuiHandler()
 return
 ;}
 
-MenuHandler:    ;{
+MenuHandler:        ;{
     MenuHandler()
 return
 ;}
 
-ListHandler:    ;{
+ListHandler:        ;{
     ListHandler()
 return
 ;}
 
-HotkeyHandler:  ;{
+HotkeyHandler:      ;{
     HotkeyHandler(a_thishotkey)
 return
 ;}
 
-GuiSize:        ;{ Gui Size Handler
+GuiSize:            ;{
 4GuiSize:
     if (a_gui = 1)
     {
@@ -253,6 +259,32 @@ GuiSize:        ;{ Gui Size Handler
     {
         Gui, 04: ListView, imList
         LV_ModifyCol(5, "AutoHdr")
+    }
+return
+;}
+
+OnClipboardChange:  ;{
+    Critical
+    conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
+    if options.selectSingleNode("//Codet/@status").text
+    {
+        if (Clipboard = oldScript)
+            return
+        oldScript:=Clipboard, kword_cnt:=0
+        kwords := options.selectSingleNode("//Codet/Keywords").text     ; load every time because it might have
+                                                                        ; changed recently
+
+        Loop, Parse, kwords, %a_space%
+            if RegexMatch(Clipboard, "i)\b" a_loopfield "\b\(?")
+                kword_cnt++
+        if (kword_cnt >= options.selectSingleNode("//Codet/Keywords/@min").text)
+        {
+            kword_cnt:=0
+            if (options.selectSingleNode("//Codet/@mode").text = 2)
+                pasteUpload("auto")
+            else
+                pasteUpload("show")
+        }
     }
 return
 ;}
@@ -311,7 +343,7 @@ FirstRun(){
 }
 TrayMenu(){
     global script
-    
+
     Menu, Tray, Icon, res/AHK-TK.ico
     Menu, Tray, Tip, % script.name " v" script.version
     Menu, Tray, NoStandard
@@ -326,65 +358,64 @@ MainMenu(){
 
     conf.load(script.conf), root:=conf.documentElement,options:=root.firstChild
     Menu, iexport, add, Import Hotkeys/Hotstrings, MenuHandler
-    ; Menu, iexport, disable, Import Hotkeys/Hotstrings
     Menu, iexport, add
     Menu, iexport, add, Export Hotkeys/Hotstrings, MenuHandler
 
-    Menu, File, add, &New`tCtrl+N, MenuHandler
-    Menu, File, add, Delete`tDEL, MenuHandler
+    Menu, File, add, &New`t(Ctrl+N), MenuHandler
+    Menu, File, add, Delete`t(DEL), MenuHandler
     Menu, File, add
-    Menu, File, add, &Open`tCtrl+O, MenuHandler
-    Menu, File, disable, &Open`tCtrl+O
-    Menu, File, add, &Save`tCtrl+S, MenuHandler
-    Menu, File, disable, &Save`tCtrl+S
-    Menu, File, add, Save As`tCtrl+Shift+S, MenuHandler
-    Menu, File, disable, Save As`tCtrl+Shift+S
+    Menu, File, add, &Open`t(Ctrl+O), MenuHandler
+    Menu, File, disable, &Open`t(Ctrl+O)
+    Menu, File, add, &Save`t(Ctrl+S), MenuHandler
+    Menu, File, disable, &Save`t(Ctrl+S)
+    Menu, File, add, Save As`t(Ctrl+Shift+S), MenuHandler
+    Menu, File, disable, Save As`t(Ctrl+Shift+S)
     Menu, File, add
     Menu, File, add, Import/Export, :iexport
     Menu, File, add
     Menu, File, add, Exit, Exit
 
-    Menu, LO, add, Duplicate Line`tCtrl+D, MenuHandler
-    Menu, LO, add, Split Lines`tCtrl+I, MenuHandler
-    Menu, LO, add, Join Lines`tCtrl+J, MenuHandler
-    Menu, LO, add, Move up current Line`tCtrl+Shift+Up, MenuHandler
-    Menu, LO, add, Move down current Line`tCtrl+Shift+Down, MenuHandler
+    Menu, LO, add, Duplicate Line`t(Ctrl+D), MenuHandler
+    Menu, LO, add, Split Lines`t(Ctrl+I), MenuHandler
+    Menu, LO, add, Join Lines`t(Ctrl+J), MenuHandler
+    Menu, LO, add, Move up current Line`t(Ctrl+Shift+Up), MenuHandler
+    Menu, LO, add, Move down current Line`t(Ctrl+Shift+Down), MenuHandler
 
-    Menu, Convert Case,add, Convert to Lowercase`tCtrl+U, MenuHandler
-    Menu, Convert Case,add, Convert to Uppercase`tCtrl+Shift+U, MenuHandler
+    Menu, Convert Case,add, Convert to Lowercase`t(Ctrl+U), MenuHandler
+    Menu, Convert Case,add, Convert to Uppercase`t(Ctrl+Shift+U), MenuHandler
 
-    ; Menu, Edit, add, Undo`tCtrl+Z, MenuHandler
-    ; Menu, Edit, disable, Undo`tCtrl+Z
-    ; Menu, Edit, add, Redo`tCtrl+Y, MenuHandler
-    ; Menu, Edit, disable, Redo`tCtrl+Y
+    Menu, Edit, add, Undo`t(Ctrl+Z), MenuHandler
+    Menu, Edit, disable, Undo`t(Ctrl+Z)
+    Menu, Edit, add, Redo`t(Ctrl+Y), MenuHandler
+    Menu, Edit, disable, Redo`t(Ctrl+Y)
     Menu, Edit, add
-    ; Menu, Edit, add, Cut`tCtrl+X, MenuHandler
-    ; Menu, Edit, add, Copy`tCtrl+C, MenuHandler
-    ; Menu, Edit, add, Paste`tCtrl+V, MenuHandler
-    ; Menu, Edit, add, Select All`tCtrl+A, MenuHandler
-    ; Menu, Edit, add
-    ; Menu, Edit, add, Convert Case, :Convert Case
-    ; Menu, Edit, add, Line Operations, :LO
-    ; Menu, Edit, add, Trim Trailing Space`tCtrl+Space, MenuHandler
-    ; Menu, Edit, add
-    ; Menu, Edit, add, Set Read Only, MenuHandler
+    Menu, Edit, add, Cut`t(Ctrl+X), MenuHandler
+    Menu, Edit, add, Copy`t(Ctrl+C), MenuHandler
+    Menu, Edit, add, Paste`t(Ctrl+V), MenuHandler
+    Menu, Edit, add, Select All`t(Ctrl+A), MenuHandler
+    Menu, Edit, add
+    Menu, Edit, add, Convert Case, :Convert Case
+    Menu, Edit, add, Line Operations, :LO
+    Menu, Edit, add, Trim Trailing Space`t(Ctrl+Space), MenuHandler
+    Menu, Edit, add
+    Menu, Edit, add, Set Read Only, MenuHandler
 
-    Menu, Search, add, Find...`tCtrl+F, MenuHandler
-    Menu, Search, add, Find in Files...`tCtrl+Shift+F, MenuHandler
-    Menu, Search, add, Find Next...`tF3, MenuHandler
-    Menu, Search, add, Find Previous...`tShift+F3, MenuHandler
-    Menu, Search, add, Find && Replace`tCtrl+H, MenuHandler
-    Menu, Search, add, Go to Line`tCtrl+G, MenuHandler
-    Menu, Search, add, Go to Matching Brace`tCtrl+B, MenuHandler
-    Menu, Search, disable, Go to Matching Brace`tCtrl+B
+    Menu, Search, add, Find...`t(Ctrl+F), MenuHandler
+    Menu, Search, add, Find in Files...`t(Ctrl+Shift+F), MenuHandler
+    Menu, Search, add, Find Next...`t(F3), MenuHandler
+    Menu, Search, add, Find Previous...`t(Shift+F3), MenuHandler
+    Menu, Search, add, Find && Replace`t(Ctrl+H), MenuHandler
+    Menu, Search, add, Go to Line`t(Ctrl+G), MenuHandler
+    Menu, Search, add, Go to Matching Brace`t(Ctrl+B), MenuHandler
+    Menu, Search, disable, Go to Matching Brace`t(Ctrl+B)
 
     Menu, Symbols, add, Show Spaces and TAB, MenuHandler
     Menu, Symbols, add, Show End Of Line, MenuHandler
     Menu, Symbols, add, Show All Characters, MenuHandler
 
-    Menu, Zoom, add, Zoom in`tCtrl+Numpad +, MenuHandler
-    Menu, Zoom, add, Zoom out`tCtrl+Numpad -, MenuHandler
-    Menu, Zoom, add, Default Zoom`tCtrl+=, MenuHandler
+    Menu, Zoom, add, Zoom in`t(Ctrl+Numpad +), MenuHandler
+    Menu, Zoom, add, Zoom out`t(Ctrl+Numpad -), MenuHandler
+    Menu, Zoom, add, Default Zoom`t(Ctrl+=), MenuHandler
 
     Menu, View, add, Always On Top, MenuHandler
     Menu, View, add, Snippet Library, MenuHandler
@@ -409,7 +440,7 @@ MainMenu(){
     Menu, Settings, add, Context Menu Options, MenuHandler
     Menu, Settings, disable, Context Menu Options
     Menu, Settings, add
-    Menu, Settings, add, &Preferences`tCtrl+P, MenuHandler
+    Menu, Settings, add, &Preferences`t(Ctrl+P), MenuHandler
 
     Menu, Help, add, Help, MenuHandler
     Menu, Help, disable, Help
@@ -459,7 +490,7 @@ CreateGui(){
     global conf, $hwnd1
 
     MainGui(), AddHKGui(), AddHSGui(), ImportGui(), ExportGui(), PreferencesGui()
-    SnippetGui(), AboutGui(), SetHotkeys("main", $hwnd1)
+    SnippetGui(), AboutGui(), PasteUploadGui(), CodetPopup(), SetHotkeys("main", $hwnd1)
     return
 }
 MainGui(){
@@ -550,6 +581,8 @@ MainGui(){
     Gui, 01: add, Button, x+10 yp w75 HWND$lcClear gGuiHandler, % "&Clear"
     GuiAttach(1),initSci($Sci1)
 
+    ; The following is used in the message handler to get the ID
+    ; of the edit controls so we can change their font (quick search controls)
     WinGet, cList1, ControlList
     WinGet, hList1, ControlListHWND
 
@@ -563,7 +596,6 @@ MainGui(){
     ; I made it so that the window is a little bit below the tab to avoid overlapping
     ; hence the h422.
     Gui, 01: show, w799 h422 %hide%, % "AutoHotkey Toolkit"
-
     return
 }
 AddHKGui(){
@@ -717,13 +749,13 @@ PreferencesGui(){
     ;{ TreeView Item List
     $P1 := TV_Add("General Preferences", 0, "Expand")
         $P1C1 := TV_Add("Code Detection", $P1, "Expand")
-            TV_Add("Keywords", $P1C1, "Expand")
-            TV_Add("Pastebin Options", $P1C1, "Expand")
+            $C1C1 := TV_Add("Keywords", $P1C1, "Expand")
+            $C1C2 := TV_Add("Pastebin Options", $P1C1, "Expand")
         $P1C2 := TV_Add("Command Helper", $P1, "Expand")
         $P1C3 := TV_Add("Live Code", $P1, "Expand")
-            TV_Add("Run Code With", $P1C3, "Expand")
-            TV_Add("Keywords", $P1C3, "Expand")
-            TV_Add("Syntax Styles", $P1C3, "Expand")
+            $C3C1 := TV_Add("Run Code With", $P1C3, "Expand")
+            $C3C2 := TV_Add("Keywords", $P1C3, "Expand")
+            $C3C3 := TV_Add("Syntax Styles", $P1C3, "Expand")
         $P1C4 := TV_Add("Screen Tools", $P1, "Expand")
         ; $P1C4 := TV_Add("Script Manager", $P1, "Expand")
     ;}
@@ -784,26 +816,55 @@ PreferencesGui(){
     Gui, 97: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
     $hwnd97 := WinExist()
 
-    Gui, 97: add, GroupBox, x3 y0 w345 h170, % "Info"
-    Gui, 97: add, Text, xp+10 yp+20 w330 Disabled
+    Gui, 97: add, GroupBox, x3 y0 w345 h145, % "Info"
+    Gui, 97: add, Text, xp+10 yp+20 w330
                       , % "CODET attempts to detect AutoHotkey code copied to the clipboard.`n`n"
                         . "Then it allows you to upload the code to a pastebin service like the ones offered by "
                         . "www.autohotkey.net or www.pastebin.com.`n`n"
-                        . "Due to the fact that some AHK keywords can be found in normal text or other "
-                        . "programming languages there can be false detections.`n`n"
-                        . "You can select the minimum amount of keywords to match (the more the more accurate) "
+                        . "You can select the minimum amount of keywords to match "
                         . "and you can also edit the keyword list to add or delete words as you want to fine tune "
-                        . "CODET to match your needs."
+                        . "CODET to match your needs and avoid false detections.`n"
 
     Gui, 97: add, Text, x0 y+20 w360 0x10
-    Gui, 97: add, GroupBox, x3 yp+10 w345 h50, % "General Preferences"
+    Gui, 97: add, GroupBox, x3 yp+10 w345 h70, % "General Preferences"
 
-    _codStat := options.selectSingleNode("//CoDet/@status").text
-    _codAuto := options.selectSingleNode("//CoDet/@auto").text
-    Gui, 97: add, CheckBox, xp+25 yp+20 Checked%_codStat% v_codStat gGuiHandler Disabled
+    codStat := options.selectSingleNode("//Codet/@status").text
+    codMode := options.selectSingleNode("//Codet/@mode").text
+    Gui, 97: add, CheckBox, xp+25 yp+20 HWND$codStat Checked%codStat% gGuiHandler vcodStat
                           , % "Enable Command Detection"
-    Gui, 97: add, CheckBox, x+10 Checked%_codAuto% v_codAuto gGuiHandler Disabled, % "Enable Auto Upload"
+    Gui, 97: add, Radio, x28 y+10 HWND$codMode1 gGuiHandler vcodMode, % "Show Popup"
+    Gui, 97: add, Radio, x+10 HWND$codMode2 gGuiHandler, % "Automatic Upload"
+
+    selRadio := codMode = 1 ? ("Show Popup", options.selectSingleNode("//Codet/@mode").text := 1)
+                            : ("Automatic Upload", options.selectSingleNode("//Codet/@mode").text := 2)
+    GuiControl, 97: , %selRadio%, 1
+
     Gui, 97: show, x165 y36 w350 h245 NoActivate
+    ;}
+
+    ;{ CODET Keywords
+    Gui, 96: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
+    $hwnd96 := WinExist()
+
+    Gui, 96: add, GroupBox, x3 y0 w345 h110, % "Info"
+    Gui, 96: add, Text, xp+10 yp+20 w330
+                      , % "There can be false detections because some AHK keywords can be found "
+                        . "in normal text or other programming languages.`n`n"
+                        . "Here you can select the minimum amount of keywords to match "
+                        . "(the more the more accurate) and you can also add or delete words "
+                        . "from the list of keywords to fine tune CODET to your liking."
+
+    Gui, 96: add, Text, x0 y+20 w360 0x10
+    Gui, 96: add, Edit, x3 yp+9 w345 h90 HWND$codKwords 0x100 gGuiHandler vcodKwords
+                      , % options.selectSingleNode("//Codet/Keywords").text
+    Gui, 96: add, Text, x3 y+8, % "Min. keyword match:"
+    Gui, 96: add, Edit, x+10 yp-3 w25 Center gGuiHandler vcodMin
+                      , % options.selectSingleNode("//Codet/Keywords/@min").text
+    Gui, 96: font, s8 cGray italic, Verdana
+    Gui, 96: add, Edit, x+11 w201 HWND$QScod Center gGuiHandler vQScod, % "Quick Search"
+    Gui, 96: font
+
+    Gui, 96: show, x165 y36 w350 h245 NoActivate
     ;}
 
     ;{ Command Helper
@@ -917,13 +978,66 @@ AboutGui(){
     Gui, 08: show, w420 h490 Hide
     return
 }
+PasteUploadGui(){
+    global
+
+    Gui, 09: +LastFound +Resize +MinSize
+    $hwnd9 := WinExist()
+
+    $Sci5 := SCI_Add($hwnd9,10,5,620,400,"","","lib\scilexer.dll")
+    Gui, 09: add, Text, HWND$puText1 w650 x0 y410 0x10
+    Gui, 09: add, GroupBox, HWND$puGBox1 w620 h80 x10 yp+5, % "Options"
+    Gui, 09: add, Text, HWND$puText2 xp+10 yp+20, % "Upload  to:"
+    Gui, 09: add, Text, HWND$puText3 x+83, % "Description"
+    Gui, 09: add, Text, HWND$puText4 x+25, % "Nick"
+    Gui, 09: add, Text, HWND$puText5 x+45, % "Privacy:"
+    Gui, 09: add, Text, HWND$puText6 x+42, % "Expiration:"
+    Gui, 09: add, DropDownList, HWND$pb_ddl w125 x20 y+10 gGuiHandler vpb_ddl
+                              , % "AutoHotkey.net||" ; Pastebin.com|Gist.com"
+    Gui, 09: add, Edit, HWND$pb_name w125 x+10 vpb_name
+    Gui, 09: add, Edit, HWND$pb_subdomain w125 x+10 vpb_subdomain
+    Gui, 09: add, DropDownList, HWND$pb_exposure w70 x+10 vpb_exposure, % "Public||Private"
+    Gui, 09: add, DropDownList, HWND$pb_expiration w115 x+10 vpb_expiration Disabled
+                              , % "Never|10 Minutes||1 Hour|1 Day|1 Month"
+    Gui, 09: add, Text, HWND$puText7 w650 x0 0x10
+    Gui, 09: add, Button, HWND$puButton1 w100 h25 x315 yp+10 gGuiHandler, % "&Upload"
+    Gui, 09: add, Button, HWND$puButton2 w100 h25 x+5 yp gGuiHandler, % "Save to File"
+    Gui, 09: add, Button, HWND$puButton3 w100 h25 x+10 yp gGuiHandler, % "&Cancel"
+    GuiAttach(9),initSci($Sci5)
+
+    Gui, 09: Show, w640 h550 Hide, % "Paste Upload"
+    return
+}
+CodetPopup(){
+    global
+
+    Gui, 94: +LastFound -Caption +Border +AlwaysOnTop +ToolWindow
+    ; $hwnd94 := WinExist()
+    WinGet, $hwnd94, ID
+
+    Gui, 94: Font, s10 w600, Verdana
+    Gui, 94: add, Text, x0 w250 Center, % "AHK Code Detected"
+    Gui, 94: add, Text, x0 w260 0x10
+    Gui, 94: Font, s8 normal
+    Gui, 94: add, Text, x5 yp+5 w250, % "You have copied text that contains some AutoHotkey Keywords. `n`n"
+                                      . "Do you want to upload it to a pastebin service?"
+    Gui, 94: add, Text, w260 x0 0x10
+    Gui, 94: add, Button, x10 yp+10 w65 gGuiHandler, % "&Yes"
+    Gui, 94: add, Button, x+5 w65 gGuiHandler, % "&No"
+    codMode := options.selectSingleNode("//Codet/@mode").text = 1 ? 1 : 0
+    Gui, 94: add, CheckBox, x+5 yp+6 Checked%codMode% gGuiHandler vpopup, % "Enable Popup"
+    Gui, 94: Show, % "Hide w250 h150 x" system.mon.Right " y" system.mon.Bottom, % "Codet Popup"
+    return
+}
 GuiAttach(guiNum){
     global $tabcont,$hkList,$hkDelim,$QShk,$hkAdd,$hkClose,$StatBar,$slTitle,$slDDL,$slList
          , $hsList,$hsGbox,$hsText1,$hsExpand,$hsText2,$hsExpandto,$hsCbox1,$hsCbox2,$hsCbox3,$hsCbox4,$hsCbox5
-         , $Sci1,$Sci2,$Sci3,$Sci4,$hsDelim,$QShs,$hsAdd,$hsClose,$lcDelim,$QSlc,$lcRun,$lcClear,$hk2Delim
+         , $Sci1,$Sci2,$Sci3,$Sci4,$Sci5,$hsDelim,$QShs,$hsAdd,$hsClose,$lcDelim,$QSlc,$lcRun,$lcClear,$hk2Delim
          , $hk2Add,$hk2Cancel,$hs2GBox,$hs2Delim,$hs2Add,$hsCancel
          , $imList,$imDelim,$imAccept,$imClear,$imCancel,$slGBox,$slDelim,$slAdd,$slCancel
-         , $shsList, $shkList
+         , $shsList,$shkList
+         , $puText1,$puGBox1,$puText2,$puText3,$puText4,$puText5,$puText6,$pb_ddl,$pb_name,$pb_subdomain
+         , $pb_exposure,$pb_expiration,$puText7,$puButton1,$puButton2,$puButton3,
 
     ; AutoHotkey ToolKit Gui
     if (guiNum = 1)
@@ -993,6 +1107,23 @@ GuiAttach(guiNum){
         attach($slDelim, "y w")
         attach($slAdd, "x y r2")
         attach($slCancel, "x y r2")
+    }
+
+    ; Paste Upload Gui
+    if (guiNum = 9)
+    {
+        attach($Sci5, "w h r2")
+        attach($puGBox1, "y w r2")
+
+        Loop, 7
+            (a_index = 1 || a_index = 7) ? attach($puText%a_index%, "y w r1") : attach($puText%a_index%, "x.5 y r1")
+
+        c:="$pb_ddl|$pb_name|$pb_subdomain|$pb_exposure|$pb_expiration"
+        loop, parse, c, |
+            attach(%a_loopfield%, "x.5 y r1")
+
+        attach($puButton1, "x y r1"),attach($puButton2, "x y r1"),attach($puButton3, "x y r1")
+
     }
 }
 SetHotkeys(list=0, $hwnd=0, title=0){
@@ -1447,6 +1578,13 @@ GuiReset(guiNum){
         _vals:="slTitle¥¢"
         SCI_StyleResetDefault($Sci4), SCI_ClearAll(), SCI_SetReadOnly(false)
     }
+    else if (guiNum = 09)   ; Pastebin Upload
+    {
+        _vals := "pb_code¥¢pb_name¥¢pb_subdomain¥"
+        Control, disable,,, ahk_id %$pb_exposure%
+        Control, disable,,, ahk_id %$pb_expiration%
+    }
+
     Loop, Parse, _vals, ¢
     {
         Loop, Parse, a_loopfield, ¥
@@ -1465,12 +1603,14 @@ GuiClose(guiNum){
     global $hwnd1
 
     Gui, %guiNum%: Hide
+    if (guiNum = 09)
+        return
     WinActivate, ahk_id %$hwnd1%
     Gui, 01: -Disabled
+    return
 }
 ApplyPref(){
     global      ; It accesses hotkey variables and others.
-
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
 
     ; [General Preferences]{
@@ -1503,9 +1643,9 @@ ApplyPref(){
         { ; Enable New Hotkey
         _mods:=(_ctrl ? "^" : null)(_alt ? "!" : null)(_shift ? "+" : null)(_win ? "#" : null)
         if strLen(_hkddl) = 1
-            Hotkey, % _mods "`" _hkddl, GuiClose
+            Hotkey, % _mods "`" _hkddl, GuiClose, On
         else
-            Hotkey, % _mods _hkddl, GuiClose
+            Hotkey, % _mods _hkddl, GuiClose, On
         }
 
     ; Suspend hotkeys on these windows
@@ -1516,8 +1656,15 @@ ApplyPref(){
 
     ; [Code Detection]{
     ; Status
-    options.selectSingleNode("//CoDet/@status").text := _codStat
-    options.selectSingleNode("//CoDet/@auto").text := _codAuto
+    options.selectSingleNode("//Codet/@status").text := codStat
+    options.selectSingleNode("//Codet/@mode").text := codMode
+
+    GuiControl, 94:, popup, % t := codMode = 1 ? 1 : 0
+    ;}
+
+    ; [Codet Keywords]{
+    options.selectSingleNode("//Codet/Keywords/@min").text := codMin
+    options.selectSingleNode("//Codet/Keywords").text := "`n" codKwords
     ;}
 
     conf.transformNodeToObject(xsl, conf)
@@ -1591,7 +1738,7 @@ GuiHandler(){
             ; ech = enable command helper
             ; eft = enable forum tag-autocomplete
             ; est = enable screen tools
-            node := options.childNodes.item[3]                      ; <-- CoDet
+            node := options.childNodes.item[3]                      ; <-- Codet
                 node.setAttribute("status", _ecd)
 
             node := options.childNodes.item[4]                      ; <-- CMDHelper
@@ -2095,6 +2242,35 @@ GuiHandler(){
             Gui, %_gui%: submit, NoHide
         }
 
+        if (a_guicontrol = "QScod")
+        {
+            QScod:
+                oldQS := QScod = "Quick Search" ? oldQS : QScod
+                if (a_thishotkey = "F3")
+                    QScod := oldQS, pos := oldpos
+                ; tooltip % QScod " - " oldpos " - " a_thishotkey, 10,20
+                pos := instr(codKwords, QScod,"", pos ? pos : 1)-1
+                SendMessage, 0xB6, 0, 0,, ahk_id %$codKwords%                       ; Scroll to visible
+                SendMessage, 0xB1, pos, pos+Strlen(QScod),, ahk_id %$codKwords%     ; Select text
+                SendMessage, 0xB7, 0, 0,, ahk_id %$codKwords%                       ; Scroll the caret into view
+                oldpos := pos + strlen(QScod)
+                if (pos = -1)
+                    oldpos := pos := 0
+                ; tooltip % QScod " - " pos " - " oldpos, 10,40,2
+            return
+
+            Gui6Search:
+                oldpos := pos := 0
+                SendMessage, 0xB1,0,0,, ahk_id %$codKwords%     ; Select text
+                ControlSetText,,, ahk_id %$QScod%
+            return
+
+            Hotkey, IfWinActive, ahk_id %$hwnd6%
+            Hotkey, F3, QScod, Off
+            Hotkey, Delete, Gui6Search, Off
+            Hotkey, IfWinActive
+        }
+
         if (a_guicontrol = "&OK")
         {
             ApplyPref(), GuiClose(06), GuiReset(06)
@@ -2114,6 +2290,20 @@ GuiHandler(){
             Control,disable,,,ahk_id %$Apply%
             ApplyPref()
             return
+        }
+
+        if (a_guicontrol = "codStat")
+        {
+            if (codStat)
+            {
+                Control, enable,,, ahk_id %$codMode1%
+                Control, enable,,, ahk_id %$codMode2%
+            }
+            else
+            {
+                Control, disable,,, ahk_id %$codMode1%
+                Control, disable,,, ahk_id %$codMode2%
+            }
         }
 
         ; Any other control would enable the Apply button.
@@ -2154,6 +2344,92 @@ GuiHandler(){
             return
         }
     }
+
+    ; Pastebin Upload
+    if (a_gui = 09)
+    {
+        if (a_guicontrol = "pb_ddl")
+        {
+             if (pb_ddl = "AutoHotkey.net")
+                Ena_Control(1,1,0)
+             ; else if (pb_ddl = "Pastebin.com")
+                ; Ena_Control(1,1,1)
+            return
+        }
+        if (a_guicontrol = "&Upload")
+        {
+            Gui, %a_gui%: submit
+            pasteUpload()
+            return
+        }
+        if (a_guicontrol = "Save to File")
+        {
+            Gui, 09: +OwnDialogs
+            FileSelectFile, f_saved, S24, %a_desktop%, Save script as..., AutoHotkey (*.ahk)
+            if !f_saved
+                return
+
+            /*
+             * The following piece of code fixes the issue with saving a file without adding
+             * the extension while the file existed as "file.ahk", which caused the file
+             * to be saved as "file.ahk.ahk" and added a msgbox if the user is overwriting an existing file
+             */
+
+            if f_saved contains .ahk               ; Check whether the user added the file extension or not
+            {
+                if FileExist(f_saved)
+                    FileDelete, %f_saved%
+                FileAppend, %pb_code%, %f_saved%   ; If added just save the file as the user specified
+            }
+            else
+            {
+                if FileExist(f_saved . ".ahk")
+                    Msgbox, 4, Replace file...?,  % f_saved . " already exist.`nDo you want to replace it?"
+                ifMsgbox, No
+                    return
+                FileDelete, %f_saved%.ahk
+                FileAppend, %pb_code%, %f_saved%.ahk
+            }
+            Gui, 09: Hide
+            return
+        }
+        if (a_guicontrol = "&Cancel")
+        {
+            9GuiClose:
+            9GuiEscape:
+                GuiClose(9), GuiReset(9)
+            return
+        }
+    }
+
+    ; Codet Popup
+    if (a_gui = 94)
+    {
+        if (a_guicontrol = "&No")
+        {
+            Gui, %a_gui%: Hide
+            Settimer, Sleep, Off
+            return
+        }
+        if (a_guicontrol = "&Yes")
+        {
+            Gui, %a_gui%: Submit
+            SCI_SetText(repIncludes(clipboard), $Sci5)
+            Gui, 09: Show
+            return
+        }
+        if (a_guicontrol = "popup")
+        {
+            selRadio := popup = 1 ? ("Show Popup", options.selectSingleNode("//Codet/@mode").text := 1)
+                                  : ("Automatic Upload", options.selectSingleNode("//Codet/@mode").text := 2)
+
+            GuiControl, 97: , %selRadio%, 1
+            conf.transformNodeToObject(xsl, conf)
+            conf.save(script.conf), conf.load(script.conf)          ; Save and Load
+        }
+
+        return
+    }
 }
 MenuHandler(stat=0){
     global
@@ -2178,16 +2454,16 @@ MenuHandler(stat=0){
         ; Menu, Settings, %stat%, Enable Command Helper
         ; Menu, Settings, %stat%, Context Menu Options
 
-        ; Menu, File, %stat%, &Open`tCtrl+O
-        ; Menu, File, %stat%, &Save`tCtrl+S
-        ; Menu, File, %stat%, Save As`tCtrl+Shift+S
+        ; Menu, File, %stat%, &Open`t(Ctrl+O)
+        ; Menu, File, %stat%, &Save`t(Ctrl+S)
+        ; Menu, File, %stat%, Save As`t(Ctrl+Shift+S)
         return
     }
 
     ; Snippet Menu
     if (a_thismenuitem = "New")
     {
-        Gui, 01: +Disable
+        Gui, 01: +Disabled
         Gui, 07: show
         return
     }
@@ -2212,7 +2488,7 @@ MenuHandler(stat=0){
     }
 
     ; Main Menu
-    if (a_thismenuitem = "&New`tCtrl+N")
+    if (a_thismenuitem = "&New`t(Ctrl+N)")
     {
         Gui_AddNew:
             Gui, 01: Submit, Nohide
@@ -2239,7 +2515,7 @@ MenuHandler(stat=0){
         return
     }
 
-    if (a_thismenuitem = "Delete`tDEL")
+    if (a_thismenuitem = "Delete`t(DEL)")
     {
         if (tabLast = "Live Code")
         {
@@ -2375,7 +2651,7 @@ MenuHandler(stat=0){
         return
     }
 
-    if (a_thismenuitem = "&Preferences`tCtrl+P")
+    if (a_thismenuitem = "&Preferences`t(Ctrl+P)")
     {
         Gui_Preferences:
             Gui, 01: +Disabled
@@ -2395,7 +2671,6 @@ MenuHandler(stat=0){
         Gui, 08: show
         return
     }
-
 }
 ListHandler(sParam=0){
     global
@@ -2788,15 +3063,16 @@ HotkeyHandler(hk){
 MsgHandler(wParam,lParam, msg, hwnd){
     static
     hCurs:=DllCall("LoadCursor","UInt",0,"Int",32649,"UInt") ;IDC_HAND
-    global cList1,hList1,cList2,hList2,cList3,hList3,$QShk,$QShs,$QSlc,$Sci1,$Sci2,$Sci3
+    global cList1,hList1,cList2,hList2,cList3,hList3,$QShk,$QShs,$QSlc,$QScod,$Sci1,$Sci2,$Sci3
          , $hsOpt,$hsExpand,$hs2Expand,$hsExpandto,$hkIfWin,$hkIfWinN,$hsIfWin,$hsIfWinN
          , $GP_E1, $GP_DDL
          , hSciL:=$Sci1 "," $Sci2 "," $Sci3
+         , oldpos,pos   ; From Gui 96
 
     if (msg = WM("MOUSEMOVE"))
     {
         MouseGetPos,,,,ctrl
-        If ctrl in Static4,Static7
+        if ((instr(ctrl, "Static4") ||  instr(ctrl, "Static7")) && a_gui != 06)
             DllCall("SetCursor","UInt",hCurs)
         Return
     }
@@ -2814,6 +3090,14 @@ MsgHandler(wParam,lParam, msg, hwnd){
                 return
             }
 
+            if (lParam = $QScod)
+            {
+                oldpos := pos := 0              ; Reset search position
+                Gui, 96: font, s8 cBlack norm
+                GuiControl, 96: font, QScod
+                ; msgbox % errorlevel
+            }
+
             ControlGetText,sText,, ahk_id %lParam%
             if a_gui
             {
@@ -2823,7 +3107,6 @@ MsgHandler(wParam,lParam, msg, hwnd){
 
             if (inStr(sText, "e.g. ") || inStr(sText, "Quick Search"))
                 ControlSetText,,, ahk_id %lParam%
-
             return
         }
 
@@ -2833,6 +3116,12 @@ MsgHandler(wParam,lParam, msg, hwnd){
             {
                 SetHotkeys()                    ; Re-Enable hotkeys
                 return
+            }
+
+            if (lParam = $QScod)
+            {
+                Gui, 96: font, s8 cGray italic, Verdana
+                GuiControl, 96: font, QScod
             }
 
             ControlGetText,cText,, ahk_id %lParam%
@@ -2856,7 +3145,7 @@ MsgHandler(wParam,lParam, msg, hwnd){
                     GuiControl, font, % getID(lParam, cList%a_gui%, hList%a_gui%)
                 }
 
-                if (lParam = $QShk || lParam = $QShs)
+                if (lParam = $QShk || lParam = $QShs || lParam = $QScod)
                     ControlSetText,, % "Quick Search", ahk_id %lParam%
 
                 if (lParam = $hsOpt)
@@ -3023,8 +3312,22 @@ prefControl(pref=0){
     else
         Gui, 97: hide
 
+    if (pref = $C1C1)
+    {
+        Gui, 96: show, NoActivate
+        Hotkey, F3, QScod, On
+        Hotkey, Delete, Gui6Search, On
+    }
+    else
+    {
+        Gui, 96: hide
+        Hotkey, F3, QScod, Off
+        Hotkey, Delete, Gui6Search, Off
+    }
+
     ; Temporal Code
-    if (pref != $P1 && pref != $P1C1)
+    w := $P1 "," $P1C1 "," $C1C1
+    if pref not in %w%
         GuiControl, 06: show, AHKTK_UC
     else
         GuiControl, 06: hide, AHKTK_UC
@@ -3042,95 +3345,21 @@ defConf(path){
         <Startup ssi="1" sww="1" smm="1" cfu="1"/>
         <MainKey ctrl="0" alt="0" shift="0" win="1">``</MainKey>
         <SuspWndList/>
-        <CoDet status="1" auto="0">
+        <Codet status="1" mode="1">
             <Pastebin current="Autohotkey">
-                <AutoHotkey private="0" nick="">http://www.autohotkey.net/paste/</AutoHotkey>
+                <AutoHotkey private="0" nick="">http://www.autohotkey.net/paste</AutoHotkey>
                 <PasteBin private="0" subdomain="" expiration="1H">http://pastebin.com/api_public.php</PasteBin>
-                <Paste2>http://paste2.org/new-paste</Paste2>
-                <Gist/>
+                <DPaste>http://www.dpaste.com</DPaste>
+                <Gist>http://api.github.com/gists</Gist>
             </Pastebin>
             <History max="10"/>
             <Keywords min="5">
-            if exitapp gosub goto ifequal ifexist ifgreater ifgreaterorequal ifinstring ifless iflessorequal
-            ifmsgbox ifnotequal ifnotexist ifnotinstring ifwinactive ifwinexist ifwinnotactive ifwinnotexist
-            onexit setbatchlines settimer suspend static global local byref autotrim blockinput clipwait click
-            control controlclick controlfocus controlget controlgetfocus controlgetpos controlgettext controlmove
-            controlsend controlsendraw controlsettext coordmode critical detecthiddentext detecthiddenwindows
-            driveget drivespacefree endrepeat envadd envdiv envget envmult envset envsub envupdate fileappend
-            filecopy filecopydir filecreatedir filecreateshortcut filedelete filegetattrib filegetshortcut
-            filegetsize filegettime filegetversion fileinstall filemove filemovedir fileread filereadline
-            filerecycle filerecycleempty fileremovedir fileselectfile fileselectfolder filesetattrib filesettime
-            formattime getkeystate groupactivate groupadd groupclose groupdeactivate gui guicontrol guicontrolget
-            hideautoitwin hotkey imagesearch inidelete iniread iniwrite input inputbox keyhistory keywait
-            listhotkeys listlines listvars mouseclick mouseclickdrag mousegetpos mousemove msgbox numget numset
-            outputdebug pixelgetcolor pixelsearch postmessage regdelete registercallback regread regwrite reload
-            runas runwait send sendevent sendinput sendmessage sendmode sendplay sendraw setcapslockstate
-            setcontroldelay setdefaultmousespeed setenv setformat setkeydelay setmousedelay setnumlockstate
-            setscrolllockstate setstorecapslockmode settitlematchmode setwindelay setworkingdir soundbeep soundget
-            soundgetwavevolume soundplay soundset soundsetwavevolume splashimage splashtextoff splashtexton
-            splitpath statusbargettext statusbarwait stringcasesense stringgetpos stringleft stringlen stringlower
-            stringmid stringreplace stringright stringsplit stringtrimleft stringtrimright stringupper sysget
-            thread tooltip transform traytip urldownloadtofile winactivate winactivatebottom winclose winget
-            wingetactivestats wingetactivetitle wingetclass wingetpos wingettext wingettitle winhide winkill
-            winmaximize winmenuselectitem winminimize winminimizeall winminimizeallundo winmove winrestore winset
-            winsettitle winshow winwait winwaitactive winwaitclose winwaitnotactive abs acos asc asin atan ceil
-            chr cos dllcall exp fileexist floor il_add il_create il_destroy instr islabel ln log lv_add lv_delete
-            lv_deletecol lv_getcount lv_getnext lv_gettext lv_insert lv_insertcol lv_modify lv_modifycol
-            lv_setimagelist mod onmessage round regexmatch regexreplace sb_seticon sb_setparts sb_settext sin sqrt
-            strlen substr tan tv_add tv_delete tv_getchild tv_getcount tv_getnext tv_get tv_getparent tv_getprev
-            tv_getselection tv_gettext tv_modify varsetcapacity winactive winexist allowsamelinecomments
-            clipboardtimeout commentflag errorstdout escapechar hotkeyinterval hotkeymodifiertimeout hotstring
-            include includeagain installkeybdhook installmousehook maxhotkeysperinterval maxmem maxthreads
-            maxthreadsbuffer maxthreadsperhotkey noenv notrayicon singleinstance usehook winactivateforce shift
-            lshift rshift alt lalt ralt lcontrol rcontrol ctrl lctrl rctrl lwin rwin appskey altdown altup
-            shiftdown shiftup ctrldown ctrlup lwindown lwinup rwindown rwinup lbutton rbutton mbutton wheelup
-            wheeldown xbutton1 xbutton2 joy1 joy2 joy3 joy4 joy5 joy6 joy7 joy8 joy9 joy10 joy11 joy12 joy13 joy14
-            joy15 joy16 joy17 joy18 joy19 joy20 joy21 joy22 joy23 joy24 joy25 joy26 joy27 joy28 joy29 joy30 joy31
-            joy32 joyx joyy joyz joyr joyu joyv joypov joyname joybuttons joyaxes joyinfo space tab enter escape
-            backspace delete insert pgup pgdn printscreen ctrlbreak scrolllock capslock numlock numpad0 numpad1
-            numpad2 numpad3 numpad4 numpad5 numpad6 numpad7 numpad8 numpad9 numpadmult numpadadd numpadsub
-            numpaddiv numpaddot numpaddel numpadins numpadclear numpadup numpaddown numpadleft numpadright
-            numpadhome numpadend numpadpgup numpadpgdn numpadenter f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14
-            f15 f16 f17 f18 f19 f20 f21 f22 f23 f24 browser_back browser_forward browser_refresh browser_stop
-            browser_search browser_favorites browser_home volume_mute volume_down volume_up media_next media_prev
-            media_stop media_play_pause launch_mail launch_media launch_app1 launch_app2 a_ahkpath a_ahkversion
-            a_appdata a_appdatacommon a_autotrim a_batchlines a_caretx a_carety a_computername a_controldelay
-            a_cursor a_dd a_ddd a_dddd a_defaultmousespeed a_desktop a_desktopcommon a_detecthiddentext
-            a_detecthiddenwindows a_endchar a_eventinfo a_exitreason a_formatfloat a_formatinteger a_gui
-            a_guievent a_guicontrol a_guicontrolevent a_guiheight a_guiwidth a_guix a_guiy a_hour a_iconfile
-            a_iconhidden a_iconnumber a_icontip a_index a_ipaddress1 a_ipaddress2 a_ipaddress3 a_ipaddress4
-            a_isadmin a_iscompiled a_issuspended a_keydelay a_language a_lasterror a_linefile a_linenumber
-            a_loopfield a_loopfileattrib a_loopfiledir a_loopfileext a_loopfilefullpath a_loopfilelongpath
-            a_loopfilename a_loopfileshortname a_loopfileshortpath a_loopfilesize a_loopfilesizekb
-            a_loopfilesizemb a_loopfiletimeaccessed a_loopfiletimecreated a_loopfiletimemodified a_loopreadline
-            a_loopregkey a_loopregname a_loopregsubkey a_loopregtimemodified a_loopregtype a_mday a_min a_mm a_mmm
-            a_mmmm a_mon a_mousedelay a_msec a_mydocuments a_now a_nowutc a_numbatchlines a_ostype a_osversion
-            a_priorhotkey a_programfiles a_programs a_programscommon a_screenheight a_screenwidth a_scriptdir
-            a_scriptfullpath a_scriptname a_sec a_space a_startmenu a_startmenucommon a_startup a_startupcommon
-            a_stringcasesense a_tab a_temp a_thisfunc a_thishotkey a_thislabel a_thismenu a_thismenuitem
-            a_thismenuitempos a_tickcount a_timeidle a_timeidlephysical a_timesincepriorhotkey
-            a_timesincethishotkey a_titlematchmode a_titlematchmodespeed a_username a_wday a_windelay a_windir
-            a_workingdir a_yday a_year a_yweek a_yyyy clipboard clipboardall comspec errorlevel programfiles true
-            false ltrim rtrim ahk_id ahk_pid ahk_class ahk_group processname minmax controllist statuscd
-            filesystem setlabel alwaysontop mainwindow nomainwindow useerrorlevel altsubmit hscroll vscroll
-            imagelist wantctrla wantf2 visfirst return wantreturn backgroundtrans minimizebox maximizebox sysmenu
-            toolwindow exstyle check3 checkedgray readonly notab lastfound lastfoundexist alttab shiftalttab
-            alttabmenu alttabandmenu alttabmenudismiss controllisthwnd hwnd deref pow bitnot bitand bitor bitxor
-            bitshiftleft bitshiftright sendandmouse mousemouveoff hkey_local_machine hkey_users hkey_current_user
-            hkey_classes_root hkey_current_config hklm hku hkcu hkcr hkcc reg_sz reg_expand_sz reg_multi_sz
-            reg_dword reg_qword reg_binary reg_link reg_resource_list reg_full_resource_descriptor
-            reg_resource_requirements_list reg_dword_big_endian regex rgb belownormal abovenormal xdigit alpha
-            upper lower alnum topmost transparent transcolor redraw idlast togglecheck toggleenable nodefault
-            nostandard deleteall noicon groupbox button checkbox dropdownlist ddl combobox statusbar treeview
-            listbox listview datetime monthcal updown iconsmall sortdesc nosort nosorthdr hdr autosize range font
-            resize owner nohide minimize maximize restore noactivate cancel destroy center margin owndialogs
-            guiescape guiclose guisize guicontextmenu guidropfiles tabstop choosestring enabled disabled visible
-            notimers interrupt priority waitclose OnClipboardChange OnGUIClose OnGUIEscape OnGUICancel
+if exitapp gosub goto ifequal ifexist ifgreater ifgreaterorequal ifinstring ifless iflessorequal ifmsgbox ifnotequal ifnotexist ifnotinstring ifwinactive ifwinexist ifwinnotactive ifwinnotexist onexit setbatchlines settimer suspend static global local byref autotrim blockinput clipwait click control controlclick controlfocus controlget controlgetfocus controlgetpos controlgettext controlmove controlsend controlsendraw controlsettext coordmode critical detecthiddentext detecthiddenwindows driveget drivespacefree endrepeat envadd envdiv envget envmult envset envsub envupdate fileappend filecopy filecopydir filecreatedir filecreateshortcut filedelete filegetattrib filegetshortcut filegetsize filegettime filegetversion fileinstall filemove filemovedir fileread filereadline filerecycle filerecycleempty fileremovedir fileselectfile fileselectfolder filesetattrib filesettime formattime getkeystate groupactivate groupadd groupclose groupdeactivate gui guicontrol guicontrolget hideautoitwin hotkey imagesearch inidelete iniread iniwrite input inputbox keyhistory keywait listhotkeys listlines listvars mouseclick mouseclickdrag mousegetpos mousemove msgbox numget numset outputdebug pixelgetcolor pixelsearch postmessage regdelete registercallback regread regwrite reload runas runwait send sendevent sendinput sendmessage sendmode sendplay sendraw setcapslockstate setcontroldelay setdefaultmousespeed setenv setformat setkeydelay setmousedelay setnumlockstate setscrolllockstate setstorecapslockmode settitlematchmode setwindelay setworkingdir soundbeep soundget soundgetwavevolume soundplay soundset soundsetwavevolume splashimage splashtextoff splashtexton splitpath statusbargettext statusbarwait stringcasesense stringgetpos stringleft stringlen stringlower stringmid stringreplace stringright stringsplit stringtrimleft stringtrimright stringupper sysget thread tooltip transform traytip urldownloadtofile winactivate winactivatebottom winclose winget wingetactivestats wingetactivetitle wingetclass wingetpos wingettext wingettitle winhide winkill winmaximize winmenuselectitem winminimize winminimizeall winminimizeallundo winmove winrestore winset winsettitle winshow winwait winwaitactive winwaitclose winwaitnotactive abs acos asc asin atan ceil chr cos dllcall exp fileexist floor il_add il_create il_destroy instr islabel ln log lv_add lv_delete lv_deletecol lv_getcount lv_getnext lv_gettext lv_insert lv_insertcol lv_modify lv_modifycol lv_setimagelist mod onmessage round regexmatch regexreplace sb_seticon sb_setparts sb_settext sin sqrt strlen substr tan tv_add tv_delete tv_getchild tv_getcount tv_getnext tv_get tv_getparent tv_getprev tv_getselection tv_gettext tv_modify varsetcapacity winactive winexist allowsamelinecomments clipboardtimeout commentflag errorstdout escapechar hotkeyinterval hotkeymodifiertimeout hotstring include includeagain installkeybdhook installmousehook maxhotkeysperinterval maxmem maxthreads maxthreadsbuffer maxthreadsperhotkey noenv notrayicon singleinstance usehook winactivateforce shift lshift rshift alt lalt ralt lcontrol rcontrol ctrl lctrl rctrl lwin rwin appskey altdown altup shiftdown shiftup ctrldown ctrlup lwindown lwinup rwindown rwinup lbutton rbutton mbutton wheelup wheeldown xbutton1 xbutton2 joy1 joy2 joy3 joy4 joy5 joy6 joy7 joy8 joy9 joy10 joy11 joy12 joy13 joy14 joy15 joy16 joy17 joy18 joy19 joy20 joy21 joy22 joy23 joy24 joy25 joy26 joy27 joy28 joy29 joy30 joy31 joy32 joyx joyy joyz joyr joyu joyv joypov joyname joybuttons joyaxes joyinfo space tab enter escape backspace delete insert pgup pgdn printscreen ctrlbreak scrolllock capslock numlock numpad0 numpad1 numpad2 numpad3 numpad4 numpad5 numpad6 numpad7 numpad8 numpad9 numpadmult numpadadd numpadsub numpaddiv numpaddot numpaddel numpadins numpadclear numpadup numpaddown numpadleft numpadright numpadhome numpadend numpadpgup numpadpgdn numpadenter f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14 f15 f16 f17 f18 f19 f20 f21 f22 f23 f24 browser_back browser_forward browser_refresh browser_stop browser_search browser_favorites browser_home volume_mute volume_down volume_up media_next media_prev media_stop media_play_pause launch_mail launch_media launch_app1 launch_app2 a_ahkpath a_ahkversion a_appdata a_appdatacommon a_autotrim a_batchlines a_caretx a_carety a_computername a_controldelay a_cursor a_dd a_ddd a_dddd a_defaultmousespeed a_desktop a_desktopcommon a_detecthiddentext a_detecthiddenwindows a_endchar a_eventinfo a_exitreason a_formatfloat a_formatinteger a_gui a_guievent a_guicontrol a_guicontrolevent a_guiheight a_guiwidth a_guix a_guiy a_hour a_iconfile a_iconhidden a_iconnumber a_icontip a_index a_ipaddress1 a_ipaddress2 a_ipaddress3 a_ipaddress4 a_isadmin a_iscompiled a_issuspended a_keydelay a_language a_lasterror a_linefile a_linenumber a_loopfield a_loopfileattrib a_loopfiledir a_loopfileext a_loopfilefullpath a_loopfilelongpath a_loopfilename a_loopfileshortname a_loopfileshortpath a_loopfilesize a_loopfilesizekb a_loopfilesizemb a_loopfiletimeaccessed a_loopfiletimecreated a_loopfiletimemodified a_loopreadline a_loopregkey a_loopregname a_loopregsubkey a_loopregtimemodified a_loopregtype a_mday a_min a_mm a_mmm a_mmmm a_mon a_mousedelay a_msec a_mydocuments a_now a_nowutc a_numbatchlines a_ostype a_osversion a_priorhotkey a_programfiles a_programs a_programscommon a_screenheight a_screenwidth a_scriptdir a_scriptfullpath a_scriptname a_sec a_space a_startmenu a_startmenucommon a_startup a_startupcommon a_stringcasesense a_tab a_temp a_thisfunc a_thishotkey a_thislabel a_thismenu a_thismenuitem a_thismenuitempos a_tickcount a_timeidle a_timeidlephysical a_timesincepriorhotkey a_timesincethishotkey a_titlematchmode a_titlematchmodespeed a_username a_wday a_windelay a_windir a_workingdir a_yday a_year a_yweek a_yyyy clipboard clipboardall comspec errorlevel programfiles true false ltrim rtrim ahk_id ahk_pid ahk_class ahk_group processname minmax controllist statuscd filesystem setlabel alwaysontop mainwindow nomainwindow useerrorlevel altsubmit hscroll vscroll imagelist wantctrla wantf2 visfirst return wantreturn backgroundtrans minimizebox maximizebox sysmenu toolwindow exstyle check3 checkedgray readonly notab lastfound lastfoundexist alttab shiftalttab alttabmenu alttabandmenu alttabmenudismiss controllisthwnd hwnd deref pow bitnot bitand bitor bitxor bitshiftleft bitshiftright sendandmouse mousemouveoff hkey_local_machine hkey_users hkey_current_user hkey_classes_root hkey_current_config hklm hku hkcu hkcr hkcc reg_sz reg_expand_sz reg_multi_sz reg_dword reg_qword reg_binary reg_link reg_resource_list reg_full_resource_descriptor reg_resource_requirements_list reg_dword_big_endian regex rgb belownormal abovenormal xdigit alpha upper lower alnum topmost transparent transcolor redraw idlast togglecheck toggleenable nodefault nostandard deleteall noicon groupbox button checkbox dropdownlist ddl combobox statusbar treeview listbox listview datetime monthcal updown iconsmall sortdesc nosort nosorthdr hdr autosize range font resize owner nohide minimize maximize restore noactivate cancel destroy center margin owndialogs guiescape guiclose guisize guicontextmenu guidropfiles tabstop choosestring enabled disabled visible notimers interrupt priority waitclose OnClipboardChange OnGUIClose OnGUIEscape OnGUICancel
             </Keywords>
     )
     template2=
     (
-		</CoDet>
+		</Codet>
 		<CMDHelper global="1" sci="1" forum="1" tags="1">
 			<HelpKey ctrl="1" alt="0" shift="0" win="0">F1</HelpKey>
 			<TagsKey ctrl="1" alt="0" shift="0" win="0">F2</TagsKey>
@@ -3525,7 +3754,7 @@ Msgbox `% version "``n" unicode
     FileAppend, %template%`n`t`t%template2%`n`t`t`t%template3%`n`t`t`t%template4%, %path%, UTF-8
     return ErrorLevel
 }
-rName(length = "", filext = ""){
+rName(length="", filext=""){
 	if !length
 		Random, length, 8, 15
 	Loop,26
@@ -3606,6 +3835,168 @@ lcRun(_gui=0){
     Run, %ahkpath% %lcfPath%
     return
 }
+pasteUpload(mode=""){
+    global ; for saving xml file Must fix this later.
+    conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
+
+    FormatTime,pb_time,,[MMM/dd/yyyy - HH:mm:ss]
+    SCI_GetText(SCI_GetLength($Sci5)+1,pb_code)
+    node := options.selectSingleNode("//Codet/Pastebin")
+    if (mode = "show"){
+        Gui, 94: Show, NoActivate
+        WinGetPos,,, 94Width, 94Height, ahk_id %$Hwnd94%
+        WinMove, ahk_id %$Hwnd94%,, system.wa.Right,% system.wa.Bottom - 94Height
+        pop_Right := system.wa.Right - 2
+        Loop, 5
+        {
+            pop_Right -= 94Width/5
+            WinMove, ahk_id %$Hwnd94%,,% pop_Right
+        }
+        Settimer, Sleep, % 1*sec    ; Using a timer allows to "stop" the sleep time fixing the bug with
+                                    ; Ctrl + C not working some times.
+        return
+
+        Sleep:
+            if slp = 5
+            {
+                slp:=0
+                SetTimer, Sleep, Off
+                Gui, 94: Hide       ; Hide Codet Popup
+            } slp++
+        return
+    }
+    if (mode = "auto")
+        pb_ddl := ""
+
+    ; [CURL]{
+    if res := curl_global_init("lib\libcurl.dll"){
+	msgbox % "Global initialization error: " res
+}
+
+    if curl := curl_easy_init(){
+
+        if (pb_ddl = "Autohotkey.net"){
+            URL := "http://www.autohotkey.net/paste/"
+            POST:= "    "
+                .  "&MAX_FILE_SIZE=262144"
+                .  "&jscheck=1"
+                .  "&text=" strget(curl_easy_escape(curl, pb_code), "CP0")
+                .  "&author=" strget(curl_easy_escape(curl, pb_subdomain), "CP0")
+                .  "&description=" strget(curl_easy_escape(curl, pb_name), "CP0")
+                .  "&irc=" (t := pb_exposure = "Public" ? 1 : 0)
+                .  "&submit=Paste"
+            sleep, 10 ; Not sure why but some times POST is corrupted. Problem is "fixed" if i use a msgbox
+                      ; This seems to be working as well >_>
+        }
+        ; else if (pb_ddl = "Pastebin.com"){
+            ; URL := "http://www.pastebin.com/api/api_post.php"
+            ; POST:= "    " ; <-- CURL corrupts at least 8 chars in UTF-8 not sure why
+                ; .  "&api_dev_key=786f7529a54ee64a1959612f2aeb8596"
+                ; .  "&api_option=paste"
+                ;
+                ; .  "&api_paste_name=" strget(curl_easy_escape(curl, pb_name), "CP0")
+                ; .  "&api_paste_code=" strget(curl_easy_escape(curl, pb_code), "CP0")
+
+
+            ; URL := "http://www.pastebin.com/api/api_post.php"
+            ; POST:= "    "
+                ; .  "&api_dev_key=786f7529a54ee64a1959612f2aeb8596"
+                ; .  "&api_option=paste"
+                ; .  "&api_paste_code=" strget(curl_easy_escape(curl, pb_code), "CP0")
+                ; .  "&api_paste_expire_date=10M" ; pb_expiration := (pb_expiration = "Never" ? "N"
+                                                           ; :  pb_expiration = "10 Minutes" ? "10M"
+                                                           ; :  pb_expiration = "1 Hour" ? "1H"
+                                                           ; :  pb_expiration = "1 Day" ? "1D"
+                                                           ; :  pb_expiration = "1 Month" ? "1M" : null)
+                ; .  "&api_paste_private=1" ; t:=(pb_exposure = "Public" ? 0 : 1)
+            ; msgbox % POST
+        ; }
+
+        curl_easy_setopt(curl, "CURLOPT_VERBOSE", true)
+        curl_easy_setopt(curl, "CURLOPT_DEBUGFUNCTION", RegisterCallBack("curl_Debug"))
+
+        curl_easy_setopt(curl, "CURLOPT_URL", URL)
+        curl_easy_setopt(curl, "CURLOPT_USERAGENT", "AHK-TK v" script.version)
+        curl_easy_setopt(curl, "CURLOPT_POST", true)
+        curl_easy_setopt(curl, "CURLOPT_POSTFIELDS", &POST)
+        curl_easy_setopt(curl, "CURLOPT_POSTFIELDSIZE", strlen(POST))
+
+        if res := curl_easy_perform(curl)
+            msgbox % curl_easy_strerror(res)
+
+        curl_easy_cleanup(curl), RegexMatch(curl_Debug, "i)location:\s?\.\/(.*)", pb_url)
+    }
+    ; gui, 50: add, edit, w800 h400, % curl_Debug
+    ; gui, 50: show
+    curl_global_cleanup()
+    Tooltip, % "Copied to clipboard: " Clipboard := pb_url := URL pb_url1, 5, 5
+    SetTimer, ttOff, % "-" 15 * sec
+    ;}
+
+
+    Loop, parse, pb_code, `n, `r%a_space%%a_tab%
+    {
+        if a_index = 5
+            break
+        pb_preview .= pb_preview ? "[``n]" a_loopfield : a_loopfield
+    }
+
+    node := options.selectSingleNode("//Codet/History")
+    if node.childNodes.length = node.attributes.item[0].text
+        node.removeChild(node.firstChild)
+
+    _h := conf.createElement("paste"), _h.setAttribute("time", pb_time), _h.setAttribute("url", pb_url)
+    _h.text := pb_preview
+    node.appendChild(_h)
+    conf.transformNodeToObject(xsl, conf)
+    conf.save(script.conf), conf.load(script.conf), root:=options:=_h:=null
+    return
+
+    ; 50GuiClose:
+    ; 50GuiEscape:
+    ; gui, 50: destroy
+    ; return
+
+    ttOff:
+        Tooltip
+    return
+}
+Ena_Control(subdomain="", exposure="", expiration=""){
+    _varList := "subdomain|exposure|expiration"
+    Loop, parse, _varList, |
+    {
+        if (%a_loopfield% = 1)
+            GuiControl, 09: enable, pb_%a_loopfield%
+        else if (%a_loopfield% = 0)
+            GuiControl, 09: disable, pb_%a_loopfield%
+    }
+    return
+}
+repIncludes(code){
+
+    /*
+    * This will replace the includes for the actual files to avoid
+    * the issues of missing includes on Pasted code
+    */
+    Loop, parse, code, `n, `r
+    {
+        if inStr(a_loopfield, "#Include")
+        {
+            ; need to work with relative paths
+            inc_file := RegexReplace(a_loopfield, "i)^#include\s|\*i\s|\s;.*")
+            if inc_file contains .ahk
+                FileRead, inc_%a_index%, %inc_file%
+            else
+                SetWorkingDir, %inc_file%
+            Stringreplace, code, code, %a_loopfield%, % inc_%a_index%
+        }
+        else
+            continue
+    }
+    SetWorkingDir %a_scriptdir%
+    return code
+}
+
 ; Storage
 WM(var){
     static
@@ -3623,6 +4014,7 @@ WM(var){
 ^CtrlBreak::Reload
 ^!LButton::                                                             ; Run Selected Code [Ctrl + Alt + LButton]
     Send, ^c
+    ClipWait
     lcRun()
 return
 ;}
