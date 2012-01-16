@@ -1,4 +1,32 @@
-commit 92725c2c9e031a0fc49532df6056ce722d8dd1b5
+Versioning:
+    Main.Feature.Changes.Bugs
+
+Legend:
+==================
+    + Add
+    - Remove
+    ! Fix
+    * Change
+    % Test
+==================
+
+commit a44495d40fe824545b2bb004a340662d7cd29b7e
+Author: RaptorX <graptorx@gmail.com>
+Date:   Mon Jan 16 22:39:59 2012 +0100
+
+    AHK-TK v0.6.1.1
+    
+    Changes:
+    
+    + Add Get Control Name snippet example
+    + Add Get Control HWND snippet example
+    
+    ! Fix config file to always have updated version number
+    ! Fix update function due to branch name change
+    
+    % Test update function
+
+commit 6e5eb1deed8573c0d82f9c11915a6ff6a48e461f
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Sep 24 02:09:39 2011 +0200
 
@@ -52,17 +80,3 @@ Date:   Thu Sep 22 00:33:52 2011 +0200
     Changed:
     
     * Fix early exit on Windows 7 due to misplaced ExitApp
-
-commit 9fde576ef2b8d2586a7258099d4926d7723a3881
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sat Sep 17 00:13:30 2011 +0200
-
-    AHK-TK v0.5.4
-    
-    Changed:
-    
-    + Add lib/scriptobj.h.ahk
-    * Fix download address
-    * Fix script object out of main script for ease of modification throughout other scripts
-    * Fix Gui continuation section error (new update from AHK_L 1.1.04.01)
-    * Fix issue with conf file not updating toolkit version

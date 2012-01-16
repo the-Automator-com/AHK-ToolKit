@@ -120,7 +120,7 @@
         debug ? debug("* getparams() [End]")
         return
         }
-    update(lversion, rfile="github", logurl="", vline=5){
+    update(lversion, rfile="github", logurl="", vline=17){
         global script, conf, debug
 
         debug ? debug("* update() [Start]", 1), node := conf.selectSingleNode("/AHK-Toolkit/@version")
@@ -134,7 +134,7 @@
             Progress, 50,,, % "Updating..."
 
         logurl := rfile = "github" ? "https://raw.github.com/" script.author
-                                   . "/" script.name "/master/Changelog.txt" : logurl
+                                   . "/" script.name "/Script/Changelog.txt" : logurl
 
         RunWait %ComSpec% /c "Ping -n 1 google.com" ,, Hide  ; Check if we are connected to the internet
         if connected := !ErrorLevel
@@ -148,12 +148,10 @@
             FileReadLine, logurl, %a_temp%\logurl, %vline%
             debug ? debug("* Version: " logurl)
             RegexMatch(logurl, "v(.*)", Version)
-            if (rfile = "github"){
-                if (a_iscompiled)
-                    rfile := "http://github.com/downloads/" script.author "/" script.name "-" Version "-Compiled.zip"
-                else
-                    rfile := "http://github.com/" script.author "/" script.name "/zipball/latest"
-            }
+            rfile := rfile = "github" ? ("http://www.github.com/"  
+                                      . script.author "/" 
+                                      . script.name "/zipball/" (a_iscompiled ? "latest-compiled" : "latest"))
+                                      : rfile
             debug ? debug("* Local Version: " lversion " Remote Version: " Version1)
             if (Version1 > lversion){
                 Progress, Off
@@ -183,7 +181,7 @@
                 Run, %lfile%
                 ExitApp
             }
-            else if a_thismenuitem = Check for Updates
+            else if (a_thismenuitem = "Check for Updates")
             {
                 Progress, Off
                 debug ? (debug("* Script is up to date"), debug("* update() [End]", 2))

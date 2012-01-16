@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.6
+ * Script Version   : 0.6.1.1
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: December 26, 2011
+ * Modification Date: January 16, 2012
  *
  * Description      :
  * ------------------
@@ -88,12 +88,12 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.6"
+           ,version     : "0.6.1.1"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "December 26, 2011"
+           ,moddate     : "January 16, 2012"
            ,conf        : "conf.xml"}, script.getparams(), TrayMenu()   ; This function is here so that
                                                                         ; the Tray Icon is shown early.
 ;}
@@ -196,6 +196,9 @@ if !conf.load(script.conf)
     else
         FirstRun()
 } root:=conf.documentElement,options:=root.firstChild,hotkeys:=options.nextSibling,hotstrings:=hotkeys.nextSibling
+node := root.attributes.item[0]
+node.text != script.version ? (node.text := script.version, conf.save(script.conf)
+                              , conf.load(script.conf), node:=null) : false
 ;}
 
 ;[Main]{
@@ -3586,6 +3589,44 @@ version := "AHK Version: " a_ahkversion
 unicode := "Supports Unicode: " `(a_isunicode ? "Yes" : "No"`)
 Msgbox `% version "``n" unicode
                 	</Snippet>
+                    <Snippet title="Get Control Name">
+/*
+ *********************************************************************
+ * This Script allows you to see the name of the control under the   *
+ * mouse while at the same time copying the name to the clipboard    *
+ * for later use.                                                    *
+ *                                                                   *
+ * Use Ctrl + Esc to exit the app, the last control name will be     *
+ * still in clipboard.                                               *
+ *********************************************************************
+ */
+ 
+loop
+{
+mousegetpos,,,,ctrl
+tooltip `% clipboard:=ctrl
+sleep 10
+}
+					</Snippet>
+					<Snippet title="Get Control Hwnd">
+/*
+ *********************************************************************
+ * This Script allows you to see the HWND of the control under the   *
+ * mouse while at the same time copying the HWND to the clipboard    *
+ * for later use.                                                    *
+ *                                                                   *
+ * Use Ctrl + Esc to exit the app, the last control HWND will be     *
+ * still in clipboard.                                               *
+ *********************************************************************
+ */
+ 
+loop
+{
+mousegetpos,,,,ctrl,2
+tooltip `% clipboard:=ctrl
+sleep 10
+}
+					</Snippet>
 				</Group>
 			</SnippetLib>
     )
