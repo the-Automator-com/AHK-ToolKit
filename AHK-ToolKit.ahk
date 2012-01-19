@@ -2,7 +2,7 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.6.1.1
+ * Script Version   : 0.6.3
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
@@ -52,6 +52,8 @@
  * GUI 07 - Add Snippet
  * GUI 08 - About
  * GUI 09 - Paste Upload
+ * GUI 92 - Command Helper Options
+ * GUI 93 - Command Helper
  * GUI 94 - Code Detection Popup
  * GUI 95 - Code Detection Pastebin Preferences
  * GUI 96 - Code Detection Keywords Preferences
@@ -88,7 +90,7 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.6.1.1"
+           ,version     : "0.6.3"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
@@ -755,6 +757,7 @@ PreferencesGui(){
             $C1C1 := TV_Add("Keywords", $P1C1, "Expand")
             $C1C2 := TV_Add("Pastebin Options", $P1C1, "Expand")
         $P1C2 := TV_Add("Command Helper", $P1, "Expand")
+            $C2C1 := TV_Add("Options", $P1C2, "Expand")
         $P1C3 := TV_Add("Live Code", $P1, "Expand")
             $C3C1 := TV_Add("Run Code With", $P1C3, "Expand")
             $C3C2 := TV_Add("Keywords", $P1C3, "Expand")
@@ -871,9 +874,62 @@ PreferencesGui(){
     ;}
 
     ;{ Command Helper
-    ; Gui, 98: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
-    ; $hwnd98 := WinExist()
-    ; Gui, 98: show, x165 y36 w350 h245 NoActivate
+    Gui, 93: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border ; -WS_POPUP   +WS_CHILD
+    $hwnd93 := WinExist()
+    
+    Gui, 93: add, GroupBox, x3 y0 w345 h150, % "Info"
+    Gui, 93: add, Text, xp+10 yp+25 w330
+                      , % "CMDHelper looks up the current selected word on the AHK help file.`n"
+                        . "Optionally you can set it to use the online help in case you dont have ahk installed or "
+                        . "if you are planning on sharing the link instead.`n`n"
+                        . "If you have the Forums Tags options enable you can use the Tags hotkey "
+                        . "to link the word under the cursor to the online documentation, providing an easy way "
+                        . "to help users to inform themselves about the command you just mentioned in your reply.`n"
+
+    Gui, 93: add, Text, x0 y+20 w360 0x10
+    
+    Gui, 93: add, GroupBox, x3 yp+10 w345 h70, % "Features"
+    Gui, 93: add, CheckBox, xp+25 yp+20 Checked%_ssi%, % "Enable CMDHelper"
+    Gui, 93: add, CheckBox, xp+180 Checked%_sww%, % "Use Online Help"
+    Gui, 93: add, CheckBox, x28 y+10 Checked%_smm% Disabled, % "Enable in Internal Editors"
+    Gui, 93: add, CheckBox, xp+180 Checked%_smm%, % "AHK Forum Tags"
+        
+    Gui, 93: show, x165 y36 w350 h245 NoActivate
+    ;}
+    
+    ;{ Command Helper Options
+    Gui, 92: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border ; -WS_POPUP   +WS_CHILD
+    $hwnd92 := WinExist()
+    
+    Gui, 92: add, GroupBox, x3 y0 w345 h60, % "Info"
+    Gui, 92: add, Text, xp+10 yp+20 w330
+                      , % "The Open Help File hotkey searches for the selected word while the Forum Tags hotkey "
+                        . "adds the [url] [/url] tags on the selected word."
+                        
+    Gui, 92: add, GroupBox, x3 y+20 w345 h55, % "Help File Path"
+    Gui, 92: add, Edit, xp+10 yp+23 w240, % "path"
+    Gui, 92: add, Button, x+10 w75, % "&Browse..."
+    
+    Gui, 92: add, GroupBox, x3 y+15 w345 h55, % "Open Help File"    ; y+26 to cover for checkbox lack of 3px
+    Gui, 92: add, CheckBox, xp+10 yp+23 Checked%_ctrl% v_hfctrl gGuiHandler, % "Ctrl"
+    Gui, 92: add, CheckBox, x+10 Checked%_alt% v_hfalt gGuiHandler, % "Alt"
+    Gui, 92: add, CheckBox, x+10 Checked%_shift% v_hfshift gGuiHandler, % "Shift"
+    Gui, 92: add, CheckBox, x+10 Checked%_win% v_hfwin gGuiHandler, % "Win"
+    Gui, 92: add, DropDownList, x+10 yp-3 w140 HWND$GP_HF_DDL v_hfddl gGuiHandler
+                , % lst:=klist("all^", "mods msb")" None  "
+
+    Control,ChooseString,%_mhk%,, ahk_id %$GP_HF_DDL%
+    
+    Gui, 92: add, GroupBox, x3 y+20 w345 h55, % "Forum Tags"
+    Gui, 92: add, CheckBox, xp+10 yp+23 Checked%_ctrl% v_tkctrl gGuiHandler, % "Ctrl"
+    Gui, 92: add, CheckBox, x+10 Checked%_alt% v_tkalt gGuiHandler, % "Alt"
+    Gui, 92: add, CheckBox, x+10 Checked%_shift% v_tkshift gGuiHandler, % "Shift"
+    Gui, 92: add, CheckBox, x+10 Checked%_win% v_tkwin gGuiHandler, % "Win"
+    Gui, 92: add, DropDownList, x+10 yp-3 w140 HWND$GP_TK_DDL v_tkddl gGuiHandler
+                , % lst:=klist("all^", "mods msb")" None  "
+
+    Control,ChooseString,%_mhk%,, ahk_id %$GP_TK_DDL%
+    Gui, 92: show, x165 y36 w350 h245 NoActivate
     ;}
 
     ;{ Live Code
@@ -895,7 +951,8 @@ PreferencesGui(){
 
 
     Gui, 01: Default
-    Gui, 06: show, w520 h330 Hide, % "Preferences"
+    Gui, 06: show, w520 h330 ; Hide, % "Preferences"
+    pause
     return
 }
 SnippetGui(){
@@ -3327,9 +3384,19 @@ prefControl(pref=0){
         Hotkey, F3, QScod, Off
         Hotkey, Delete, Gui6Search, Off
     }
-
+    
+    if (pref = $P1C2)
+        Gui, 93: show, x165 y36 w350 NoActivate
+    else
+        Gui, 93: hide
+    
+    if (pref = $C2C1)
+        Gui, 92: show, x165 y36 w350 NoActivate
+    else
+        Gui, 92: hide
+        
     ; Temporal Code
-    w := $P1 "," $P1C1 "," $C1C1
+    w := $P1 "," $P1C1 "," $C1C1 "," $P1C2 "," $C2C1
     if pref not in %w%
         GuiControl, 06: show, AHKTK_UC
     else
