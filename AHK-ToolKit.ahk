@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.6.1.1
+ * Script Version   : 0.6.2
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: January 16, 2012
+ * Modification Date: January 20, 2012
  *
  * Description      :
  * ------------------
@@ -64,13 +64,14 @@
 
 ;[Includes]{
 #include *i %a_scriptdir%
-#include lib\scriptobj.h.ahk
 #include lib\sci.h.ahk
-#include lib\curl.h.ahk
 #include lib\hash.h.ahk
 #include lib\klist.h.ahk
 #include lib\attach.h.ahk
 #include lib\hkSwap.h.ahk
+#include lib\uriSwap.h.ahk
+#include lib\scriptobj.h.ahk
+#include lib\httprequest.h.ahk
 ;}
 
 ;[Directives]{
@@ -88,12 +89,12 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.6.1.1"
+           ,version     : "0.6.2"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "January 16, 2012"
+           ,moddate     : "January 20, 2012"
            ,conf        : "conf.xml"}, script.getparams(), TrayMenu()   ; This function is here so that
                                                                         ; the Tray Icon is shown early.
 ;}
@@ -836,7 +837,7 @@ PreferencesGui(){
     Gui, 97: add, CheckBox, xp+25 yp+20 HWND$codStat Checked%codStat% gGuiHandler vcodStat
                           , % "Enable Command Detection"
     Gui, 97: add, Radio, x28 y+10 HWND$codMode1 gGuiHandler vcodMode, % "Show Popup"
-    Gui, 97: add, Radio, x+10 HWND$codMode2 gGuiHandler, % "Automatic Upload"
+    Gui, 97: add, Radio, x+10 HWND$codMode2 gGuiHandler Disabled, % "Automatic Upload"
 
     selRadio := codMode = 1 ? ("Show Popup", options.selectSingleNode("//Codet/@mode").text := 1)
                             : ("Automatic Upload", options.selectSingleNode("//Codet/@mode").text := 2)
@@ -991,20 +992,20 @@ PasteUploadGui(){
     Gui, 09: add, Text, HWND$puText1 w650 x0 y410 0x10
     Gui, 09: add, GroupBox, HWND$puGBox1 w620 h80 x10 yp+5, % "Options"
     Gui, 09: add, Text, HWND$puText2 xp+10 yp+20, % "Upload  to:"
-    Gui, 09: add, Text, HWND$puText3 x+83, % "Description"
-    Gui, 09: add, Text, HWND$puText4 x+25, % "Nick"
-    Gui, 09: add, Text, HWND$puText5 x+45, % "Privacy:"
-    Gui, 09: add, Text, HWND$puText6 x+42, % "Expiration:"
+    Gui, 09: add, Text, HWND$puText3 xp+135 w100, % "Nick"
+    Gui, 09: add, Text, HWND$puText4 xp+135, % "Description"
+    Gui, 09: add, Text, HWND$puText5 xp+135, % "Privacy"
+    Gui, 09: add, Text, HWND$puText6 xp+80, % "Expiration"
     Gui, 09: add, DropDownList, HWND$pb_ddl w125 x20 y+10 gGuiHandler vpb_ddl
-                              , % "AutoHotkey.net||" ; Pastebin.com|Gist.com"
+                              , % "AutoHotkey.net||Pastebin.com" ; |Gist.com"
     Gui, 09: add, Edit, HWND$pb_name w125 x+10 vpb_name
-    Gui, 09: add, Edit, HWND$pb_subdomain w125 x+10 vpb_subdomain
+    Gui, 09: add, Edit, HWND$pb_description w125 x+10 vpb_description
     Gui, 09: add, DropDownList, HWND$pb_exposure w70 x+10 vpb_exposure, % "Public||Private"
     Gui, 09: add, DropDownList, HWND$pb_expiration w115 x+10 vpb_expiration Disabled
                               , % "Never|10 Minutes||1 Hour|1 Day|1 Month"
     Gui, 09: add, Text, HWND$puText7 w650 x0 0x10
-    Gui, 09: add, Button, HWND$puButton1 w100 h25 x315 yp+10 gGuiHandler, % "&Upload"
-    Gui, 09: add, Button, HWND$puButton2 w100 h25 x+5 yp gGuiHandler, % "Save to File"
+    Gui, 09: add, Button, HWND$puButton1 w100 h25 x315 yp+10 gGuiHandler Default, % "&Upload"
+    Gui, 09: add, Button, HWND$puButton2 w100 h25 x+5 yp gGuiHandler, % "&Save to File"
     Gui, 09: add, Button, HWND$puButton3 w100 h25 x+10 yp gGuiHandler, % "&Cancel"
     GuiAttach(9),initSci($Sci5)
 
@@ -1039,7 +1040,7 @@ GuiAttach(guiNum){
          , $hk2Add,$hk2Cancel,$hs2GBox,$hs2Delim,$hs2Add,$hsCancel
          , $imList,$imDelim,$imAccept,$imClear,$imCancel,$slGBox,$slDelim,$slAdd,$slCancel
          , $shsList,$shkList
-         , $puText1,$puGBox1,$puText2,$puText3,$puText4,$puText5,$puText6,$pb_ddl,$pb_name,$pb_subdomain
+         , $puText1,$puGBox1,$puText2,$puText3,$puText4,$puText5,$puText6,$pb_ddl,$pb_name,$pb_description
          , $pb_exposure,$pb_expiration,$puText7,$puButton1,$puButton2,$puButton3,
 
     ; AutoHotkey ToolKit Gui
@@ -1121,7 +1122,7 @@ GuiAttach(guiNum){
         Loop, 7
             (a_index = 1 || a_index = 7) ? attach($puText%a_index%, "y w r1") : attach($puText%a_index%, "x.5 y r1")
 
-        c:="$pb_ddl|$pb_name|$pb_subdomain|$pb_exposure|$pb_expiration"
+        c:="$pb_ddl|$pb_name|$pb_description|$pb_exposure|$pb_expiration"
         loop, parse, c, |
             attach(%a_loopfield%, "x.5 y r1")
 
@@ -1583,7 +1584,7 @@ GuiReset(guiNum){
     }
     else if (guiNum = 09)   ; Pastebin Upload
     {
-        _vals := "pb_code¥¢pb_name¥¢pb_subdomain¥"
+        _vals := "pb_code¥¢pb_name¥¢pb_description¥"
         Control, disable,,, ahk_id %$pb_exposure%
         Control, disable,,, ahk_id %$pb_expiration%
     }
@@ -2353,10 +2354,16 @@ GuiHandler(){
     {
         if (a_guicontrol = "pb_ddl")
         {
-             if (pb_ddl = "AutoHotkey.net")
+            if (pb_ddl = "AutoHotkey.net"){
                 Ena_Control(1,1,0)
-             ; else if (pb_ddl = "Pastebin.com")
-                ; Ena_Control(1,1,1)
+                ControlSetText,, Nick, ahk_id %$puText3%
+                Control,enable,,, ahk_id %$puText4%
+            }
+            else if (pb_ddl = "Pastebin.com"){
+                Ena_Control(0,1,1)
+                ControlSetText,, Post Title, ahk_id %$puText3%
+                Control,disable,,, ahk_id %$puText4%
+            }
             return
         }
         if (a_guicontrol = "&Upload")
@@ -3350,10 +3357,10 @@ defConf(path){
         <SuspWndList/>
         <Codet status="1" mode="1">
             <Pastebin current="Autohotkey">
-                <AutoHotkey private="0" nick="">http://www.autohotkey.net/paste</AutoHotkey>
-                <PasteBin private="0" subdomain="" expiration="1H">http://pastebin.com/api_public.php</PasteBin>
-                <DPaste>http://www.dpaste.com</DPaste>
-                <Gist>http://api.github.com/gists</Gist>
+                <AutoHotkey private="0" nick=""></AutoHotkey>
+                <PasteBin private="0" key="" expiration="1H"></PasteBin>
+                <DPaste nick=""></DPaste>
+                <Gist></Gist>
             </Pastebin>
             <History max="10"/>
             <Keywords min="5">
@@ -3909,69 +3916,37 @@ pasteUpload(mode=""){
     if (mode = "auto")
         pb_ddl := ""
 
-    ; [CURL]{
-    if res := curl_global_init("lib\libcurl.dll"){
-	msgbox % "Global initialization error: " res
-}
-
-    if curl := curl_easy_init(){
-
-        if (pb_ddl = "Autohotkey.net"){
+    ; [httpRequest]{
+    if (pb_ddl = "Autohotkey.net"){
             URL := "http://www.autohotkey.net/paste/"
-            POST:= "    "
-                .  "&MAX_FILE_SIZE=262144"
+            POST:= "MAX_FILE_SIZE=262144"
                 .  "&jscheck=1"
-                .  "&text=" strget(curl_easy_escape(curl, pb_code), "CP0")
-                .  "&author=" strget(curl_easy_escape(curl, pb_subdomain), "CP0")
-                .  "&description=" strget(curl_easy_escape(curl, pb_name), "CP0")
+                .  "&text=" uriSwap(pb_code, "e")
+                .  "&author=" uriSwap(pb_name, "e")
+                .  "&description=" uriSwap(pb_description, "e")
                 .  "&irc=" (t := pb_exposure = "Public" ? 1 : 0)
                 .  "&submit=Paste"
-            sleep, 10 ; Not sure why but some times POST is corrupted. Problem is "fixed" if i use a msgbox
-                      ; This seems to be working as well >_>
-        }
-        ; else if (pb_ddl = "Pastebin.com"){
-            ; URL := "http://www.pastebin.com/api/api_post.php"
-            ; POST:= "    " ; <-- CURL corrupts at least 8 chars in UTF-8 not sure why
-                ; .  "&api_dev_key=786f7529a54ee64a1959612f2aeb8596"
-                ; .  "&api_option=paste"
-                ;
-                ; .  "&api_paste_name=" strget(curl_easy_escape(curl, pb_name), "CP0")
-                ; .  "&api_paste_code=" strget(curl_easy_escape(curl, pb_code), "CP0")
-
-
-            ; URL := "http://www.pastebin.com/api/api_post.php"
-            ; POST:= "    "
-                ; .  "&api_dev_key=786f7529a54ee64a1959612f2aeb8596"
-                ; .  "&api_option=paste"
-                ; .  "&api_paste_code=" strget(curl_easy_escape(curl, pb_code), "CP0")
-                ; .  "&api_paste_expire_date=10M" ; pb_expiration := (pb_expiration = "Never" ? "N"
-                                                           ; :  pb_expiration = "10 Minutes" ? "10M"
-                                                           ; :  pb_expiration = "1 Hour" ? "1H"
-                                                           ; :  pb_expiration = "1 Day" ? "1D"
-                                                           ; :  pb_expiration = "1 Month" ? "1M" : null)
-                ; .  "&api_paste_private=1" ; t:=(pb_exposure = "Public" ? 0 : 1)
-            ; msgbox % POST
-        ; }
-
-        curl_easy_setopt(curl, "CURLOPT_VERBOSE", true)
-        curl_easy_setopt(curl, "CURLOPT_DEBUGFUNCTION", RegisterCallBack("curl_Debug"))
-
-        curl_easy_setopt(curl, "CURLOPT_URL", URL)
-        curl_easy_setopt(curl, "CURLOPT_USERAGENT", "AHK-TK v" script.version)
-        curl_easy_setopt(curl, "CURLOPT_POST", true)
-        curl_easy_setopt(curl, "CURLOPT_POSTFIELDS", &POST)
-        curl_easy_setopt(curl, "CURLOPT_POSTFIELDSIZE", strlen(POST))
-
-        if res := curl_easy_perform(curl)
-            msgbox % curl_easy_strerror(res)
-
-        curl_easy_cleanup(curl), RegexMatch(curl_Debug, "i)location:\s?\.\/(.*)", pb_url)
     }
-    ; gui, 50: add, edit, w800 h400, % curl_Debug
-    ; gui, 50: show
-    curl_global_cleanup()
-    Tooltip, % "Copied to clipboard: " Clipboard := pb_url := URL pb_url1, 5, 5
-    SetTimer, ttOff, % "-" 15 * sec
+    else if (pb_ddl = "Pastebin.com"){
+        URL := "http://www.pastebin.com/api/api_post.php"
+        POST:= "api_option=paste"
+            .  "&api_dev_key=786f7529a54ee64a1959612f2aeb8596"
+            .  "&api_paste_code=" uriSwap(pb_code, "e")
+            .  "&api_paste_private=" t := (pb_exposure = "Public" ? 0 : 1)
+            .  "&api_paste_name=" uriSwap(pb_name, "e")
+            .  "&api_paste_format=autohotkey"
+            .  "&api_paste_expire_date=" pb_expiration := (pb_expiration = "Never" ? "N"
+                                                       :   pb_expiration = "10 Minutes" ? "10M"
+                                                       :   pb_expiration = "1 Hour" ? "1H"
+                                                       :   pb_expiration = "1 Day" ? "1D"
+                                                       :   pb_expiration = "1 Month" ? "1M" : null)
+    }
+
+    httpRequest(URL,POST,headers:="", "charset: utf-8")
+    RegexMatch(POST, "i)(<title>Paste #(.*)<\/title>|\w{3}\/(.*)$)", pb_url)
+    pb_url := (pb_ddl = "Pastebin.com" ? substr(URL, 1,-16) : URL) pb_url2 pb_url3
+    Tooltip, % "Copied to clipboard: " Clipboard := pb_url, 5, 5
+    SetTimer, ttOff, % "-" 10 * sec
     ;}
 
 
@@ -3979,7 +3954,7 @@ pasteUpload(mode=""){
     {
         if a_index = 5
             break
-        pb_preview .= pb_preview ? "[``n]" a_loopfield : a_loopfield
+        pb_preview .= pb_preview ? "[``n]" a_loopfield : "`n" a_loopfield
     }
 
     node := options.selectSingleNode("//Codet/History")
@@ -3987,23 +3962,18 @@ pasteUpload(mode=""){
         node.removeChild(node.firstChild)
 
     _h := conf.createElement("paste"), _h.setAttribute("time", pb_time), _h.setAttribute("url", pb_url)
-    _h.text := pb_preview
+    _h.text := pb_preview "`n                ", pb_preview := "" ; for xml formatting
     node.appendChild(_h)
     conf.transformNodeToObject(xsl, conf)
     conf.save(script.conf), conf.load(script.conf), root:=options:=_h:=null
     return
 
-    ; 50GuiClose:
-    ; 50GuiEscape:
-    ; gui, 50: destroy
-    ; return
-
     ttOff:
         Tooltip
     return
 }
-Ena_Control(subdomain="", exposure="", expiration=""){
-    _varList := "subdomain|exposure|expiration"
+Ena_Control(description="", exposure="", expiration=""){
+    _varList := "description|exposure|expiration"
     Loop, parse, _varList, |
     {
         if (%a_loopfield% = 1)

@@ -3,14 +3,39 @@ Versioning:
 
 Legend:
 ==================
-    + Add
-    - Remove
+    + Add       ^ Enable
+    - Remove    $ Disable
     ! Fix
     * Change
     % Test
 ==================
 
-commit a44495d40fe824545b2bb004a340662d7cd29b7e
+commit 977ed481a2c31ed823214192ea4db6b5c80c8ab2
+Author: RaptorX <graptorx@gmail.com>
+Date:   Fri Jan 20 21:50:04 2012 +0100
+
+    AHK-TK v0.6.2
+    
+    Changes:
+    
+    + lib/httpRequest.h.ahk
+    + lib/uriSwap.h.ahk
+    + Pastebin.com
+    
+    - lib/libcurl.dll
+    - lib/curl.h.ahk
+    
+    ! Pastebin Upload GUI
+    
+    * Function to upload pastebins to allow unicode support ([VxE]'s httpRequest())
+    * Update function to read from dedicated file
+    * Url encode/decode function
+    * uriSwap to enhance performance
+    * README file
+    
+    % Paste Upload functions
+
+commit 7ec0704849bc29f98f32d947546cf55d7321e5bb
 Author: RaptorX <graptorx@gmail.com>
 Date:   Mon Jan 16 22:39:59 2012 +0100
 
@@ -20,9 +45,12 @@ Date:   Mon Jan 16 22:39:59 2012 +0100
     
     + Add Get Control Name snippet example
     + Add Get Control HWND snippet example
+    + Add legend on Changelog for versioning guide and info signs
     
     ! Fix config file to always have updated version number
     ! Fix update function due to branch name change
+    
+    * Change Versioning system
     
     % Test update function
 
@@ -70,13 +98,3 @@ Date:   Thu Sep 22 09:11:47 2011 +0200
     + Add run selected code hotkey [Ctrl + Alt + LButton]
     * Fix Tray Icon tooltip to display current version
     * Fix issue with Live Code editor not sending standard edit hotkey commands
-
-commit fdd0226a9ae101d94f6cb16cd7db623ee6cba274
-Author: RaptorX <graptorx@gmail.com>
-Date:   Thu Sep 22 00:33:52 2011 +0200
-
-    AHK-TK v0.5.5
-    
-    Changed:
-    
-    * Fix early exit on Windows 7 due to misplaced ExitApp
