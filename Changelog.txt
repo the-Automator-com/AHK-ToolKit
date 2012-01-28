@@ -3,14 +3,30 @@ Versioning:
 
 Legend:
 ==================
-    + Add       ^ Enable
-    - Remove    $ Disable
+    + Add
+    - Remove
     ! Fix
     * Change
     % Test
+    ^ Enable
+    $ Disable
 ==================
 
-commit 977ed481a2c31ed823214192ea4db6b5c80c8ab2
+commit 0f099382e75d519ec6a284262c34a3e5dcc27bea
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Jan 28 17:40:18 2012 +0100
+
+    AHK-TK v0.6.2.1
+    
+    Changes:
+    
+    + Add compiler settings
+    
+    ! Fix link regex for uploaded pastebin
+    ! Fix issue with ahk-tk not notifiying IRC channel about new paste
+    ! Fix uriSwap() function
+
+commit 44ad2ac19209cf06db31ad87efa5be52aed01ecf
 Author: RaptorX <graptorx@gmail.com>
 Date:   Fri Jan 20 21:50:04 2012 +0100
 
@@ -86,15 +102,3 @@ Date:   Fri Sep 23 00:18:01 2011 +0200
     Changed:
     
     * Fix update function
-
-commit f1b40d07cf8c214411db3d945314cbdaf1a398bf
-Author: RaptorX <graptorx@gmail.com>
-Date:   Thu Sep 22 09:11:47 2011 +0200
-
-    AHK-TK v0.5.6
-    
-    Changed:
-    
-    + Add run selected code hotkey [Ctrl + Alt + LButton]
-    * Fix Tray Icon tooltip to display current version
-    * Fix issue with Live Code editor not sending standard edit hotkey commands

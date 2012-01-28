@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.6.2
+ * Script Version   : 0.6.2.1
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: January 20, 2012
+ * Modification Date: January 28, 2012
  *
  * Description      :
  * ------------------
@@ -63,15 +63,14 @@
  */
 
 ;[Includes]{
-#include *i %a_scriptdir%
-#include lib\sci.h.ahk
-#include lib\hash.h.ahk
-#include lib\klist.h.ahk
-#include lib\attach.h.ahk
-#include lib\hkSwap.h.ahk
-#include lib\uriSwap.h.ahk
-#include lib\scriptobj.h.ahk
-#include lib\httprequest.h.ahk
+#include <sci>
+#include <hash>
+#include <klist>
+#include <attach>
+#include <hkSwap>
+#include <uriSwap>
+#include <scriptobj>
+#include <httprequest>
 ;}
 
 ;[Directives]{
@@ -89,14 +88,15 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.6.2"
+           ,version     : "0.6.2.1"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "January 20, 2012"
+           ,moddate     : "January 28, 2012"
            ,conf        : "conf.xml"}, script.getparams(), TrayMenu()   ; This function is here so that
                                                                         ; the Tray Icon is shown early.
+
 ;}
 
 ;[General Variables]{
@@ -3943,10 +3943,10 @@ pasteUpload(mode=""){
     }
 
     httpRequest(URL,POST,headers:="", "charset: utf-8")
-    RegexMatch(POST, "i)(<title>Paste #(.*)<\/title>|\w{3}\/(.*)$)", pb_url)
-    pb_url := (pb_ddl = "Pastebin.com" ? substr(URL, 1,-16) : URL) pb_url2 pb_url3
-    Tooltip, % "Copied to clipboard: " Clipboard := pb_url, 5, 5
-    SetTimer, ttOff, % "-" 10 * sec
+    RegexMatch(POST, "i)<title>Paste #(.*?)<\/title>|.com\/(.*)", pb_url)
+    pb_url := (pb_ddl = "Pastebin.com" ? substr(URL, 1,24) : URL) pb_url1 pb_url2
+    Tooltip, % "Copied: " Clipboard := pb_url, 5, 5
+    SetTimer, ttOff, % "-" 5 * sec
     ;}
 
 
@@ -4029,3 +4029,30 @@ WM(var){
     lcRun()
 return
 ;}
+
+/*
+ * * * Compile_AHK SETTINGS BEGIN * * *
+
+[AHK2EXE]
+Exe_File=%In_Dir%\AHK-ToolKit.exe
+Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
+[VERSION]
+Set_Version_Info=1
+File_Version=1.0.0.0
+Inc_File_Version=0
+Internal_Name=AHK-TK
+Legal_Copyright=GNU General Public License 3.0
+Original_Filename=AutoHotkey Toolkit.exe
+Product_Name=AutoHotkey Toolkit
+Product_Version=0.6.2.1
+[ICONS]
+Icon_1=%In_Dir%\res\AHK-TK.ico
+Icon_2=%In_Dir%\res\AHK-TK.ico
+Icon_3=%In_Dir%\res\AHK-TK.ico
+Icon_4=%In_Dir%\res\AHK-TK.ico
+Icon_5=%In_Dir%\res\AHK-TK.ico
+Icon_6=%In_Dir%\res\AHK-TK.ico
+Icon_7=%In_Dir%\res\AHK-TK.ico
+
+* * * Compile_AHK SETTINGS END * * *
+*/
