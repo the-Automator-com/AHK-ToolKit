@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.6.2.1
+ * Script Version   : 0.6.2.2
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: January 28, 2012
+ * Modification Date: January 29, 2012
  *
  * Description      :
  * ------------------
@@ -88,12 +88,12 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.6.2.1"
+           ,version     : "0.6.2.2"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "January 28, 2012"
+           ,moddate     : "January 29, 2012"
            ,conf        : "conf.xml"}, script.getparams(), TrayMenu()   ; This function is here so that
                                                                         ; the Tray Icon is shown early.
 
@@ -2372,9 +2372,10 @@ GuiHandler(){
             pasteUpload()
             return
         }
-        if (a_guicontrol = "Save to File")
+        if (a_guicontrol = "&Save to File")
         {
             Gui, 09: +OwnDialogs
+            SCI_GetText(SCI_GetLength($Sci5)+1,pb_code, $Sci5)
             FileSelectFile, f_saved, S24, %a_desktop%, Save script as..., AutoHotkey (*.ahk)
             if !f_saved
                 return
@@ -4044,7 +4045,7 @@ Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.6.2.1
+Product_Version=0.6.2.2
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico

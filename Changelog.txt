@@ -12,7 +12,17 @@ Legend:
     $ Disable
 ==================
 
-commit 0f099382e75d519ec6a284262c34a3e5dcc27bea
+commit 66d608b914aabe3566858ce03f7d1482c5b0fc00
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sun Jan 29 00:07:19 2012 +0100
+
+    AHK-TK v0.6.2.2
+    
+    Changes:
+    
+    ! Fix Pastebin Save to file
+
+commit e85da43b00c54e9a08bec93c3029cfcedf17473c
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Jan 28 17:40:18 2012 +0100
 
@@ -92,13 +102,3 @@ Date:   Sat Sep 24 02:09:39 2011 +0200
     ! Fix update function
     
     % Tested upload function ANSI & UNICODE - some bugs left UNICODE, var corruption.
-
-commit ec201f4a0c0eb5167ab8b52d2717865a2f49e429
-Author: RaptorX <graptorx@gmail.com>
-Date:   Fri Sep 23 00:18:01 2011 +0200
-
-    AHK-TK v0.5.7
-    
-    Changed:
-    
-    * Fix update function
