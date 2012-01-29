@@ -12,7 +12,18 @@ Legend:
     $ Disable
 ==================
 
-commit 66d608b914aabe3566858ce03f7d1482c5b0fc00
+commit 1c2050975d7747e531cb9a28d7bcd71e3214dc2d
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sun Jan 29 01:07:54 2012 +0100
+
+    AHK-TK v0.6.3
+    
+    Changes:
+    
+    + Add Code Detection Pastebin Preferences Gui
+    + Add Gui functionality
+
+commit 19cfea2dea52692f83999e267983f2f6cdb132aa
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sun Jan 29 00:07:19 2012 +0100
 
@@ -79,26 +90,3 @@ Date:   Mon Jan 16 22:39:59 2012 +0100
     * Change Versioning system
     
     % Test update function
-
-commit 6e5eb1deed8573c0d82f9c11915a6ff6a48e461f
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sat Sep 24 02:09:39 2011 +0200
-
-    AHK-TK v0.6
-    
-    Changed:
-    
-    + Add CoDed popup Gui
-    + Add CoDet Kewords Preferences Gui
-    + Add PasteUpload()
-    + Add Autohotkey.net to the upload options
-    
-    ! Fix CODET preferences GUI
-    ! Fix IDC_HAND icon on CODET preferences GUI
-    ! Fix Run Selected Code hotkey to wait for clipboard
-    ! Fix menu items who interfere with scintilla hotkeys
-    ! Fix Preferences Menu item not working
-    ! Fix small Preferences GUI issues
-    ! Fix update function
-    
-    % Tested upload function ANSI & UNICODE - some bugs left UNICODE, var corruption.

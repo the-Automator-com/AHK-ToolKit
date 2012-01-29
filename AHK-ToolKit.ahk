@@ -2,7 +2,7 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.6.2.2
+ * Script Version   : 0.6.3
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
@@ -88,7 +88,7 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.6.2.2"
+           ,version     : "0.6.3"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
@@ -816,7 +816,7 @@ PreferencesGui(){
     Gui, 98: show, x165 y36 w350 h245 NoActivate
     ;}
 
-    ;{ Code Detection
+    ;{ Code Detection Preferences
     Gui, 97: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
     $hwnd97 := WinExist()
 
@@ -837,7 +837,7 @@ PreferencesGui(){
     Gui, 97: add, CheckBox, xp+25 yp+20 HWND$codStat Checked%codStat% gGuiHandler vcodStat
                           , % "Enable Command Detection"
     Gui, 97: add, Radio, x28 y+10 HWND$codMode1 gGuiHandler vcodMode, % "Show Popup"
-    Gui, 97: add, Radio, x+10 HWND$codMode2 gGuiHandler Disabled, % "Automatic Upload"
+    Gui, 97: add, Radio, x+10 HWND$codMode2 gGuiHandler, % "Automatic Upload"
 
     selRadio := codMode = 1 ? ("Show Popup", options.selectSingleNode("//Codet/@mode").text := 1)
                             : ("Automatic Upload", options.selectSingleNode("//Codet/@mode").text := 2)
@@ -846,7 +846,7 @@ PreferencesGui(){
     Gui, 97: show, x165 y36 w350 h245 NoActivate
     ;}
 
-    ;{ CODET Keywords
+    ;{ Code Detection Keywords Preferences
     Gui, 96: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
     $hwnd96 := WinExist()
 
@@ -871,6 +871,33 @@ PreferencesGui(){
     Gui, 96: show, x165 y36 w350 h245 NoActivate
     ;}
 
+    ;{ Code Detection Pastebin Preferences
+    Gui, 95: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 ; +Border ; -WS_POPUP +WS_CHILD
+    $hwnd95 := WinExist()
+    
+    Gui, 95: add, GroupBox, x3 y0 w345 h110, % "Info"
+    Gui, 95: add, Text, xp+10 yp+20 w330
+                      , % "If AutoUpload is enabled you wont be prompted to select a Pastebin,`n"
+                        . "instead the info will be retrieved from here.`n`n"
+                        . "You can change the default options for the AutoUpload function here.`n`n"
+                        . "For Pastebin.com click on the 'Get Key' button to get a user key."
+
+    Gui, 95: add, Text, x0 y+20 w360 0x10
+    Gui, 95: add, Text, x3 yp+10, % "Current Bin"
+    Gui, 95: add, DropDownList, x3 y+10 w140 gGuiHandler vpbp_ddl
+                              , % "AutoHotkey.net||Pastebin.com" ; |Gist.com"
+    Gui, 95: add, Button, HWND$pbpButton1 x+10 yp w75 gGuiHandler Disabled, % "Get UserKey"
+    Gui, 95: add, Text, HWND$pbpText1 x3 y+15 w100, % "Nick"
+    Gui, 95: add, Text, xp+150, % "Privacy"
+    Gui, 95: add, Text, HWND$pbpText2 xp+80 Disabled, % "Expiration"
+    Gui, 95: add, Edit, w140 x3 y+10 vpbp_user
+    Gui, 95: add, DropDownList, w70 x+10 vpbp_exposure, % "Public||Private"
+    Gui, 95: add, DropDownList, w115 x+10 vpbp_expiration Disabled 
+                              , % "Never|10 Minutes||1 Hour|1 Day|1 Month"
+
+    Gui, 95: show, x165 y36 w350 h245 NoActivate
+    ;}
+    
     ;{ Command Helper
     ; Gui, 98: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
     ; $hwnd98 := WinExist()
@@ -2441,6 +2468,27 @@ GuiHandler(){
 
         return
     }
+
+    ; Code Detection Pastebin Preferences
+    if (a_gui = 95)
+    {
+        if (a_guicontrol = "pbp_ddl")
+        {
+            if (pbp_ddl = "AutoHotkey.net"){
+                Ena_Control(1,1,0, a_gui)
+                ControlSetText,, Nick, ahk_id %$pbpText1%
+                Control,disable,,, ahk_id %$pbpButton1%
+                Control,disable,,, ahk_id %$pbpText2%
+            }
+            else if (pbp_ddl = "Pastebin.com"){
+                Ena_Control(1,1,1, a_gui)
+                ControlSetText,, User Key, ahk_id %$pbpText1%
+                ; Control,enable,,, ahk_id %$pbpButton1%
+                Control,enable,,, ahk_id %$pbpText2%
+            }
+            return
+        }
+    }
 }
 MenuHandler(stat=0){
     global
@@ -3336,8 +3384,13 @@ prefControl(pref=0){
         Hotkey, Delete, Gui6Search, Off
     }
 
+    if (pref = $C1C2)
+        Gui, 95: show, NoActivate
+    else
+        Gui, 95: hide
+        
     ; Temporal Code
-    w := $P1 "," $P1C1 "," $C1C1
+    w := $P1 "," $P1C1 "," $C1C1 "," $C1C2
     if pref not in %w%
         GuiControl, 06: show, AHKTK_UC
     else
@@ -3973,14 +4026,15 @@ pasteUpload(mode=""){
         Tooltip
     return
 }
-Ena_Control(description="", exposure="", expiration=""){
+Ena_Control(description="", exposure="", expiration="", guiNum=1){
     _varList := "description|exposure|expiration"
     Loop, parse, _varList, |
     {
+        ctrl := (guiNum = 9 ? "pb_" : "pbp_") (a_loopfield = "description" ? "user" : a_loopfield)
         if (%a_loopfield% = 1)
-            GuiControl, 09: enable, pb_%a_loopfield%
+            GuiControl, %guiNum%: enable, %ctrl%
         else if (%a_loopfield% = 0)
-            GuiControl, 09: disable, pb_%a_loopfield%
+            GuiControl, %guiNum%: disable, %ctrl%
     }
     return
 }
@@ -4045,7 +4099,7 @@ Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.6.2.2
+Product_Version=0.6.3
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico
