@@ -2,7 +2,7 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.6.3
+ * Script Version   : 0.6.3.1
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
@@ -88,7 +88,7 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.6.3"
+           ,version     : "0.6.3.1"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
@@ -1016,24 +1016,24 @@ PasteUploadGui(){
     $hwnd9 := WinExist()
 
     $Sci5 := SCI_Add($hwnd9,10,5,620,400,"","","lib\scilexer.dll")
-    Gui, 09: add, Text, HWND$puText1 w650 x0 y410 0x10
-    Gui, 09: add, GroupBox, HWND$puGBox1 w620 h80 x10 yp+5, % "Options"
+    Gui, 09: add, Text, HWND$puText1 x0 y410 w650 0x10
+    Gui, 09: add, GroupBox, HWND$puGBox1 x10 yp+5 w620 h80, % "Options"
     Gui, 09: add, Text, HWND$puText2 xp+10 yp+20, % "Upload  to:"
     Gui, 09: add, Text, HWND$puText3 xp+135 w100, % "Nick"
     Gui, 09: add, Text, HWND$puText4 xp+135, % "Description"
     Gui, 09: add, Text, HWND$puText5 xp+135, % "Privacy"
-    Gui, 09: add, Text, HWND$puText6 xp+80, % "Expiration"
-    Gui, 09: add, DropDownList, HWND$pb_ddl w125 x20 y+10 gGuiHandler vpb_ddl
+    Gui, 09: add, Text, HWND$puText6 xp+80 Disabled, % "Expiration"
+    Gui, 09: add, DropDownList, HWND$pb_ddl x20 y+10 w125 gGuiHandler vpb_ddl
                               , % "AutoHotkey.net||Pastebin.com" ; |Gist.com"
-    Gui, 09: add, Edit, HWND$pb_name w125 x+10 vpb_name
-    Gui, 09: add, Edit, HWND$pb_description w125 x+10 vpb_description
-    Gui, 09: add, DropDownList, HWND$pb_exposure w70 x+10 vpb_exposure, % "Public||Private"
-    Gui, 09: add, DropDownList, HWND$pb_expiration w115 x+10 vpb_expiration Disabled
+    Gui, 09: add, Edit, HWND$pb_name x+10 w125 vpb_name
+    Gui, 09: add, Edit, HWND$pb_description x+10 w125 vpb_description
+    Gui, 09: add, DropDownList, HWND$pb_exposure x+10 w70 vpb_exposure, % "Public||Private"
+    Gui, 09: add, DropDownList, HWND$pb_expiration x+10 w115 vpb_expiration Disabled
                               , % "Never|10 Minutes||1 Hour|1 Day|1 Month"
-    Gui, 09: add, Text, HWND$puText7 w650 x0 0x10
-    Gui, 09: add, Button, HWND$puButton1 w100 h25 x315 yp+10 gGuiHandler Default, % "&Upload"
-    Gui, 09: add, Button, HWND$puButton2 w100 h25 x+5 yp gGuiHandler, % "&Save to File"
-    Gui, 09: add, Button, HWND$puButton3 w100 h25 x+10 yp gGuiHandler, % "&Cancel"
+    Gui, 09: add, Text, HWND$puText7 x0 w650 0x10
+    Gui, 09: add, Button, HWND$puButton1 h25 x385 yp+10 w75 gGuiHandler Default, % "&Upload"
+    Gui, 09: add, Button, HWND$puButton2 h25 x+10 yp w75 gGuiHandler, % "&Save to File"
+    Gui, 09: add, Button, HWND$puButton3 h25 x+10 yp w75 gGuiHandler, % "&Cancel"
     GuiAttach(9),initSci($Sci5)
 
     Gui, 09: Show, w640 h550 Hide, % "Paste Upload"
@@ -2376,20 +2376,24 @@ GuiHandler(){
         }
     }
 
-    ; Pastebin Upload
+    ; Paste Upload
     if (a_gui = 09)
     {
         if (a_guicontrol = "pb_ddl")
         {
             if (pb_ddl = "AutoHotkey.net"){
-                Ena_Control(1,1,0)
+                Ena_Control(1,1,0, a_gui)
                 ControlSetText,, Nick, ahk_id %$puText3%
                 Control,enable,,, ahk_id %$puText4%
+                Control,enable,,, ahk_id %$pb_description%
+                Control,disable,,, ahk_id %$puText6%
             }
             else if (pb_ddl = "Pastebin.com"){
-                Ena_Control(0,1,1)
+                Ena_Control(0,1,1, a_gui)
                 ControlSetText,, Post Title, ahk_id %$puText3%
                 Control,disable,,, ahk_id %$puText4%
+                Control,disable,,, ahk_id %$pb_description%
+                Control,enable,,, ahk_id %$puText6%
             }
             return
         }
@@ -4099,7 +4103,7 @@ Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.6.3
+Product_Version=0.6.3.1
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico
