@@ -38,7 +38,7 @@ HTTPRequest( URL, byref In_POST__Out_Data="", byref In_Out_HEADERS="", Options="
 ; the header to the script's ANSI codepage OR to UTF-16 for unicode versions of AHK.
 ; "ErrorLevel" is set to '0' if there is a problem, otherwise it is set to the HTTP response code.
 
-	Static version := "2.40", Ptr, PtrSize, IsUnicode, MyACP, MyCharset, Default_Agent, WorA := ""
+	Static version := "2.41", Ptr, PtrSize, IsUnicode, MyACP, MyCharset, Default_Agent, WorA := ""
 	, Default_Accept_Types := "text/xml, text/json; q=0.4, text/html; q=0.3, text/*; q=0.2, */*; q=0.1"
 ; This list of content subtypes is not official, I just globbed together a few MIME subtypes to use
 ; as a whitelist for converting downloaded text to the script's codepage. If the Content-Type
@@ -388,7 +388,7 @@ HTTPRequest( URL, byref In_POST__Out_Data="", byref In_Out_HEADERS="", Options="
 			}
 		; Method option: use a different verb when creating the request
 			Else If ( options = "METHOD" ) && InStr( "|GET|HEAD|POST|PUT|DELETE|OPTIONS|TRACE|", "|" A_LoopField "|" )
-				StringUpper, Method, A_LoopField
+				StringUpper, Method_Verb, A_LoopField
 		; Proxy option: use the indicated URL as the proxy server for this request.
 			Else If ( options = "PROXY" )
 				Internet_Open_Type := 3, proxy_url := A_LoopField
@@ -788,9 +788,9 @@ HTTPRequest( URL, byref In_POST__Out_Data="", byref In_Out_HEADERS="", Options="
 						Break
 					}
 				; WriteFile > http://msdn.microsoft.com/en-us/library/aa365747%28v=vs.85%29.aspx
-					Else If ( Do_Download_To_File ) && !DllCall( "WriteFile", Ptr, Do_Download_To_File, Ptr, pos, "UInt", dtsz, Ptr, 0, Ptr, 0 )
+					Else If ( Do_Download_To_File ) && !DllCall( "WriteFile", Ptr, Do_Download_To_File, Ptr, pos, "UInt", dtsz, "Int*", 0, Ptr, 0 )
 						MyErrors .= "`nThere was a problem writing data to the disk. 'WriteFile' failed: ErrorLevel = " ErrorLevel ", A_LastError = " A_LastError
-					Else If ( size < rbuffsz )
+					Else If !( Do_Download_To_File ) && ( size < rbuffsz )
 					{
 						DllCall( "RtlMoveMemory", Ptr, &rbuffer, Ptr, &dbuffer, "Int", size )
 						VarSetCapacity( dbuffer, Content_Length := 4096 + ( size += dtsz ), 0 )

@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.6.3.1
+ * Script Version   : 0.6.4
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: January 29, 2012
+ * Modification Date: February 19, 2012
  *
  * Description      :
  * ------------------
@@ -88,12 +88,12 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.6.3.1"
+           ,version     : "0.6.4"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "January 29, 2012"
+           ,moddate     : "February 19, 2012"
            ,conf        : "conf.xml"}, script.getparams(), TrayMenu()   ; This function is here so that
                                                                         ; the Tray Icon is shown early.
 
@@ -874,6 +874,9 @@ PreferencesGui(){
     ;{ Code Detection Pastebin Preferences
     Gui, 95: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 ; +Border ; -WS_POPUP +WS_CHILD
     $hwnd95 := WinExist()
+
+    curr:=options.selectSingleNode("//Codet/Pastebin/@current").text
+    ahknet := curr = "Autohotkey.net" ? 1 : 0
     
     Gui, 95: add, GroupBox, x3 y0 w345 h110, % "Info"
     Gui, 95: add, Text, xp+10 yp+20 w330
@@ -884,20 +887,37 @@ PreferencesGui(){
 
     Gui, 95: add, Text, x0 y+20 w360 0x10
     Gui, 95: add, Text, x3 yp+10, % "Current Bin"
-    Gui, 95: add, DropDownList, x3 y+10 w140 gGuiHandler vpbp_ddl
+    Gui, 95: add, DropDownList, HWND$CP_DDL x3 y+10 w140 gGuiHandler vpbp_ddl
                               , % "AutoHotkey.net||Pastebin.com" ; |Gist.com"
-    Gui, 95: add, Button, HWND$pbpButton1 x+10 yp w75 gGuiHandler Disabled, % "Get UserKey"
-    Gui, 95: add, Text, HWND$pbpText1 x3 y+15 w100, % "Nick"
+
+
+    Gui, 95: add, Button, HWND$pbpButton1 x+10 yp w75 gGuiHandler Disabled, % "Get User Key"
+    Gui, 95: add, Text, HWND$pbpText1 x3 y+15 w100, % ahknet ? "Nick" : "User Key"
     Gui, 95: add, Text, xp+150, % "Privacy"
     Gui, 95: add, Text, HWND$pbpText2 xp+80 Disabled, % "Expiration"
-    Gui, 95: add, Edit, w140 x3 y+10 vpbp_user
-    Gui, 95: add, DropDownList, w70 x+10 vpbp_exposure, % "Public||Private"
-    Gui, 95: add, DropDownList, w115 x+10 vpbp_expiration Disabled 
+    Gui, 95: add, Edit, HWND$pbpText3 w140 x3 y+10 gGuiHandler vpbp_user
+                      , % ahknet ? options.selectSingleNode("//Codet/Pastebin/AutoHotkey/@nick").text
+                                 : options.selectSingleNode("//Codet/Pastebin/PasteBin/@key").text
+
+    Gui, 95: add, DropDownList, HWND$CP_DDL2 w70 x+10 gGuiHandler vpbp_exposure, % "Public||Private"
+
+    Control,ChooseString
+    ,% ahknet ? options.selectSingleNode("//Codet/Pastebin/AutoHotkey/@private").text = 1 ? "Private" : "Public"
+              : options.selectSingleNode("//Codet/Pastebin/PasteBin/@private").text = 1 ? "Private" : "Public"
+    ,, ahk_id %$CP_DDL2%
+
+    Gui, 95: add, DropDownList, HWND$CP_DDL3 w115 x+10 gGuiHandler vpbp_expiration Disabled
                               , % "Never|10 Minutes||1 Hour|1 Day|1 Month"
 
+    Control,ChooseString
+           ,% options.selectSingleNode("//Codet/Pastebin/PasteBin/@expiration").text
+           ,, ahk_id %$CP_DDL3%
+
+    Control,ChooseString,%curr%,, ahk_id %$CP_DDL%
+    
     Gui, 95: show, x165 y36 w350 h245 NoActivate
     ;}
-    
+
     ;{ Command Helper
     ; Gui, 98: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
     ; $hwnd98 := WinExist()
@@ -1015,6 +1035,9 @@ PasteUploadGui(){
     Gui, 09: +LastFound +Resize +MinSize
     $hwnd9 := WinExist()
 
+    curr:=options.selectSingleNode("//Codet/Pastebin/@current").text
+    ahknet := curr = "AutoHotkey.net" ? 1 : 0
+    
     $Sci5 := SCI_Add($hwnd9,10,5,620,400,"","","lib\scilexer.dll")
     Gui, 09: add, Text, HWND$puText1 x0 y410 w650 0x10
     Gui, 09: add, GroupBox, HWND$puGBox1 x10 yp+5 w620 h80, % "Options"
@@ -1025,11 +1048,30 @@ PasteUploadGui(){
     Gui, 09: add, Text, HWND$puText6 xp+80 Disabled, % "Expiration"
     Gui, 09: add, DropDownList, HWND$pb_ddl x20 y+10 w125 gGuiHandler vpb_ddl
                               , % "AutoHotkey.net||Pastebin.com" ; |Gist.com"
+
+
     Gui, 09: add, Edit, HWND$pb_name x+10 w125 vpb_name
+                      , % ahknet ? options.selectSingleNode("//Codet/Pastebin/AutoHotkey/@nick").text
+                                 : NULL
+
     Gui, 09: add, Edit, HWND$pb_description x+10 w125 vpb_description
     Gui, 09: add, DropDownList, HWND$pb_exposure x+10 w70 vpb_exposure, % "Public||Private"
+
+    Control,ChooseString
+    ,% ahknet ? options.selectSingleNode("//Codet/Pastebin/AutoHotkey/@private").text = 1 ? "Private" : "Public"
+              : options.selectSingleNode("//Codet/Pastebin/PasteBin/@private").text = 1 ? "Private" : "Public"
+    ,, ahk_id %$pb_exposure%
+
     Gui, 09: add, DropDownList, HWND$pb_expiration x+10 w115 vpb_expiration Disabled
                               , % "Never|10 Minutes||1 Hour|1 Day|1 Month"
+                              
+    Control,ChooseString
+           ,% options.selectSingleNode("//Codet/Pastebin/PasteBin/@expiration").text
+           ,, ahk_id %$pb_expiration%
+           
+    Control,ChooseString,%curr%,, ahk_id %$pb_ddl%  ; all variables are created so when this triggers gui handler
+                                                    ; there will be no issues.
+    
     Gui, 09: add, Text, HWND$puText7 x0 w650 0x10
     Gui, 09: add, Button, HWND$puButton1 h25 x385 yp+10 w75 gGuiHandler Default, % "&Upload"
     Gui, 09: add, Button, HWND$puButton2 h25 x+10 yp w75 gGuiHandler, % "&Save to File"
@@ -1693,11 +1735,29 @@ ApplyPref(){
     GuiControl, 94:, popup, % t := codMode = 1 ? 1 : 0
     ;}
 
-    ; [Codet Keywords]{
+    ; [Code Detection Keywords]{
     options.selectSingleNode("//Codet/Keywords/@min").text := codMin
     options.selectSingleNode("//Codet/Keywords").text := "`n" codKwords
     ;}
 
+    ; [Code Detection Options]{
+    options.selectSingleNode("//Codet/Pastebin/@current").text := pbp_ddl
+
+    ; AutoHotkey.net
+    if (pbp_ddl = "AutoHotkey.net")
+    {
+        options.selectSingleNode("//Codet/Pastebin/AutoHotkey/@private").text := pbp_exposure = "Private" ? 1 : 0
+        options.selectSingleNode("//Codet/Pastebin/AutoHotkey/@nick").text := pbp_user
+    }
+    ; PasteBin.com
+    else if (pbp_ddl = "Pastebin.com")
+    {
+        options.selectSingleNode("//Codet/Pastebin/PasteBin/@private").text := pbp_exposure = "Private" ? 1 : 0
+        options.selectSingleNode("//Codet/Pastebin/PasteBin/@key").text := pbp_user
+        options.selectSingleNode("//Codet/Pastebin/PasteBin/@expiration").text := pbp_expiration
+    }
+    ;}
+    
     conf.transformNodeToObject(xsl, conf)
     conf.save(script.conf), conf.load(script.conf)          ; Save and Load
     if !conf.xml
@@ -1705,6 +1765,21 @@ ApplyPref(){
               , % "Operation Failed"
               , % "There was a problem while saving the settings.`n"
                 . "The configuration file could not be reloaded."
+
+    ; Update Pastebin Upload Gui
+    if (pbp_ddl = "AutoHotkey.net")
+    {
+        Control,ChooseString,%pbp_exposure%,, ahk_id %$pb_exposure%
+        Control,ChooseString,AutoHotkey.net,, ahk_id %$pb_ddl%
+        ControlSetText,,%pbp_user%, ahk_id %$pb_name%
+    }
+    else if (pbp_ddl = "Pastebin.com")
+    {
+        Control,ChooseString,%pbp_exposure%,, ahk_id %$pb_exposure%
+        Control,ChooseString,%pbp_expiration%,, ahk_id %$pb_expiration%
+        Control,ChooseString,Pastebin.com,, ahk_id %$pb_ddl%
+        ControlSetText,,, ahk_id %$pb_name%
+    }
 }
 
 ; Handlers
@@ -2483,12 +2558,28 @@ GuiHandler(){
                 ControlSetText,, Nick, ahk_id %$pbpText1%
                 Control,disable,,, ahk_id %$pbpButton1%
                 Control,disable,,, ahk_id %$pbpText2%
+                
+                Control,ChooseString
+                ,% options.selectSingleNode("//Codet/Pastebin/AutoHotkey/@private").text = 1 ? "Private" : "Public"
+                ,, ahk_id %$CP_DDL2%
+                
+                ControlSetText,
+                ,% options.selectSingleNode("//Codet/Pastebin/AutoHotkey/@nick").text
+                ,ahk_id %$pbpText3%
             }
             else if (pbp_ddl = "Pastebin.com"){
                 Ena_Control(1,1,1, a_gui)
                 ControlSetText,, User Key, ahk_id %$pbpText1%
                 ; Control,enable,,, ahk_id %$pbpButton1%
                 Control,enable,,, ahk_id %$pbpText2%
+                
+                Control,ChooseString
+                ,% options.selectSingleNode("//Codet/Pastebin/PasteBin/@private").text = 1 ? "Private" : "Public"
+                ,, ahk_id %$CP_DDL2%
+                
+                ControlSetText,
+                ,% options.selectSingleNode("//Codet/Pastebin/PasteBin/@key").text
+                ,ahk_id %$pbpText3%
             }
             return
         }
@@ -3392,7 +3483,7 @@ prefControl(pref=0){
         Gui, 95: show, NoActivate
     else
         Gui, 95: hide
-        
+
     ; Temporal Code
     w := $P1 "," $P1C1 "," $C1C1 "," $C1C2
     if pref not in %w%
@@ -3665,7 +3756,7 @@ Msgbox `% version "``n" unicode
  * still in clipboard.                                               *
  *********************************************************************
  */
- 
+
 loop
 {
 mousegetpos,,,,ctrl
@@ -3684,7 +3775,7 @@ sleep 10
  * still in clipboard.                                               *
  *********************************************************************
  */
- 
+
 loop
 {
 mousegetpos,,,,ctrl,2
@@ -3972,25 +4063,33 @@ pasteUpload(mode=""){
         return
     }
     if (mode = "auto")
-        pb_ddl := ""
+        pb_ddl := options.selectSingleNode("//Codet/Pastebin/@current").text
 
     ; [httpRequest]{
     if (pb_ddl = "Autohotkey.net"){
             URL := "http://www.autohotkey.net/paste/"
             POST:= "MAX_FILE_SIZE=262144"
                 .  "&jscheck=1"
-                .  "&text=" uriSwap(pb_code, "e")
-                .  "&author=" uriSwap(pb_name, "e")
-                .  "&description=" uriSwap(pb_description, "e")
-                .  "&irc=" (t := pb_exposure = "Public" ? 1 : 0)
+                .  "&text=" uriSwap(mode = "auto" ? Clipboard : pb_code, "e")
+                .  "&description=" uriSwap(mode = "auto" ? null : pb_description, "e")
                 .  "&submit=Paste"
+                .  "&author=" 
+                .  uriSwap(mode = "auto"  ? options.selectSingleNode("//Pastebin/AutoHotkey/@nick").text 
+                                          : pb_name, "e")
+                .  "&irc=" ; note that here 1 = public and 0 = private, contrary to how i save it, hence the not.
+                .  (mode = "auto" ? !options.selectSingleNode("//Pastebin/AutoHotkey/@private").text
+                                  : (pb_exposure = "Public" ? 1 : 0))
     }
     else if (pb_ddl = "Pastebin.com"){
+        pb_expiration := mode = "auto" ? options.selectSingleNode("//Pastebin/PasteBin/@expiration").text 
+                                       : pb_expiration
         URL := "http://www.pastebin.com/api/api_post.php"
         POST:= "api_option=paste"
             .  "&api_dev_key=786f7529a54ee64a1959612f2aeb8596"
-            .  "&api_paste_code=" uriSwap(pb_code, "e")
-            .  "&api_paste_private=" t := (pb_exposure = "Public" ? 0 : 1)
+            .  "&api_paste_code=" uriSwap(mode = "auto" ? Clipboard : pb_code, "e")
+            .  "&api_paste_private=" 
+            .  (mode = "auto" ? options.selectSingleNode("//Pastebin/PasteBin/@private").text
+                              : (pb_exposure = "Public" ? 0 : 1))
             .  "&api_paste_name=" uriSwap(pb_name, "e")
             .  "&api_paste_format=autohotkey"
             .  "&api_paste_expire_date=" pb_expiration := (pb_expiration = "Never" ? "N"
@@ -3999,12 +4098,15 @@ pasteUpload(mode=""){
                                                        :   pb_expiration = "1 Day" ? "1D"
                                                        :   pb_expiration = "1 Month" ? "1M" : null)
     }
-
+    
     httpRequest(URL,POST,headers:="", "charset: utf-8")
     RegexMatch(POST, "i)<title>Paste #(.*?)<\/title>|.com\/(.*)", pb_url)
     pb_url := (pb_ddl = "Pastebin.com" ? substr(URL, 1,24) : URL) pb_url1 pb_url2
     Tooltip, % "Copied: " Clipboard := pb_url, 5, 5
     SetTimer, ttOff, % "-" 5 * sec
+    
+    if (mode = "auto")
+        SoundPlay, *48
     ;}
 
 
@@ -4093,7 +4195,7 @@ return
  * * * Compile_AHK SETTINGS BEGIN * * *
 
 [AHK2EXE]
-Exe_File=%In_Dir%\AHK-ToolKit.exe
+Exe_File=%In_Dir%\lib\AHK-ToolKit.exe
 Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
 [VERSION]
 Set_Version_Info=1
@@ -4103,7 +4205,7 @@ Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.6.3.1
+Product_Version=0.6.4
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico

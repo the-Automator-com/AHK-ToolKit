@@ -7,12 +7,31 @@ Legend:
     - Remove
     ! Fix
     * Change
+    ^ Update
     % Test
-    ^ Enable
+    & Enable
     $ Disable
 ==================
 
-commit a7465f369018d5b895a22a97e7fbc6e7a79b6621
+commit 2d331ba562f582e73eac10fbada6d6952771494c
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sun Feb 19 21:26:12 2012 +0100
+
+    AHK-TK v0.6.4
+    
+    Changes:
+    
+    + Add Pastebin Automatic Upload functionality
+    
+    * Update HttpRequest to latest version
+    * Update Splash image
+    
+    To Do:
+    
+    CMD Helper
+    Screen Tools
+
+commit 1eb55cea77009915440917c0485a8caeb45205ec
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sun Jan 29 01:22:19 2012 +0100
 
@@ -56,28 +75,3 @@ Date:   Sat Jan 28 17:40:18 2012 +0100
     ! Fix link regex for uploaded pastebin
     ! Fix issue with ahk-tk not notifiying IRC channel about new paste
     ! Fix uriSwap() function
-
-commit 44ad2ac19209cf06db31ad87efa5be52aed01ecf
-Author: RaptorX <graptorx@gmail.com>
-Date:   Fri Jan 20 21:50:04 2012 +0100
-
-    AHK-TK v0.6.2
-    
-    Changes:
-    
-    + lib/httpRequest.h.ahk
-    + lib/uriSwap.h.ahk
-    + Pastebin.com
-    
-    - lib/libcurl.dll
-    - lib/curl.h.ahk
-    
-    ! Pastebin Upload GUI
-    
-    * Function to upload pastebins to allow unicode support ([VxE]'s httpRequest())
-    * Update function to read from dedicated file
-    * Url encode/decode function
-    * uriSwap to enhance performance
-    * README file
-    
-    % Paste Upload functions
