@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.6.4
+ * Script Version   : 0.7
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: February 19, 2012
+ * Modification Date: March 30, 2012
  *
  * Description      :
  * ------------------
@@ -52,6 +52,8 @@
  * GUI 07 - Add Snippet
  * GUI 08 - About
  * GUI 09 - Paste Upload
+ * GUI 92 - Command Helper Options
+ * GUI 93 - Command Helper
  * GUI 94 - Code Detection Popup
  * GUI 95 - Code Detection Pastebin Preferences
  * GUI 96 - Code Detection Keywords Preferences
@@ -70,6 +72,7 @@
 #include <hkSwap>
 #include <uriSwap>
 #include <scriptobj>
+#include <htmlhelp>
 #include <httprequest>
 ;}
 
@@ -88,12 +91,12 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.6.4"
+           ,version     : "0.7"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "February 19, 2012"
+           ,moddate     : "March 30, 2012"
            ,conf        : "conf.xml"}, script.getparams(), TrayMenu()   ; This function is here so that
                                                                         ; the Tray Icon is shown early.
 
@@ -293,6 +296,26 @@ OnClipboardChange:  ;{
 return
 ;}
 
+; Special Labels
+OpenHelpFile:       ;{
+oldclip := ClipboardAll
+Send, {Ctrl Down}{left}+{right}c{CtrlUp}
+ClipWait
+htmlhelp(hwnd, regexreplace(a_ahkpath, "exe$", "chm"), clipboard)
+Clipboard := oldclip
+return
+;}
+
+ForumTags:          ;{
+oldclip := ClipboardAll
+Send, {Ctrl Down}{left}+{right}c{CtrlUp}
+ClipWait
+htmlhelp("ForumHelper", regexreplace(a_ahkpath, "exe$", "chm"), clipboard)
+Clipboard := oldclip
+return
+;}
+
+
 Exit:
     Process,Close, %hslPID%
     if FileExist(a_temp "\ahkl.bak")
@@ -323,7 +346,7 @@ FirstRun(){
     Gui, add, CheckBox, x+91 Checked v_cfu, % "Check for updates"
 
     Gui, add, GroupBox, x10 y+20 w345 h55, % "Main GUI Hotkey"
-    Gui, add, DropDownList, xp+10 yp+20 w140 HWND$hkddl v_hkddl, % lst:=klist("all^", "mods msb")" None  "
+    Gui, add, DropDownList, xp+10 yp+20 w140 HWND$hkddl v_hkddl, % lst := "None " klist("all^", "mods msb")
     SetHotkeys(lst,$hkddl, "First Run")
     Gui, add, CheckBox, x+10 yp+3 v_ctrl, % "Ctrl"
     Gui, add, CheckBox, x+10 v_alt, % "Alt"
@@ -624,7 +647,7 @@ AddHKGui(){
     Gui, 02: add, CheckBox, x+10 vhkalt, % "Alt"
     Gui, 02: add, CheckBox, x+10 vhkshift, % "Shift"
     Gui, 02: add, CheckBox, x+10 vhkwin, % "Win"
-    Gui, 02: add, DropDownList, x+10 yp-3 w140 vhkey, % lst:=klist("all^", "mods msb") " None  "
+    Gui, 02: add, DropDownList, x+10 yp-3 w140 vhkey, % lst := "None " klist("all^", "mods msb")
     ; SetHotkeys(lst,$hkddl, "Add Hotkey")
 
     Gui, 02: add, GroupBox, x+20 y6 w395 h205, % "Advanced Options"
@@ -756,6 +779,7 @@ PreferencesGui(){
             $C1C1 := TV_Add("Keywords", $P1C1, "Expand")
             $C1C2 := TV_Add("Pastebin Options", $P1C1, "Expand")
         $P1C2 := TV_Add("Command Helper", $P1, "Expand")
+            $C2C1 := TV_Add("Options", $P1C2, "Expand")
         $P1C3 := TV_Add("Live Code", $P1, "Expand")
             $C3C1 := TV_Add("Run Code With", $P1C3, "Expand")
             $C3C2 := TV_Add("Keywords", $P1C3, "Expand")
@@ -789,7 +813,6 @@ PreferencesGui(){
     Loop, Parse, vars, |
         _%a_loopfield% := options.selectSingleNode("MainKey/@" a_loopfield).text
     _mods:=(_ctrl ? "^" : null)(_alt ? "!" : null)(_shift ? "+" : null)(_win ? "#" : null)
-    _mainhotkey := _mods _mhk
 
     Gui, 98: add, GroupBox, x3 y+20 w345 h55, % "Main GUI Hotkey"
     Gui, 98: add, CheckBox, xp+10 yp+23 Checked%_ctrl% v_ctrl gGuiHandler, % "Ctrl"
@@ -797,7 +820,7 @@ PreferencesGui(){
     Gui, 98: add, CheckBox, x+10 Checked%_shift% v_shift gGuiHandler, % "Shift"
     Gui, 98: add, CheckBox, x+10 Checked%_win% v_win gGuiHandler, % "Win"
     Gui, 98: add, DropDownList, x+10 yp-3 w140 HWND$GP_DDL v_hkddl gGuiHandler
-                , % lst:=klist("all^", "mods msb")" None  "
+                , % lst := "None " klist("all^", "mods msb")
 
     Control,ChooseString,%_mhk%,, ahk_id %$GP_DDL%
     ; SetHotkeys(lst,$GP_DDL, "Preferences")
@@ -806,13 +829,8 @@ PreferencesGui(){
     Gui, 98: add, Edit, xp+10 yp+20 w325 h70 HWND$GP_E1 v_swl gGuiHandler Disabled
                 , % options.selectSingleNode("SuspWndList").text
 
-    if strLen(_mhk) = 1
-        Hotkey, % _mods "`" _mhk, GuiClose
-    else
-        Hotkey, % _mods _mhk, GuiClose
+    Hotkey, % _mods _mhk, GuiClose
 
-    ; --
-    vars:=_ssi:=_sww:=_smm:=_cfu:=_mods:=_mhk:=_ctrl:=_alt:=_shift:=_win:=null ; Clean
     Gui, 98: show, x165 y36 w350 h245 NoActivate
     ;}
 
@@ -919,9 +937,78 @@ PreferencesGui(){
     ;}
 
     ;{ Command Helper
-    ; Gui, 98: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
-    ; $hwnd98 := WinExist()
-    ; Gui, 98: show, x165 y36 w350 h245 NoActivate
+    Gui, 93: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border ; -WS_POPUP   +WS_CHILD
+    $hwnd93 := WinExist()
+    
+    Gui, 93: add, GroupBox, x3 y0 w345 h150, % "Info"
+    Gui, 93: add, Text, xp+10 yp+25 w330
+                      , % "CMDHelper looks up the current selected word on the AHK help file.`n"
+                        . "Optionally you can set it to use the online help in case you dont have ahk installed or "
+                        . "if you are planning on sharing the link instead.`n`n"
+                        . "If you have the Forums Tags options enable you can use the Tags hotkey "
+                        . "to link the word under the cursor to the online documentation, providing an easy way "
+                        . "to help users to inform themselves about the command you just mentioned in your reply.`n"
+
+    Gui, 93: add, Text, x0 y+20 w360 0x10
+    
+    Gui, 93: add, GroupBox, x3 yp+10 w345 h70, % "Features"
+    Gui, 93: add, CheckBox, xp+25 yp+20 HWND$cmdStat Checked%cmdStat% gGuiHandler vcmdStat, % "Enable CMDHelper"
+    Gui, 93: add, CheckBox, xp+180 HWND$_uoh Checked%_uoh% gGuiHandler v_uoh, % "Use Online Help"
+    Gui, 93: add, CheckBox, x28 y+10 HWND$_eie Checked%_eie% Disabled gGuiHandler v_eie
+                          , % "Enable in Internal Editors"
+    Gui, 93: add, CheckBox, xp+180 HWND$_eft Checked%_eft% gGuiHandler v_eft, % "AHK Forum Tags"
+        
+    Gui, 93: show, x165 y36 w350 h245 NoActivate
+    ;}
+    
+    ;{ Command Helper Options
+    Gui, 92: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border ; -WS_POPUP   +WS_CHILD
+    $hwnd92 := WinExist()
+    
+    Gui, 92: add, GroupBox, x3 y0 w345 h60, % "Info"
+    Gui, 92: add, Text, xp+10 yp+20 w330
+                      , % "Open Help File searches the help file.`n"
+                        . "Forum Tags adds [url] tags and autocompletes other forum tags."
+    
+    _hfhk := options.selectSingleNode("CMDHelper/HelpKey").text
+    vars := "ctrl|alt|shift|win"
+    Loop, Parse, vars, |
+        _hf%a_loopfield% := options.selectSingleNode("CMDHelper/HelpKey/@" a_loopfield).text
+    _mods:=(_hfctrl ? "^" : null)(_hfalt ? "!" : null)(_hfshift ? "+" : null)(_hfwin ? "#" : null)
+    
+    Gui, 92: add, GroupBox, x3 y+20 w345 h55, % "Open Help File"    ; y+26 to cover for checkbox lack of 3px
+    Gui, 92: add, CheckBox, xp+10 yp+23 HWND$_hfctrl Checked%_hfctrl% v_hfctrl gGuiHandler, % "Ctrl"
+    Gui, 92: add, CheckBox, x+10 HWND$_hfalt Checked%_hfalt% v_hfalt gGuiHandler, % "Alt"
+    Gui, 92: add, CheckBox, x+10 HWND$_hfshift Checked%_hfshift% v_hfshift gGuiHandler, % "Shift"
+    Gui, 92: add, CheckBox, x+10 HWND$_hfwin Checked%_hfwin% v_hfwin gGuiHandler, % "Win"
+    Gui, 92: add, DropDownList, x+10 yp-3 w140 HWND$HF_DDL v_hfddl gGuiHandler
+                , % lst := "None " klist("all^", "mods msb")
+
+    Control,ChooseString,%_hfhk%,, ahk_id %$HF_DDL%
+    Hotkey, % _mods _hfhk, OpenHelpFile
+    
+    _fthk := options.selectSingleNode("CMDHelper/TagsKey").text
+    vars := "ctrl|alt|shift|win"
+    Loop, Parse, vars, |
+        _ft%a_loopfield% := options.selectSingleNode("CMDHelper/TagsKey/@" a_loopfield).text
+    _mods:=(_ftctrl ? "^" : null)(_ftalt ? "!" : null)(_ftshift ? "+" : null)(_ftwin ? "#" : null)
+    
+    Gui, 92: add, GroupBox, x3 y+20 w345 h55, % "Forum Tags"
+    Gui, 92: add, CheckBox, xp+10 yp+23 HWND$_ftctrl Checked%_ftctrl% v_ftctrl gGuiHandler, % "Ctrl"
+    Gui, 92: add, CheckBox, x+10 HWND$_ftalt Checked%_ftalt% v_ftalt gGuiHandler, % "Alt"
+    Gui, 92: add, CheckBox, x+10 HWND$_ftshift Checked%_ftshift% v_ftshift gGuiHandler, % "Shift"
+    Gui, 92: add, CheckBox, x+10 HWND$_ftwin Checked%_ftwin% v_ftwin gGuiHandler, % "Win"
+    Gui, 92: add, DropDownList, x+10 yp-3 w140 HWND$FT_DDL v_ftddl gGuiHandler
+                , % lst := "None " klist("all^", "mods msb")
+
+    Control,ChooseString,%_fthk%,, ahk_id %$FT_DDL%
+    Hotkey, % _mods _fthk, ForumTags
+
+    Gui, 92: add, GroupBox, x3 y+20 w345 h55, % "Help File Path"
+    Gui, 92: add, Edit, xp+10 yp+23 w240 r1 vhfPath, % options.selectSingleNode("CMDHelper/HelpPath").text
+    Gui, 92: add, Button, x+10 w75 gGuiHandler, % "&Browse..."
+    
+    Gui, 92: show, x165 y36 w350 h245 NoActivate
     ;}
 
     ;{ Live Code
@@ -1210,7 +1297,7 @@ SetHotkeys(list=0, $hwnd=0, title=0){
         {
             Hotkey, IfWinActive, %title%
             if strLen(a_loopfield) = 1
-                Hotkey, % "`" a_loopfield, hkcAction
+                Hotkey, %  a_loopfield, hkcAction
             else
                 Hotkey, %a_loopfield%, hkcAction
             Hotkey, IfWinActive
@@ -1223,7 +1310,7 @@ SetHotkeys(list=0, $hwnd=0, title=0){
         {
             Hotkey, IfWinActive, %ltitle%
             if strLen(a_loopfield) = 1
-                Hotkey, % "`" a_loopfield, Toggle
+                Hotkey, %  a_loopfield, Toggle
             else
                 Hotkey, %a_loopfield%, Toggle
             Hotkey, IfWinActive
@@ -1695,31 +1782,27 @@ ApplyPref(){
 
     ; Main Hotkey
     node := options.childNodes.item[1]                      ; <-- MainKey
-        ; Load old hotkey
+        ;{ Load old hotkey
         _octrl := node.attributes.item[0].text, _oalt := node.attributes.item[1].text
         _oshift := node.attributes.item[2].text, _owin := node.attributes.item[3].text
         _mhk := node.text
-
-        { ; Disable Old Hotkey
+        ;}
+        
+        ;{ Disable Old Hotkey
         _mods:=(_octrl ? "^" : null)(_oalt ? "!" : null)(_oshift ? "+" : null)(_owin ? "#" : null)
-        if strLen(_mhk) = 1
-            Hotkey, % _mods "`" _mhk, Off
-        else
-            Hotkey, % _mods _mhk, Off
-        }
+        Hotkey, % _mods  _mhk, Off
+        ;}
 
-        ; Load new hotkey
-        node.text := (_hkddl = "None" ? ("``", _win := 1) : _hkddl)
+        ;{ Load new hotkey
+        node.text := (_hkddl = "None" ? (, _ctrl:=_alt:=_shift:=0, _win:=1) : _hkddl)
         node.setAttribute("ctrl", _ctrl), node.setAttribute("alt", _alt)
         node.setAttribute("shift", _shift), node.setAttribute("win", _win)
+        ;}
 
-        { ; Enable New Hotkey
+        ;{ Enable New Hotkey
         _mods:=(_ctrl ? "^" : null)(_alt ? "!" : null)(_shift ? "+" : null)(_win ? "#" : null)
-        if strLen(_hkddl) = 1
-            Hotkey, % _mods "`" _hkddl, GuiClose, On
-        else
-            Hotkey, % _mods _hkddl, GuiClose, On
-        }
+        Hotkey, % _mods node.text, GuiClose, On
+        ;}
 
     ; Suspend hotkeys on these windows
     node := options.childNodes.item[2]                      ; <-- SuspWndList
@@ -1758,6 +1841,70 @@ ApplyPref(){
     }
     ;}
     
+    ; [Command Helper]{
+    ; Status
+    options.selectSingleNode("//CMDHelper/@global").text := cmdStat
+    options.selectSingleNode("//CMDHelper/@sci").text := _eie
+    options.selectSingleNode("//CMDHelper/@tags").text := _eft
+    options.selectSingleNode("//CMDHelper/HelpPath/@online").text := _uoh
+    ;}
+    
+    ; [Command Helper Options]{
+    
+    ;{ Help File
+    node := options.selectSingleNode("//CMDHelper/HelpKey")
+        ;{ Load old hotkey
+        _octrl := node.attributes.item[0].text, _oalt := node.attributes.item[1].text
+        _oshift := node.attributes.item[2].text, _owin := node.attributes.item[3].text
+        _hfhk := node.text
+        ;}
+        
+        ;{ Disable Old Hotkey
+        _mods:=(_octrl ? "^" : null)(_oalt ? "!" : null)(_oshift ? "+" : null)(_owin ? "#" : null)
+        Hotkey, % _mods _hfhk, Off
+        ;}
+
+        ;{ Load new hotkey
+        node.text := (_hfddl = "None" ? ("F1", _hfalt:=_hfshift:=_hfwin:=0, _hfctrl := 1) : _hfddl)
+        node.setAttribute("ctrl", _hfctrl), node.setAttribute("alt", _hfalt)
+        node.setAttribute("shift", _hfshift), node.setAttribute("win", _hfwin)
+        ;}
+
+        ;{ Enable New Hotkey
+        _mods:=(_hfctrl ? "^" : null)(_hfalt ? "!" : null)(_hfshift ? "+" : null)(_hfwin ? "#" : null)
+        Hotkey, % _mods node.text, OpenHelpFile, On
+        ;}
+    ;}
+    
+    ;{ Forum Tags
+    node := options.selectSingleNode("//CMDHelper/TagsKey")
+        ;{ Load old hotkey
+        _octrl := node.attributes.item[0].text, _oalt := node.attributes.item[1].text
+        _oshift := node.attributes.item[2].text, _owin := node.attributes.item[3].text
+        _fthk := node.text
+        ;}
+        
+        ;{ Disable Old Hotkey
+        _mods:=(_octrl ? "^" : null)(_oalt ? "!" : null)(_oshift ? "+" : null)(_owin ? "#" : null)
+        Hotkey, % _mods _fthk, Off
+        ;}
+
+        ;{ Load new hotkey
+        node.text := (_ftddl = "None" ? ("F2", _ftalt:=_ftshift:=_ftwin:=0, _ftctrl := 1) : _ftddl)
+        node.setAttribute("ctrl", _ftctrl), node.setAttribute("alt", _ftalt)
+        node.setAttribute("shift", _ftshift), node.setAttribute("win", _ftwin)
+        ;}
+
+        ;{ Enable New Hotkey
+        _mods:=(_ftctrl ? "^" : null)(_ftalt ? "!" : null)(_ftshift ? "+" : null)(_ftwin ? "#" : null)
+        Hotkey, % _mods node.text, ForumTags, On
+        ;}
+    ;}
+    
+    ;{ File Path
+    options.selectSingleNode("//CMDHelper/HelpPath").text := hfPath
+    ;}
+    
     conf.transformNodeToObject(xsl, conf)
     conf.save(script.conf), conf.load(script.conf)          ; Save and Load
     if !conf.xml
@@ -1780,10 +1927,12 @@ ApplyPref(){
         Control,ChooseString,Pastebin.com,, ahk_id %$pb_ddl%
         ControlSetText,,, ahk_id %$pb_name%
     }
+;}
 }
 
 ; Handlers
 GuiHandler(){
+
     global
 
     if !a_gui
@@ -1835,7 +1984,7 @@ GuiHandler(){
 
             ; Main Hotkey:
             node := options.childNodes.item[1]                      ; <-- MainKey
-                node.text := (_hkddl = "None" ? ("``", _win := 1) : _hkddl)
+                node.text := (_hkddl = "None" ? (, _win := 1) : _hkddl)
                 node.setAttribute("ctrl", _ctrl), node.setAttribute("alt", _alt)
                 node.setAttribute("shift", _shift), node.setAttribute("win", _win)
 
@@ -2412,7 +2561,83 @@ GuiHandler(){
             }
         }
 
-        ; Any other control would enable the Apply button.
+        if (a_guicontrol = "cmdStat")
+        {
+            if (cmdStat)
+            {
+                ; Control, enable,,, ahk_id %$_eie%
+                Control, enable,,, ahk_id %$_uoh%
+                Control, enable,,, ahk_id %$_eft%
+            }
+            else
+            {
+                ; Control, disable,,, ahk_id %$_eie%
+                Control, disable,,, ahk_id %$_uoh%
+                Control, disable,,, ahk_id %$_eft%
+            }
+        }
+        
+        if (a_guicontrol = "_uoh")
+        {
+            ctrls:="ctrl|alt|shift|win"
+            if (_uoh)
+            {
+                Loop, parse, ctrls, |
+                {
+                    c := $_hf%a_loopfield%
+                    Control, enable,,, ahk_id %c%
+                }
+                Control, enable,,, ahk_id %$HF_DDL%
+            }
+            else
+            {
+                Loop, parse, ctrls, |
+                {
+                    c := $_hf%a_loopfield%
+                    Control, disable,,, ahk_id %c%
+                }
+                Control, disable,,, ahk_id %$HF_DDL%
+            }
+        }
+        
+        if (a_guicontrol = "_eft")
+        {
+            ctrls:="ctrl|alt|shift|win"
+            if (_eft)
+            {
+                Loop, parse, ctrls, |
+                {
+                    c := $_ft%a_loopfield%
+                    Control, enable,,, ahk_id %c%
+                }
+                Control, enable,,, ahk_id %$FT_DDL%
+            }
+            else
+            {
+                Loop, parse, ctrls, |
+                {
+                    c := $_ft%a_loopfield%
+                    Control, disable,,, ahk_id %c%
+                }
+                Control, disable,,, ahk_id %$FT_DDL%
+            }
+        }
+        
+        if (a_guicontrol = "&Browse...")
+        {
+            if (a_gui = 92)
+            {
+                Gui, 92: +OwnDialogs
+                FileSelectFile, hf, 3, %a_ahkpath%, % "Select the help file", Help Files (*.chm)
+                
+                if (hf)
+                    GuiControl, 92:, hfPath, % RegexReplace(hf, "\n", "|")
+                else
+                    GuiControl, 92:, hfPath, % RegexReplace(a_ahkpath, "exe$", "chm")
+            }
+        }
+        
+        ; There are no returns because any other control would enable the Apply button.
         Control,enable,,,ahk_id %$Apply%
     }
 
@@ -2491,7 +2716,7 @@ GuiHandler(){
              * the extension while the file existed as "file.ahk", which caused the file
              * to be saved as "file.ahk.ahk" and added a msgbox if the user is overwriting an existing file
              */
-
+             
             if f_saved contains .ahk               ; Check whether the user added the file extension or not
             {
                 if FileExist(f_saved)
@@ -3483,9 +3708,20 @@ prefControl(pref=0){
         Gui, 95: show, NoActivate
     else
         Gui, 95: hide
-
+   
+    if (pref = $P1C2)
+        Gui, 93: show, x165 y36 w350 NoActivate
+    else
+        Gui, 93: hide
+    
+    if (pref = $C2C1)
+        Gui, 92: show, x165 y36 w350 NoActivate
+    else
+        Gui, 92: hide
+        
     ; Temporal Code
-    w := $P1 "," $P1C1 "," $C1C1 "," $C1C2
+    w := $P1 "," $P1C1 "," $C1C1 "," $P1C2 "," $C2C1
+    
     if pref not in %w%
         GuiControl, 06: show, AHKTK_UC
     else
@@ -3494,7 +3730,7 @@ prefControl(pref=0){
 defConf(path){
     global script
 
-    s_version := script.version, hlpPath := subStr(a_ahkpath, 1,-14) "AutoHotkey.chm"
+    s_version := script.version, hlpPath := RegexReplace(a_ahkpath, "exe$", "chm")
     a_isunicode ? (unicode := a_ahkpath, current := "L-Unicode") : (ansi := a_ahkpath, current := "L-Ansi")
     template=
     (
@@ -4168,6 +4404,84 @@ repIncludes(code){
     SetWorkingDir %a_scriptdir%
     return code
 }
+matchclip(type, funct=""){
+	
+    clipold := Clipboard
+	httpRequest(URL := "http://www.autohotkey.com/docs/" type ".htm", htm)
+    
+	if type = Variables
+    {
+        if !RegexMatch(htm, "i)" . Clipboard, Match)
+            return 0
+        if InStr(Clipboard, "screen")
+            Match := URL . "#Screen"
+        else if InStr(Clipboard, "caret")
+            Match := URL . "#Caret"
+        else if InStr(Clipboard, "guiheight")
+            Match := URL . "#GuiWidth"
+        else
+            Match := URL . "#" . SubStr(Match, 3)
+        return Match
+    }
+    if type = Functions
+    {
+        if !RegexMatch(htm, "i)" . funct, Match)
+            return 0
+        if (InStr(funct, "regex") || InStr(funct, "dllcall"))
+            return Match := matchclip("cmd")
+        else if InStr(funct, "asc")
+            return Match := URL . "#Asc"
+        else if InStr(funct, "abs")
+            return Match := URL . "#Abs"
+        else
+            Match := URL . "#" . Match
+        return Match
+    }
+    if type = Commands
+    {
+        if ((InStr(Clipboard, "clipboard") || InStr(Clipboard, "thread")) && !InStr(Clipboard, "regex"))
+            URL := "http://www.autohotkey.com/docs/misc/"
+        else
+            URL := "http://www.autohotkey.com/docs/commands/"
+        
+        if !RegexMatch(htm, "i)>(" . RegexReplace(Clipboard, "\W.*", "") . ").*?<", Match)
+            return 0
+        if InStr(Clipboard, "#")
+            Match := URL . RegexReplace(Clipboard, "#", "_") . ".htm"
+        else if (InStr(Clipboard, "regex") || InStr(Clipboard, "dllcall"))
+            Match := URL . RegexReplace(Clipboard, "\s?\(.*\).*", "") . ".htm"
+        else
+            Match := URL . Match1 . ".htm"
+        return Match
+    }
+    if type = manual
+    {
+        Match := RegexReplace(Clipboard, "\(.*", "")
+        if InStr(Match, "guiwidth")
+            Match := "A_GuiWidth"
+        ToolTip, % "Searching for """ . Match . """ on the documentation files"
+        Sleep 2*sec
+        URL := "http://www.autohotkey.com/search/search.php"
+        POST := "site=4"
+             . "&refine=1"
+             . "&template_demo=phpdig.html"
+             . "&result_page=search.php"
+             . "&query_string=" . Match
+             . "&search=Go+..."
+             . "&option=start"
+             . "&path=docs%2F%25"
+
+        httpRequest(URL, POST)
+        if (Clipboard = "WinGet")
+            RegexMatch(POST, "99.80 %.+?(href=""(.+?)"")", Match)
+        else if (Clipboard = "ErrorLevel")
+            RegexMatch(POST, "4.+82.92 %.+?(href=""(.+?)"")", Match)
+        else
+            RegexMatch(POST, "100.00 %.+?(href=""(.+?)"")", Match)
+        return Match2
+    }
+	return 0
+}
 
 ; Storage
 WM(var){
@@ -4205,7 +4519,7 @@ Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.6.4
+Product_Version=0.7
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico

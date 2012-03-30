@@ -13,7 +13,34 @@ Legend:
     $ Disable
 ==================
 
-commit 2d331ba562f582e73eac10fbada6d6952771494c
+commit a7ee7fab6fa6c3f512bed61a72707a9402c7a1b9
+Merge: ade1508 63f83c2
+Author: RaptorX <graptorx@gmail.com>
+Date:   Fri Mar 30 23:50:29 2012 +0200
+
+    AHK-TK v0.7 [Merge]
+    
+    Changes:
+    
+    + Add CmdHelper GUI
+    + Add CmdHelper Options GUI
+    + Add CmdHelper functionality
+    + Add save/load CmdHelper preferences functionality
+    
+    ! Fix General hotkey lists to have "None" as the first option
+    ! Fix General hotkey lists saving default hotkey if "None" was selected
+    ! Fix feature status checkbox triggers "Apply" button like other controls
+    
+    % Test GUI all CmdHelper GUI functionality
+    % Test save/load CmdHelper GUI info + hotkeys
+    
+    Todo:
+    + Add Forum Tags Hotstrings
+    
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
+
+commit ade1508d4dcdb4d7d0a8e079ab7763a1fd2412bf
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sun Feb 19 21:26:12 2012 +0100
 
@@ -51,27 +78,3 @@ Date:   Sun Jan 29 01:07:54 2012 +0100
     
     + Add Code Detection Pastebin Preferences Gui
     + Add Gui functionality
-
-commit 19cfea2dea52692f83999e267983f2f6cdb132aa
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Jan 29 00:07:19 2012 +0100
-
-    AHK-TK v0.6.2.2
-    
-    Changes:
-    
-    ! Fix Pastebin Save to file
-
-commit e85da43b00c54e9a08bec93c3029cfcedf17473c
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sat Jan 28 17:40:18 2012 +0100
-
-    AHK-TK v0.6.2.1
-    
-    Changes:
-    
-    + Add compiler settings
-    
-    ! Fix link regex for uploaded pastebin
-    ! Fix issue with ahk-tk not notifiying IRC channel about new paste
-    ! Fix uriSwap() function
