@@ -13,7 +13,17 @@ Legend:
     $ Disable
 ==================
 
-commit 03bd12c51d2d5ef290b23a4aba82c963fb854e1a
+commit b27c24c8311a764841cda67b1a49f136df74dfe1
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Mar 31 01:49:57 2012 +0200
+
+    AHK-TK v0.7.1.1
+    
+    Changes:
+    
+    * Change show splash before version check
+
+commit a03bacc93d6825be024e68a7edd3c47a6e96850d
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Mar 31 01:41:56 2012 +0200
 
@@ -101,13 +111,3 @@ Date:   Sun Feb 19 21:26:12 2012 +0100
     
     CMD Helper
     Screen Tools
-
-commit 1eb55cea77009915440917c0485a8caeb45205ec
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Jan 29 01:22:19 2012 +0100
-
-    AHK-TK v0.6.3.1
-    
-    Changes:
-    
-    ! Fix Paste Upload Gui functionality

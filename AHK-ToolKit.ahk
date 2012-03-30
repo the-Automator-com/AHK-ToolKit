@@ -2,7 +2,7 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.7.0.1
+ * Script Version   : 0.7.1.1
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
@@ -91,7 +91,7 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.7.0.1"
+           ,version     : "0.7.1.1"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
@@ -208,11 +208,11 @@ node.text != script.version ? (node.text := script.version, conf.save(script.con
 ;[Main]{
 script.autostart(options.selectSingleNode("//@sww").text)
 
-if options.selectSingleNode("//@cfu").text
-    script.update(script.version)
-
 if options.selectSingleNode("//@ssi").text
     script.splash("res\img\AHK-TK_Splash.png")
+
+if options.selectSingleNode("//@cfu").text
+    script.update(script.version)
 
 CreateGui()
 Return                      ; [End of Auto-Execute area]
@@ -4519,7 +4519,7 @@ Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.7.0.1
+Product_Version=0.7.1.1
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico
