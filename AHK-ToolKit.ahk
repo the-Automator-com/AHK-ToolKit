@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.7
+ * Script Version   : 0.7.0.1
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: March 30, 2012
+ * Modification Date: March 31, 2012
  *
  * Description      :
  * ------------------
@@ -91,12 +91,12 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.7"
+           ,version     : "0.7.0.1"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "March 30, 2012"
+           ,moddate     : "March 31, 2012"
            ,conf        : "conf.xml"}, script.getparams(), TrayMenu()   ; This function is here so that
                                                                         ; the Tray Icon is shown early.
 
@@ -3720,7 +3720,7 @@ prefControl(pref=0){
         Gui, 92: hide
         
     ; Temporal Code
-    w := $P1 "," $P1C1 "," $C1C1 "," $P1C2 "," $C2C1
+    w := $P1 "," $P1C1 "," $C1C1 "," $P1C2 "," $C1C2 "," $C2C1 
     
     if pref not in %w%
         GuiControl, 06: show, AHKTK_UC
@@ -4519,7 +4519,7 @@ Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.7
+Product_Version=0.7.0.1
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico

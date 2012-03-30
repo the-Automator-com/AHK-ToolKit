@@ -13,12 +13,56 @@ Legend:
     $ Disable
 ==================
 
-commit a7ee7fab6fa6c3f512bed61a72707a9402c7a1b9
+commit 03bd12c51d2d5ef290b23a4aba82c963fb854e1a
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sat Mar 31 01:41:56 2012 +0200
+
+    AHK-TK v0.7.0.1
+    
+    Changes:
+    
+    ! Fix Pastebin Preferences GUI not showing
+    
+    Todo:
+    
+    + Add Forum Tags Hotstrings
+    
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
+
+commit a77b1f0a84c749878b231028ec566810cf10892b
 Merge: ade1508 63f83c2
 Author: RaptorX <graptorx@gmail.com>
 Date:   Fri Mar 30 23:50:29 2012 +0200
 
     AHK-TK v0.7 [Merge]
+    
+    Changes:
+    
+    + Add CmdHelper GUI
+    + Add CmdHelper Options GUI
+    + Add CmdHelper functionality
+    + Add save/load CmdHelper preferences functionality
+    
+    ! Fix General hotkey lists to have "None" as the first option
+    ! Fix General hotkey lists saving default hotkey if "None" was selected
+    ! Fix feature status checkbox triggers "Apply" button like other controls
+    
+    % Test GUI all CmdHelper GUI functionality
+    % Test save/load CmdHelper GUI info + hotkeys
+    
+    Todo:
+    
+    + Add Forum Tags Hotstrings
+    
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
+
+commit 63f83c2f9a0819577413171d0511b01b7b64e020
+Author: RaptorX <graptorx@gmail.com>
+Date:   Fri Mar 30 23:19:29 2012 +0200
+
+    AHK-TK v0.7
     
     Changes:
     
@@ -67,14 +111,3 @@ Date:   Sun Jan 29 01:22:19 2012 +0100
     Changes:
     
     ! Fix Paste Upload Gui functionality
-
-commit d99370a6eb31eea07f8bd72b604e68c3c8db5ae4
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Jan 29 01:07:54 2012 +0100
-
-    AHK-TK v0.6.3
-    
-    Changes:
-    
-    + Add Code Detection Pastebin Preferences Gui
-    + Add Gui functionality
