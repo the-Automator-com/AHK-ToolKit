@@ -120,7 +120,7 @@
         debug ? debug("* getparams() [End]")
         return
         }
-    update(lversion, rfile="github", logurl="", vline=17){
+    update(lversion, rfile="github", logurl="", vline=1){
         global script, conf, debug
 
         debug ? debug("* update() [Start]", 1), node := conf.selectSingleNode("/AHK-Toolkit/@version")
@@ -134,7 +134,7 @@
             Progress, 50,,, % "Updating..."
 
         logurl := rfile = "github" ? "https://raw.github.com/" script.author
-                                   . "/" script.name "/Script/Changelog.txt" : logurl
+                                   . "/" script.name "/ver/ver" : logurl
 
         RunWait %ComSpec% /c "Ping -n 1 google.com" ,, Hide  ; Check if we are connected to the internet
         if connected := !ErrorLevel
@@ -153,6 +153,7 @@
                                       . script.name "/zipball/" (a_iscompiled ? "latest-compiled" : "latest"))
                                       : rfile
             debug ? debug("* Local Version: " lversion " Remote Version: " Version1)
+            
             if (Version1 > lversion){
                 Progress, Off
                 debug ? debug("* There is a new update available")

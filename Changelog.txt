@@ -1,88 +1,21 @@
-Versioning:
-    Main.Feature.Changes.Bugs
+AHK-TK v0.7
 
-Legend:
-==================
-    + Add
-    - Remove
-    ! Fix
-    * Change
-    % Test
-    ^ Enable
-    $ Disable
-==================
+Changes:
 
-commit 1d53a87a3859003fed0382bc624d0c87e190f86f
-Author: RaptorX <graptorx@gmail.com>
-Date:   Thu Jan 19 19:47:19 2012 +0100
++ Add CmdHelper GUI
++ Add CmdHelper Options GUI
++ Add CmdHelper functionality
++ Add save/load CmdHelper preferences functionality 
 
-    AHK-TK v0.6.2.1
-    
-    Changes:
-    
-    + Add Command Helper GUI
-    + Add Command Helper Options GUI
+! Fix General hotkey lists to have "None" as the first option
+! Fix General hotkey lists saving default hotkey if "None" was selected
+! Fix feature status checkbox triggers "Apply" button like other controls
 
-commit 7ec0704849bc29f98f32d947546cf55d7321e5bb
-Author: RaptorX <graptorx@gmail.com>
-Date:   Mon Jan 16 22:39:59 2012 +0100
+% Test GUI all CmdHelper GUI functionality
+% Test save/load CmdHelper GUI info + hotkeys
 
-    AHK-TK v0.6.1.1
-    
-    Changes:
-    
-    + Add Get Control Name snippet example
-    + Add Get Control HWND snippet example
-    + Add legend on Changelog for versioning guide and info signs
-    
-    ! Fix config file to always have updated version number
-    ! Fix update function due to branch name change
-    
-    * Change Versioning system
-    
-    % Test update function
+Todo:
++ Add Forum Tags Hotstrings
 
-commit 6e5eb1deed8573c0d82f9c11915a6ff6a48e461f
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sat Sep 24 02:09:39 2011 +0200
-
-    AHK-TK v0.6
-    
-    Changed:
-    
-    + Add CoDed popup Gui
-    + Add CoDet Kewords Preferences Gui
-    + Add PasteUpload()
-    + Add Autohotkey.net to the upload options
-    
-    ! Fix CODET preferences GUI
-    ! Fix IDC_HAND icon on CODET preferences GUI
-    ! Fix Run Selected Code hotkey to wait for clipboard
-    ! Fix menu items who interfere with scintilla hotkeys
-    ! Fix Preferences Menu item not working
-    ! Fix small Preferences GUI issues
-    ! Fix update function
-    
-    % Tested upload function ANSI & UNICODE - some bugs left UNICODE, var corruption.
-
-commit ec201f4a0c0eb5167ab8b52d2717865a2f49e429
-Author: RaptorX <graptorx@gmail.com>
-Date:   Fri Sep 23 00:18:01 2011 +0200
-
-    AHK-TK v0.5.7
-    
-    Changed:
-    
-    * Fix update function
-
-commit f1b40d07cf8c214411db3d945314cbdaf1a398bf
-Author: RaptorX <graptorx@gmail.com>
-Date:   Thu Sep 22 09:11:47 2011 +0200
-
-    AHK-TK v0.5.6
-    
-    Changed:
-    
-    + Add run selected code hotkey [Ctrl + Alt + LButton]
-    * Fix Tray Icon tooltip to display current version
-    * Fix issue with Live Code editor not sending standard edit hotkey commands
+! Fix General hotkey lists clear all checkboxes if "None" was selected
+! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
