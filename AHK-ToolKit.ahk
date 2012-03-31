@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.7.1.1
+ * Script Version   : 0.7.2.1
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: March 31, 2012
+ * Modification Date: April 01, 2012
  *
  * Description      :
  * ------------------
@@ -82,6 +82,7 @@
 ; --
 SendMode, Input
 SetBatchLines, -1
+CoordMode, Caret, Screen
 CoordMode, Tooltip, Screen
 SetWorkingDir, %a_scriptdir%
 OnExit, Exit
@@ -91,14 +92,14 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.7.1.1"
+           ,version     : "0.7.2.1"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "March 31, 2012"
-           ,conf        : "conf.xml"}, script.getparams(), TrayMenu()   ; This function is here so that
-                                                                        ; the Tray Icon is shown early.
+           ,moddate     : "April 01, 2012"
+           ,conf        : "conf.xml"}, script.getparams(), ForumMenu(), TrayMenu()   ; These function are here so that
+                                                                                     ; the Tray Icon is shown early and forum menus are ready.
 
 ;}
 
@@ -501,6 +502,31 @@ MainMenu(){
         Menu, Settings, check, Enable Command Helper
 
     return
+}
+ForumMenu(){
+
+    Menu, Color, Add, Custom, MenuHandler
+    Menu, Color, Add, Dark Red, MenuHandler
+    Menu, Color, Add, Red, MenuHandler
+    Menu, Color, Add, Orange, MenuHandler
+    Menu, Color, Add, Brown, MenuHandler
+    Menu, Color, Add, Yellow, MenuHandler
+    Menu, Color, Add, Green, MenuHandler
+    Menu, Color, Add, Olive, MenuHandler
+    Menu, Color, Add, Cyan, MenuHandler
+    Menu, Color, Add, Blue, MenuHandler
+    Menu, Color, Add, Dark Blue, MenuHandler
+    Menu, Color, Add, Indigo, MenuHandler
+    Menu, Color, Add, Violet, MenuHandler
+    Menu, Color, Add, White, MenuHandler
+    Menu, Color, Add, Black, MenuHandler
+    
+    Menu, Size, Add, Custom, MenuHandler
+    Menu, Size, Add, Tiny, MenuHandler
+    Menu, Size, Add, Small, MenuHandler
+    Menu, Size, Add, Normal, MenuHandler
+    Menu, Size, Add, Large, MenuHandler
+    Menu, Size, Add, Huge, MenuHandler
 }
 SnippetMenu(){
     global
@@ -2813,6 +2839,7 @@ GuiHandler(){
 MenuHandler(stat=0){
     global
     static tog_aot, tog_lw, tog_ech, tog_sl, tog_ro:=0
+           , colors:="Dark Red,Red,Orange,Brown,Yellow,Green,Olive,Cyan,Blue,Dark Blue,Indigo,Violet,White,Black,Custom"
 
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
     tog_aot := root.selectSingleNode("//@alwaysontop").text, tog_ech := options.selectSingleNode("//@sci").text
@@ -3050,6 +3077,37 @@ MenuHandler(stat=0){
         Gui, 08: show
         return
     }
+
+    ; Forum Color Menu
+    if (instr(colors, a_thismenuitem) && a_thismenuitem != "Custom")
+        Send, % RegexReplace(a_thismenuitem, "\s") "][/color]{Left 8}"
+    else if (a_thismenu = "Color" && a_thismenuitem = "Custom")
+    {
+        InputBox, hexColor, % "Custom Hexadecimal Color", % "Please Input a hexadecimal color.`nThe hash is optional.",, 210, 140
+        if (!ErrorLevel)
+        {
+            SendRaw, % "#" RegexReplace(hexColor, "#")
+            Send, ][/color]{Left 8}
+        }
+    }
+
+    ; Forum Size Menu
+    if (a_thismenu = "Size" && a_thismenuitem = "Custom")
+    {
+        InputBox, fontSize, % "Custom Font Size", % "Please Input a number which will be your font size.",, 180, 140
+        if (!ErrorLevel)
+            Send, %fontSize%][/size]{Left 7}
+    }
+    else if (a_thismenuitem = "Tiny")
+        Send, 7][/size]{Left 7}
+    else if (a_thismenuitem = "Small")
+        Send, 9][/size]{Left 7}
+    else if (a_thismenuitem = "Normal")
+        Send, 12][/size]{Left 7}
+    else if (a_thismenuitem = "Large")
+        Send, 18][/size]{Left 7}
+    else if (a_thismenuitem = "Huge")
+        Send, 24][/size]{Left 7}
 }
 ListHandler(sParam=0){
     global
@@ -4503,6 +4561,28 @@ WM(var){
     ClipWait
     lcRun()
 return
+
+; Forum Hotstrings
+#if WinActive("Edit post") or WinActive("Post a new topic")
+:*B0:[b]::[/b]{Left 4}
+:*B0:[i]::[/i]{Left 4}
+:*B0:[u]::[/u]{Left 4}
+:*B0:[img]::[/img]{Left 6}
+:*B0:[url]::[/url]{Left 6}
+:*B0:[list]::[/list]{Left 7}
+:*B0:[code]::[/code]{Left 7}
+:*B0:[quote]::[/quote]{Left 8}
+
+:*B0:[color=::
+Menu, Color, Show
+return
+
+:*B0:[size=::
+Menu, Size, Show
+return
+
+#if
+
 ;}
 
 /*
@@ -4519,7 +4599,7 @@ Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.7.1.1
+Product_Version=0.7.2.1
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico

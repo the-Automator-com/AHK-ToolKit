@@ -13,7 +13,27 @@ Legend:
     $ Disable
 ==================
 
-commit b27c24c8311a764841cda67b1a49f136df74dfe1
+commit 67d90976840c7ac92c0371d97714696286585775
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sun Apr 1 00:44:35 2012 +0200
+
+    AHK-TK v0.7.2.1
+    
+    Changes:
+    
+    + Add Forum Tags Hotstrings
+    
+    Todo:
+    
+    + Add Screen Tools
+    + Add Auto unzip updates
+    
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
+    
+    * Change Disabled option hides List View child
+
+commit f7cec6a271f4ce57b5e22679a020e222a59076f7
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sat Mar 31 01:49:57 2012 +0200
 
@@ -93,21 +113,3 @@ Date:   Fri Mar 30 23:19:29 2012 +0200
     
     ! Fix General hotkey lists clear all checkboxes if "None" was selected
     ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
-
-commit ade1508d4dcdb4d7d0a8e079ab7763a1fd2412bf
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Feb 19 21:26:12 2012 +0100
-
-    AHK-TK v0.6.4
-    
-    Changes:
-    
-    + Add Pastebin Automatic Upload functionality
-    
-    * Update HttpRequest to latest version
-    * Update Splash image
-    
-    To Do:
-    
-    CMD Helper
-    Screen Tools
