@@ -13,65 +13,100 @@ Legend:
     $ Disable
 ==================
 
-commit 2d331ba562f582e73eac10fbada6d6952771494c
+commit bfb635e08836ff130787185f1ead8faf52946ede
 Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Feb 19 21:26:12 2012 +0100
+Date:   Thu Apr 19 20:43:32 2012 +0200
 
-    AHK-TK v0.6.4
+    AHK-TK v0.7.3.2
     
     Changes:
     
-    + Add Pastebin Automatic Upload functionality
+    + Add Screen Tools
+    + Add Encoding to tooltip information
     
-    * Update HttpRequest to latest version
-    * Update Splash image
+    ! Fix Hotstrings to match new window title
     
-    To Do:
+    Todo:
     
-    CMD Helper
-    Screen Tools
+    + Add Auto unzip updates
+    + Add Screen Tools Preferences
+    
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
+    
+    * Change Disabled option hides List View child
 
-commit 1eb55cea77009915440917c0485a8caeb45205ec
+commit a17ddc8c51993de01b0d94aba5def76a626bb41a
 Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Jan 29 01:22:19 2012 +0100
+Date:   Sun Apr 1 00:44:35 2012 +0200
 
-    AHK-TK v0.6.3.1
+    AHK-TK v0.7.2.1
     
     Changes:
     
-    ! Fix Paste Upload Gui functionality
+    + Add Forum Tags Hotstrings
+    
+    Todo:
+    
+    + Add Screen Tools
+    + Add Auto unzip updates
+    
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
+    
+    * Change Disabled option hides List View child
 
-commit d99370a6eb31eea07f8bd72b604e68c3c8db5ae4
+commit f7cec6a271f4ce57b5e22679a020e222a59076f7
 Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Jan 29 01:07:54 2012 +0100
+Date:   Sat Mar 31 01:49:57 2012 +0200
 
-    AHK-TK v0.6.3
+    AHK-TK v0.7.1.1
     
     Changes:
     
-    + Add Code Detection Pastebin Preferences Gui
-    + Add Gui functionality
+    * Change show splash before version check
 
-commit 19cfea2dea52692f83999e267983f2f6cdb132aa
+commit a03bacc93d6825be024e68a7edd3c47a6e96850d
 Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Jan 29 00:07:19 2012 +0100
+Date:   Sat Mar 31 01:41:56 2012 +0200
 
-    AHK-TK v0.6.2.2
+    AHK-TK v0.7.0.1
     
     Changes:
     
-    ! Fix Pastebin Save to file
+    ! Fix Pastebin Preferences GUI not showing
+    
+    Todo:
+    
+    + Add Forum Tags Hotstrings
+    
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
 
-commit e85da43b00c54e9a08bec93c3029cfcedf17473c
+commit a77b1f0a84c749878b231028ec566810cf10892b
+Merge: ade1508 63f83c2
 Author: RaptorX <graptorx@gmail.com>
-Date:   Sat Jan 28 17:40:18 2012 +0100
+Date:   Fri Mar 30 23:50:29 2012 +0200
 
-    AHK-TK v0.6.2.1
+    AHK-TK v0.7 [Merge]
     
     Changes:
     
-    + Add compiler settings
+    + Add CmdHelper GUI
+    + Add CmdHelper Options GUI
+    + Add CmdHelper functionality
+    + Add save/load CmdHelper preferences functionality
     
-    ! Fix link regex for uploaded pastebin
-    ! Fix issue with ahk-tk not notifiying IRC channel about new paste
-    ! Fix uriSwap() function
+    ! Fix General hotkey lists to have "None" as the first option
+    ! Fix General hotkey lists saving default hotkey if "None" was selected
+    ! Fix feature status checkbox triggers "Apply" button like other controls
+    
+    % Test GUI all CmdHelper GUI functionality
+    % Test save/load CmdHelper GUI info + hotkeys
+    
+    Todo:
+    
+    + Add Forum Tags Hotstrings
+    
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
