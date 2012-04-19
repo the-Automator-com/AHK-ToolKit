@@ -13,7 +13,30 @@ Legend:
     $ Disable
 ==================
 
-commit 67d90976840c7ac92c0371d97714696286585775
+commit bfb635e08836ff130787185f1ead8faf52946ede
+Author: RaptorX <graptorx@gmail.com>
+Date:   Thu Apr 19 20:43:32 2012 +0200
+
+    AHK-TK v0.7.3.2
+    
+    Changes:
+    
+    + Add Screen Tools
+    + Add Encoding to tooltip information
+    
+    ! Fix Hotstrings to match new window title
+    
+    Todo:
+    
+    + Add Auto unzip updates
+    + Add Screen Tools Preferences
+    
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
+    
+    * Change Disabled option hides List View child
+
+commit a17ddc8c51993de01b0d94aba5def76a626bb41a
 Author: RaptorX <graptorx@gmail.com>
 Date:   Sun Apr 1 00:44:35 2012 +0200
 
@@ -83,32 +106,6 @@ Date:   Fri Mar 30 23:50:29 2012 +0200
     
     Todo:
     
-    + Add Forum Tags Hotstrings
-    
-    ! Fix General hotkey lists clear all checkboxes if "None" was selected
-    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
-
-commit 63f83c2f9a0819577413171d0511b01b7b64e020
-Author: RaptorX <graptorx@gmail.com>
-Date:   Fri Mar 30 23:19:29 2012 +0200
-
-    AHK-TK v0.7
-    
-    Changes:
-    
-    + Add CmdHelper GUI
-    + Add CmdHelper Options GUI
-    + Add CmdHelper functionality
-    + Add save/load CmdHelper preferences functionality
-    
-    ! Fix General hotkey lists to have "None" as the first option
-    ! Fix General hotkey lists saving default hotkey if "None" was selected
-    ! Fix feature status checkbox triggers "Apply" button like other controls
-    
-    % Test GUI all CmdHelper GUI functionality
-    % Test save/load CmdHelper GUI info + hotkeys
-    
-    Todo:
     + Add Forum Tags Hotstrings
     
     ! Fix General hotkey lists clear all checkboxes if "None" was selected

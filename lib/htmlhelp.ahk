@@ -29,7 +29,7 @@
                 ToolTip, % "Not found in the documentation files"
         }
 
-        if (WinActive("Edit post") || WinActive("Post a new topic"))
+        if WinActive("AutoHotkey Community")
             Send, {Raw}[url=%Match%]%Clipboard%[/url]
         else
             Run, % Match

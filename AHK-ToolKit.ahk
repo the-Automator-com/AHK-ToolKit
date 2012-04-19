@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.7.2.1
+ * Script Version   : 0.7.3.2
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: April 01, 2012
+ * Modification Date: April 09, 2012
  *
  * Description      :
  * ------------------
@@ -42,8 +42,7 @@
  *
  * [GUI Number Index]
  *
- * GUI 01 - First Time Run
- * GUI 01 - AutoHotkey ToolKit [MAIN GUI]
+ * GUI 01 - First Time Run / AutoHotkey ToolKit [MAIN GUI]
  * GUI 02 - Add Hotkey
  * GUI 03 - Add Hotstring
  * GUI 04 - Import Hotkeys/Hotstrings
@@ -59,12 +58,13 @@
  * GUI 96 - Code Detection Keywords Preferences
  * GUI 97 - Code Detection Preferences
  * GUI 98 - General Preferences
- * GUI 99 - Splash Window
+ * GUI 99 - Splash Window / Screen Tool Area Selection
  *
  * =============================================================================================== *
  */
 
 ;[Includes]{
+#include <sc>
 #include <sci>
 #include <hash>
 #include <klist>
@@ -92,12 +92,12 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.7.2.1"
+           ,version     : "0.7.3.2"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "April 01, 2012"
+           ,moddate     : "April 09, 2012"
            ,conf        : "conf.xml"}, script.getparams(), ForumMenu(), TrayMenu()   ; These function are here so that
                                                                                      ; the Tray Icon is shown early and forum menus are ready.
 
@@ -246,7 +246,7 @@ GuiSize:            ;{
     {
         _lists := "hkList|shkList|hsList|shsList"
         _guiwidth := a_guiwidth, _guiheight:= a_guiheight
-        SB_SetParts(150,150,a_guiwidth-370,50)
+        SB_SetParts(150,150,a_guiwidth-378,50)
 
         Loop, Parse, _lists, |
         {
@@ -373,7 +373,7 @@ TrayMenu(){
     global script
 
     Menu, Tray, Icon, res/AHK-TK.ico
-    Menu, Tray, Tip, % script.name " v" script.version
+    Menu, Tray, Tip, % script.name " v" script.version " [" (a_isunicode ? "W" : "A") "]"
     Menu, Tray, NoStandard
     Menu, Tray, Click, 1
     Menu, Tray, add, % "Show Main Gui", GuiClose
@@ -543,7 +543,7 @@ CreateGui(){
     global conf, $hwnd1
 
     MainGui(), AddHKGui(), AddHSGui(), ImportGui(), ExportGui(), PreferencesGui()
-    SnippetGui(), AboutGui(), PasteUploadGui(), CodetPopup(), SetHotkeys("main", $hwnd1)
+    SnippetGui(), AboutGui(), PasteUploadGui(), CodetPopup(), AreaSlectionGui(), SetHotkeys("main", $hwnd1)
     return
 }
 MainGui(){
@@ -648,7 +648,7 @@ MainGui(){
     ; The attach function redraws the tab on top of the Status bar.
     ; I made it so that the window is a little bit below the tab to avoid overlapping
     ; hence the h422.
-    Gui, 01: show, w799 h422 %hide%, % "AutoHotkey Toolkit"
+    Gui, 01: show, w799 h422 %hide%, % "AutoHotkey Toolkit [" (a_isunicode ? "W" : "A") "]"
     return
 }
 AddHKGui(){
@@ -1102,7 +1102,7 @@ AboutGui(){
     $hwnd8 := WinExist()
 
     info    := "Author`t`t  : " script.author " <" script.email ">`n"
-            .  "Script Version`t  : " script.version "`n"
+            .  "Script Version`t  : " " [" (a_isunicode ? "W" : "A") "]`n"
             .  "Homepage`t  : "
 
     info2   := "Creation Date`t  : " script.crtdate "`n"
@@ -1214,6 +1214,13 @@ CodetPopup(){
     Gui, 94: add, CheckBox, x+5 yp+6 Checked%codMode% gGuiHandler vpopup, % "Enable Popup"
     Gui, 94: Show, % "Hide w250 h150 x" system.mon.Right " y" system.mon.Bottom, % "Codet Popup"
     return
+}
+AreaSlectionGui(){
+    global
+    
+    Gui, 99: -Caption +ToolWindow +AlwaysOnTop +Border
+    Gui, 99: Color, 600000
+    Gui, 99: Show, Hide, % "SelBox"
 }
 GuiAttach(guiNum){
     global $tabcont,$hkList,$hkDelim,$QShk,$hkAdd,$hkClose,$StatBar,$slTitle,$slDDL,$slList
@@ -2442,7 +2449,7 @@ GuiHandler(){
             if (exHK)
             {
                 node := root.selectSingleNode("//Hotkeys")
-                FileAppend, % "; Hotkeys Exported with AutoHotkey Toolkit v" script.version "`n", %exPath%
+                FileAppend, % "; Hotkeys Exported with AutoHotkey Toolkit v" script.version " [" (a_isunicode ? "W" : "A") "]`n", %exPath%
                 Loop % node.attributes.item[0].text
                 {
                     _hk := node.selectSingleNode("//hk[" a_index - 1 "]/@key").text
@@ -2472,7 +2479,7 @@ GuiHandler(){
             if (exHS)
             {
                 node := root.selectSingleNode("//Hotstrings")
-                FileAppend, % "; Hotstrings Exported with AutoHotkey Toolkit v" script.version "`n", %exPath%
+                FileAppend, % "; Hotstrings Exported with AutoHotkey Toolkit v" script.version " [" (a_isunicode ? "W" : "A") "]`n", %exPath%
                 Loop % node.attributes.item[0].text
                 {
                     _opts := node.selectSingleNode("//hs[" a_index - 1 "]/@opts").text
@@ -4249,20 +4256,17 @@ rName(length="", filext=""){
 	if !length
 		Random, length, 8, 15
 	Loop,26
-	{
-		n .= chr(64+a_index)
-		n .= chr(96+a_index)
-	}
+		n .= chr(64+a_index) chr(96+a_index)
 	n .= "0123456789"
 	Loop,% length {
 		Random,rnd,1,% StrLen(n)
 		Random,UL,0,1
-		RName .= RegExReplace(SubStr(n,rnd,1),".$","$" (round(UL)? "U":"L") "0")
+		rName .= RegExReplace(SubStr(n,rnd,1),".$","$" (round(UL)? "U":"L") "0")
 	}
 	if !filext
-		return RName
+		return rName
 	Else
-		return RName . "." . filext
+		return rName . "." . filext
 }
 updateSB(){
     global script, root, $hwnd1
@@ -4271,7 +4275,7 @@ updateSB(){
     SB_SetParts(150,150,_w - 378,50) ; including 8 pixes for the borders.
     SB_SetText("`t" root.selectSingleNode("//Hotkeys/@count").text " Hotkeys currently active",1)
     SB_SetText("`t" root.selectSingleNode("//Hotstrings/@count").text " Hotstrings currently active",2)
-    SB_SetText("`tv" script.version,4)
+    SB_SetText("v" script.version,4)
     return
 }
 lcRun(_gui=0){
@@ -4540,6 +4544,25 @@ matchclip(type, funct=""){
     }
 	return 0
 }
+imgUpload(image_file, Anonymous_API_Key, byref output_XML=""){ 
+
+   Static Imgur_Upload_Endpoint := "http://api.imgur.com/2/upload.xml"
+   FileGetSize, size, % image_file
+   FileRead, output_XML, % "*c " image_file
+   If HTTPRequest( Imgur_Upload_Endpoint "?key=" Anonymous_API_Key, output_XML
+      , Response_Headers := "Content-Type: application/octet-stream`nContent-Length: " size
+      , "Callback: CustomProgress" )
+   && ( pos := InStr( output_XML, "<original>" ) )
+      Return SubStr( output_XML, pos + 10, Instr( output_XML, "</original>", 0, pos ) - pos - 10 )
+   Else Return "" ; error: see response
+}
+CustomProgress(pct, total){
+If ( pct = "" )
+   Tooltip
+Else If ( pct < 0 )
+   Tooltip, % "Uploading " Round( 100 * ( pct + 1 ), 1 ) "%. "
+   . Round( ( pct + 1 ) * total, 0 ) " of " total " bytes."
+}
 
 ; Storage
 WM(var){
@@ -4556,14 +4579,84 @@ WM(var){
 
 ;[Hotkeys/Hotstrings]{
 ^CtrlBreak::Reload
-^!LButton::                                                             ; Run Selected Code [Ctrl + Alt + LButton]
+
+#IfWinActive ahk_class SWarClass
+
+!LButton::                                                              ;{ [Alt + LButton] Screen Capture Active Window/Area
+    CoordMode, Mouse, Screen
+    rect := False
+    MouseGetPos, scXL, scYT
+    WinMove, % "SelBox",, %scXL%, %scYT%
+    Sleep, 150
+    if GetKeyState("LButton", "P")
+    {
+    Gui, 99: Show, w1 h1 x%scXL% y%scYT%, % "SelBox"
+    WinSet, Transparent, 120, % "SelBox"
+    While GetKeyState("LButton", "P")
+    {
+        ; amazing solution by adabo
+        ; first we check which direction we are dragging the mouse
+        ; then we calculate the width and height and finally show the GUI
+        MouseGetPos, scXR, scYB
+        if (scXL < scXR) and (scYT < scYB) ; direction - right up
+            Gui, 99:Show, % "x"(scXL) "y"(scYT) "w"(scXR - scXL) "h"(scYB - scYT), % "SelBox"
+
+        if (scXL < scXR) and (scYT > scYB) ; direction - right down
+            Gui, 99:Show, % "x"(scXL) "y"(scYB) "w"(scXR - scXL) "h"(scYT - scYB), % "SelBox"
+
+        if (scXL > scXR) and (scYT < scYB) ; direction - left up
+            Gui, 99:Show, % "x"(scXR) "y"(scYT) "w"(scXL - scXR) "h"(scYB - scYT), % "SelBox"
+
+        if (scXL > scXR) and (scYT > scYB) ; direction - left down
+            Gui, 99:Show, % "x"(scXR) "y"(scYB) "w"(scXL - scXR) "h"(scYT - scYB), % "SelBox"
+
+        WinGetPos,,, guiw, guih, % "SelBox"
+        ToolTip, % guiw "," guih
+        if GetKeyState("RButton", "P")
+        {
+            ToolTip
+            Gui, 99: Show, Hide w1 h1 x0 y0, % "SelBox"
+            return
+        }
+    }
+    ToolTip
+    Gui, 99: Show, Hide w1 h1 x0 y0, % "SelBox"
+    outputdebug, % scXL "-" scXR
+    if (scXL < scXR)
+        CaptureScreen(scXL "," scYT "," scXR "," scYB, 0, scRect := a_temp . "\scRect_" . rName(0,"png"))
+    else
+        CaptureScreen(scXR "," scYB "," scXL "," scYT, 0, scRect := a_temp . "\scRect_" . rName(0,"png"))
+    rect := True
+    }
+PrintScreen::
+    if (!rect)
+    CaptureScreen(a_thishotkey = "Printscreen" ? 0 : 1, 0, scWin := a_temp . "\scWin_" . rName(0,"png"))
+
+    if FileExist(scWin)
+    image := scWin
+    else if FileExist(scRect)
+    image := scRect
+
+    Tooltip % "Clipboard: " Clipboard := imgUpload(image, "cc6055c88e33af94a7577e2fe845ae66")
+    Sleep, 5*sec
+    Tooltip
+
+    FileDelete, %scWin%
+    FileDelete, %scRect%
+return
+;}
+
+#IfWinActive
+
+^!LButton::                                                             ;{ [Ctrl + Alt + LButton] Run Selected Code
     Send, ^c
     ClipWait
     lcRun()
 return
+;}
 
-; Forum Hotstrings
-#if WinActive("Edit post") or WinActive("Post a new topic")
+;{ Forum Hotstrings
+#if WinActive("AutoHotkey Community")
 :*B0:[b]::[/b]{Left 4}
 :*B0:[i]::[/i]{Left 4}
 :*B0:[u]::[/u]{Left 4}
@@ -4580,9 +4673,10 @@ return
 :*B0:[size=::
 Menu, Size, Show
 return
-
 #if
-
+;}
+;}
+;}
 ;}
 
 /*
@@ -4599,7 +4693,7 @@ Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.7.2.1
+Product_Version=0.7.3.2
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico
