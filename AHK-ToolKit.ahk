@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.7.3.2
+ * Script Version   : 0.7.3.3
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: April 09, 2012
+ * Modification Date: April 26, 2012
  *
  * Description      :
  * ------------------
@@ -92,12 +92,12 @@ OnExit, Exit
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.7.3.2"
+           ,version     : "0.7.3.3"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "April 09, 2012"
+           ,moddate     : "April 26, 2012"
            ,conf        : "conf.xml"}, script.getparams(), ForumMenu(), TrayMenu()   ; These function are here so that
                                                                                      ; the Tray Icon is shown early and forum menus are ready.
 
@@ -347,7 +347,7 @@ FirstRun(){
     Gui, add, CheckBox, x+91 Checked v_cfu, % "Check for updates"
 
     Gui, add, GroupBox, x10 y+20 w345 h55, % "Main GUI Hotkey"
-    Gui, add, DropDownList, xp+10 yp+20 w140 HWND$hkddl v_hkddl, % lst := "None " klist("all^", "mods msb")
+    Gui, add, DropDownList, xp+10 yp+20 w140 HWND$hkddl v_hkddl, % lst := "None  " klist("all^", "mods msb")
     SetHotkeys(lst,$hkddl, "First Run")
     Gui, add, CheckBox, x+10 yp+3 v_ctrl, % "Ctrl"
     Gui, add, CheckBox, x+10 v_alt, % "Alt"
@@ -673,7 +673,7 @@ AddHKGui(){
     Gui, 02: add, CheckBox, x+10 vhkalt, % "Alt"
     Gui, 02: add, CheckBox, x+10 vhkshift, % "Shift"
     Gui, 02: add, CheckBox, x+10 vhkwin, % "Win"
-    Gui, 02: add, DropDownList, x+10 yp-3 w140 vhkey, % lst := "None " klist("all^", "mods msb")
+    Gui, 02: add, DropDownList, x+10 yp-3 w140 vhkey, % lst := "None  " klist("all^", "mods msb")
     ; SetHotkeys(lst,$hkddl, "Add Hotkey")
 
     Gui, 02: add, GroupBox, x+20 y6 w395 h205, % "Advanced Options"
@@ -846,7 +846,7 @@ PreferencesGui(){
     Gui, 98: add, CheckBox, x+10 Checked%_shift% v_shift gGuiHandler, % "Shift"
     Gui, 98: add, CheckBox, x+10 Checked%_win% v_win gGuiHandler, % "Win"
     Gui, 98: add, DropDownList, x+10 yp-3 w140 HWND$GP_DDL v_hkddl gGuiHandler
-                , % lst := "None " klist("all^", "mods msb")
+                , % lst := "None  " klist("all^", "mods msb")
 
     Control,ChooseString,%_mhk%,, ahk_id %$GP_DDL%
     ; SetHotkeys(lst,$GP_DDL, "Preferences")
@@ -1008,7 +1008,7 @@ PreferencesGui(){
     Gui, 92: add, CheckBox, x+10 HWND$_hfshift Checked%_hfshift% v_hfshift gGuiHandler, % "Shift"
     Gui, 92: add, CheckBox, x+10 HWND$_hfwin Checked%_hfwin% v_hfwin gGuiHandler, % "Win"
     Gui, 92: add, DropDownList, x+10 yp-3 w140 HWND$HF_DDL v_hfddl gGuiHandler
-                , % lst := "None " klist("all^", "mods msb")
+                , % lst := "None  " klist("all^", "mods msb")
 
     Control,ChooseString,%_hfhk%,, ahk_id %$HF_DDL%
     Hotkey, % _mods _hfhk, OpenHelpFile
@@ -1025,7 +1025,7 @@ PreferencesGui(){
     Gui, 92: add, CheckBox, x+10 HWND$_ftshift Checked%_ftshift% v_ftshift gGuiHandler, % "Shift"
     Gui, 92: add, CheckBox, x+10 HWND$_ftwin Checked%_ftwin% v_ftwin gGuiHandler, % "Win"
     Gui, 92: add, DropDownList, x+10 yp-3 w140 HWND$FT_DDL v_ftddl gGuiHandler
-                , % lst := "None " klist("all^", "mods msb")
+                , % lst := "None  " klist("all^", "mods msb")
 
     Control,ChooseString,%_fthk%,, ahk_id %$FT_DDL%
     Hotkey, % _mods _fthk, ForumTags
@@ -1325,7 +1325,7 @@ SetHotkeys(list=0, $hwnd=0, title=0){
     if (list && list != "main")
     {
         $lhwnd:=$hwnd, ltitle:=title
-        StringReplace, lst,list,%a_space%None%a_space%%a_space%
+        StringReplace, lst,list,None%a_space%%a_space% ; two spaces to select None
         Loop, Parse, lst, %a_space%
         {
             Hotkey, IfWinActive, %title%
@@ -1735,7 +1735,7 @@ GuiReset(guiNum){
     else if (guiNum = 02)   ; Add Hotkey Gui
     {
         _vals:="hkName¥¢hkType¥1¢hkPath¥" a_programfiles "¢hkctrl¥0¢hkalt¥0¢hkshift¥0¢hkwin¥0¢"
-             . "hkey¥ " klist("all^", "mods msb") " None  ¢"
+             . "hkey¥None  " klist("all^", "mods msb") "¢"
              . "hkIfWin¥If window active list (e.g. Winamp, Notepad, Fire.*)¢"
              . "hkIfWinN¥If window NOT active list (e.g. Notepad++, Firefox, post.*\s)¢"
              . "hkLMod¥0¢hkRMod¥0¢hkWild¥0¢hkSend¥0¢hkHook¥0¢hkfRel¥0"
@@ -2017,7 +2017,7 @@ GuiHandler(){
 
             ; Main Hotkey:
             node := options.childNodes.item[1]                      ; <-- MainKey
-                node.text := (_hkddl = "None" ? (, _win := 1) : _hkddl)
+                node.text := (_hkddl = "None" ? ("``", _win := 1) : _hkddl)
                 node.setAttribute("ctrl", _ctrl), node.setAttribute("alt", _alt)
                 node.setAttribute("shift", _shift), node.setAttribute("win", _win)
 
@@ -4693,7 +4693,7 @@ Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.7.3.2
+Product_Version=0.7.3.3
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico

@@ -13,7 +13,27 @@ Legend:
     $ Disable
 ==================
 
-commit bfb635e08836ff130787185f1ead8faf52946ede
+commit 423c9d23c607d2272de3394905484c57b3504af9
+Author: RaptorX <graptorx@gmail.com>
+Date:   Thu Apr 26 23:00:00 2012 +0200
+
+    AHK-TK v0.7.3.3
+    
+    Changes:
+    
+    ! Fix main hotkey not being set correctly on new installations
+    
+    Todo:
+    
+    + Add Auto unzip updates
+    + Add Screen Tools Preferences
+    
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
+    
+    * Change Disabled option hides List View child
+
+commit 5ac08873d058cc6bed274fff7e9b62212386e533
 Author: RaptorX <graptorx@gmail.com>
 Date:   Thu Apr 19 20:43:32 2012 +0200
 
@@ -75,34 +95,6 @@ Date:   Sat Mar 31 01:41:56 2012 +0200
     Changes:
     
     ! Fix Pastebin Preferences GUI not showing
-    
-    Todo:
-    
-    + Add Forum Tags Hotstrings
-    
-    ! Fix General hotkey lists clear all checkboxes if "None" was selected
-    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
-
-commit a77b1f0a84c749878b231028ec566810cf10892b
-Merge: ade1508 63f83c2
-Author: RaptorX <graptorx@gmail.com>
-Date:   Fri Mar 30 23:50:29 2012 +0200
-
-    AHK-TK v0.7 [Merge]
-    
-    Changes:
-    
-    + Add CmdHelper GUI
-    + Add CmdHelper Options GUI
-    + Add CmdHelper functionality
-    + Add save/load CmdHelper preferences functionality
-    
-    ! Fix General hotkey lists to have "None" as the first option
-    ! Fix General hotkey lists saving default hotkey if "None" was selected
-    ! Fix feature status checkbox triggers "Apply" button like other controls
-    
-    % Test GUI all CmdHelper GUI functionality
-    % Test save/load CmdHelper GUI info + hotkeys
     
     Todo:
     
