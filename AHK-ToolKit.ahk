@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.7.3.3
+ * Script Version   : 0.7.4.4
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: April 26, 2012
+ * Modification Date: May 11, 2012
  *
  * Description      :
  * ------------------
@@ -82,22 +82,25 @@
 ; --
 SendMode, Input
 SetBatchLines, -1
+SetTitleMatchMode, RegEx
 CoordMode, Caret, Screen
 CoordMode, Tooltip, Screen
 SetWorkingDir, %a_scriptdir%
 OnExit, Exit
 ; --
+GroupAdd, ScreenTools, ahk_class SWarClass
+GroupAdd, ScreenTools, ahk_class Photoshop
 ;}
 
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.7.3.3"
+           ,version     : "0.7.4.4"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "April 26, 2012"
+           ,moddate     : "May 11, 2012"
            ,conf        : "conf.xml"}, script.getparams(), ForumMenu(), TrayMenu()   ; These function are here so that
                                                                                      ; the Tray Icon is shown early and forum menus are ready.
 
@@ -4580,8 +4583,7 @@ WM(var){
 ;[Hotkeys/Hotstrings]{
 ^CtrlBreak::Reload
 
-#IfWinActive ahk_class SWarClass
-
+#IfWinNotActive ahk_group ScreenTools
 !LButton::                                                              ;{ [Alt + LButton] Screen Capture Active Window/Area
     CoordMode, Mouse, Screen
     rect := False
@@ -4645,7 +4647,6 @@ PrintScreen::
     FileDelete, %scRect%
 return
 ;}
-
 #IfWinActive
 
 ^!LButton::                                                             ;{ [Ctrl + Alt + LButton] Run Selected Code
@@ -4656,28 +4657,37 @@ return
 ;}
 
 ;{ Forum Hotstrings
-#if WinActive("AutoHotkey Community")
+#IfWinActive AutoHotkey Community
 :*B0:[b]::[/b]{Left 4}
+:*B0:[c]::[/c]{Left 4}
 :*B0:[i]::[/i]{Left 4}
 :*B0:[u]::[/u]{Left 4}
-:*B0:[img]::[/img]{Left 6}
-:*B0:[url]::[/url]{Left 6}
+:*B0:[s]::[/s]{Left 4}
 :*B0:[list]::[/list]{Left 7}
 :*B0:[code]::[/code]{Left 7}
 :*B0:[quote]::[/quote]{Left 8}
+:*B0:[youtube]::[/youtube]{Left 10}
+:*B0:[gist]::[/gist]{Left 7}
+:*B0:[img]::[/img]{Left 6}
+:*B0:[url]::[/url]{Left 6}
+
+:*B0:[url=::
+    SendInput %clipboard%][/url]{Left 6}
+return
 
 :*B0:[color=::
-Menu, Color, Show
+    Menu, Color, Show
 return
 
 :*B0:[size=::
-Menu, Size, Show
+    Menu, Size, Show
 return
-#if
+
+#IfWinActive
+
 ;}
-;}
-;}
-;}
+
+;} ; Added for correct folding in C++ Lexer (To be removed when finished)
 
 /*
  * * * Compile_AHK SETTINGS BEGIN * * *
@@ -4687,13 +4697,13 @@ Exe_File=%In_Dir%\lib\AHK-ToolKit.exe
 Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
 [VERSION]
 Set_Version_Info=1
-File_Version=1.0.0.0
+File_Version=0.7.4.4
 Inc_File_Version=0
 Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.7.3.3
+Product_Version=0.7.4.4
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico

@@ -148,7 +148,7 @@
             FileReadLine, logurl, %a_temp%\logurl, %vline%
             debug ? debug("* Version: " logurl)
             RegexMatch(logurl, "v(.*)", Version)
-            rfile := rfile = "github" ? ("http://www.github.com/"  
+            rfile := rfile = "github" ? ("https://www.github.com/"  
                                       . script.author "/" 
                                       . script.name "/zipball/" (a_iscompiled ? "latest-compiled" : "latest"))
                                       : rfile
@@ -172,15 +172,24 @@
                     debug ? debug("* Update aborted by user", 3)
                     return 2
                 }
-                FileSelectFile, lfile, S16, %a_temp%
-                debug ? debug("* Downloading file to: " lfile)
-                UrlDownloadToFile, %rfile%, %lfile%
+                debug ? debug("* Downloading file to: " a_temp "\ahk-tk.zip")
+                Download(rfile, a_temp "\ahk-tk.zip")
+                oShell := ComObjCreate("Shell.Application")
+                oDir := oShell.NameSpace(a_temp), oZip := oShell.NameSpace(a_temp "\ahk-tk.zip")
+                oDir.CopyHere(oZip.Items), oShell := oDir := oZip := ""
+                
+                ; FileCopy instead of FileMove so that file permissions are inherited correctly.
+                Loop, % a_temp "\RaptorX*", 1
+                    FileCopyDir, %a_loopfilefullpath%, %a_scriptdir%, 1
+                
+                FileDelete, %a_temp%\ahk-tk.zip
+                FileDelete, %a_temp%\RaptorX*
+                
                 Msgbox, 0x40040
-                      , % "Download Complete"
-                      , % "To install the new version simply replace the old file with the one`n"
-                        . "that was downloaded.`n`n The application will exit now."
-                Run, %lfile%
-                ExitApp
+                      , % "Installation Complete"
+                      , % "The application will restart now."
+                
+                Reload
             }
             else if (a_thismenuitem = "Check for Updates")
             {
@@ -276,4 +285,40 @@ debug(msg,delimiter = False){
                   .  " [Start]`n* getparams() [Start]", ft := 0)
         FileAppend, %msg%`n, %debugfile%
     }
+}
+
+; Based on code by Sean and SKAN @ http://www.autohotkey.com/forum/viewtopic.php?p=184468#184468
+Download(url, file)
+{
+    global _cu
+    static vt
+    SplitPath file, dFile
+    x:=(a_screenwidth/2)-(330/2), y:=(a_screenheight/2)-(52/2), VarSetCapacity(_cu, 100), VarSetCapacity(tn, 520)
+    
+    if !VarSetCapacity(vt)
+    {
+        VarSetCapacity(vt, A_PtrSize*11), nPar := "31132253353"
+        Loop Parse, nPar
+            NumPut(RegisterCallback("DL_Progress", "F", A_LoopField, A_Index-1), vt, A_PtrSize*(A_Index-1))
+    }
+
+    DllCall("shlwapi\PathCompactPathEx", "str", _cu, "str", url, "uint", 50, "uint", 0)
+    Progress, Hide CWE0E0E0 CT000020 CB1111DD x%x% y%y% w330 h52 B1 FM8 FS8 WM700 WS700 ZH12 ZY3 C11,, %_cu%, AutoHotkeyProgress, Tahoma
+    
+    if (0 = DllCall("urlmon\URLDownloadToCacheFile", "ptr", 0, "str", url, "str", tn, "uint", 260, "uint", 0x10, "ptr*", &vt))
+        FileCopy %tn%, %file%
+    else
+        ErrorLevel := 1
+    Progress Off
+    return !ErrorLevel
+}
+DL_Progress( pthis, nP=0, nPMax=0, nSC=0, pST=0 )
+{
+    global _cu
+    if A_EventInfo = 6
+    {
+        Progress Show
+        Progress % P := 100*nP//nPMax, % "Downloading:     " Round(np/1024,1) " KB / " Round(npmax/1024) " KB    [ " P "`% ]", %_cu%
+    }
+    return 0
 }
