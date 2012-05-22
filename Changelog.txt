@@ -13,7 +13,32 @@ Legend:
     $ Disable
 ==================
 
-commit 423c9d23c607d2272de3394905484c57b3504af9
+commit 51756508f801198ea298dc1dde3590ae0117facf
+Author: RaptorX <graptorx@gmail.com>
+Date:   Fri May 11 22:51:21 2012 +0200
+
+    AHK-TK v0.7.4.4
+    
+    Changes:
+    
+    + Add Auto unzip updates
+    + Add newest forum hotstrings
+    
+    ! Fix Forum Hotstrings
+    
+    Todo:
+    
+    + Add Screen Tools Preferences
+    + Add Open option for Live Code
+    + Add Save/Save As... options for Live Code
+    
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
+    
+    * Change Disabled option hides List View child
+    * Conditional download of AHK_L backup.
+
+commit d3647c5625e982eee7f1359704d58d967f057593
 Author: RaptorX <graptorx@gmail.com>
 Date:   Thu Apr 26 23:00:00 2012 +0200
 
@@ -85,20 +110,3 @@ Date:   Sat Mar 31 01:49:57 2012 +0200
     Changes:
     
     * Change show splash before version check
-
-commit a03bacc93d6825be024e68a7edd3c47a6e96850d
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sat Mar 31 01:41:56 2012 +0200
-
-    AHK-TK v0.7.0.1
-    
-    Changes:
-    
-    ! Fix Pastebin Preferences GUI not showing
-    
-    Todo:
-    
-    + Add Forum Tags Hotstrings
-    
-    ! Fix General hotkey lists clear all checkboxes if "None" was selected
-    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
