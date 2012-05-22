@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.7.4.4
+ * Script Version   : 0.7.5.4
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: May 11, 2012
+ * Modification Date: May 21, 2012
  *
  * Description      :
  * ------------------
@@ -95,12 +95,12 @@ GroupAdd, ScreenTools, ahk_class Photoshop
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.7.4.4"
+           ,version     : "0.7.5.4"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "May 11, 2012"
+           ,moddate     : "May 21, 2012"
            ,conf        : "conf.xml"}, script.getparams(), ForumMenu(), TrayMenu()   ; These function are here so that
                                                                                      ; the Tray Icon is shown early and forum menus are ready.
 
@@ -1356,11 +1356,12 @@ SetHotkeys(list=0, $hwnd=0, title=0){
 
     if (list = "main")
     {
-        ; The Hotkey command allow the hotkeys to run the labels inside the MenuHandler function
-        ; sad but true
         Hotkey, IfWinActive, ahk_id %$hwnd%
-        Hotkey, ^i, Gui_Import          ; Ctrl + I
         Hotkey, ^n, Gui_AddNew          ; Ctrl + N
+        Hotkey, ^o, Gui_Open            ; Ctrl + O
+        Hotkey, ^s, Gui_Save            ; Ctrl + S
+        Hotkey, ^+s, Gui_SaveAs         ; Ctrl + Shift + S
+        Hotkey, ^i, Gui_Import          ; Ctrl + I
         Hotkey, ^p, Gui_Preferences     ; Ctrl + P
         Hotkey, IfWinActive
     }
@@ -2768,6 +2769,7 @@ GuiHandler(){
                 FileDelete, %f_saved%.ahk
                 FileAppend, %pb_code%, %f_saved%.ahk
             }
+            
             Gui, 09: Hide
             return
         }
@@ -2850,6 +2852,7 @@ MenuHandler(stat=0){
     global
     static tog_aot, tog_lw, tog_ech, tog_sl, tog_ro:=0
            , colors:="Dark Red,Red,Orange,Brown,Yellow,Green,Olive,Cyan,Blue,Dark Blue,Indigo,Violet,White,Black,Custom"
+           , lcfPath, lcFile
 
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
     tog_aot := root.selectSingleNode("//@alwaysontop").text, tog_ech := options.selectSingleNode("//@sci").text
@@ -2870,9 +2873,9 @@ MenuHandler(stat=0){
         ; Menu, Settings, %stat%, Enable Command Helper
         ; Menu, Settings, %stat%, Context Menu Options
 
-        ; Menu, File, %stat%, &Open`t(Ctrl+O)
-        ; Menu, File, %stat%, &Save`t(Ctrl+S)
-        ; Menu, File, %stat%, Save As`t(Ctrl+Shift+S)
+        Menu, File, %stat%, &Open`t(Ctrl+O)
+        Menu, File, %stat%, &Save`t(Ctrl+S)
+        Menu, File, %stat%, Save As`t(Ctrl+Shift+S)
         return
     }
 
@@ -2981,6 +2984,42 @@ MenuHandler(stat=0){
         }
     }
 
+    if (a_thismenuitem = "&Open`t(Ctrl+O)")
+    {
+        Gui_Open:
+            Gui, 01: +OwnDialogs
+            FileSelectFile, lcfPath, 1, %a_mydocuments%, % "Please select the file to open.", % "AutoHotkey (*.ahk)"
+            lcFile := FileOpen(lcfPath, "rw `n", "UTF-8")
+            SCI_SetText(lcFile.Read(), $sci1), lcFile.Close()
+        return
+    }
+    
+    if (a_thismenuitem = "&Save`t(Ctrl+S)")
+    {
+        Gui_Save:
+            FileDelete, %lcfPath%
+            lcFile := FileOpen(lcfPath, "rw `n", "UTF-8")
+            SCI_GetText(SCI_GetLength($Sci1)+1, _lcCode)
+            lcFile.Write(_lcCode), lcFile.Close()
+        return
+    }
+    
+    if (a_thismenuitem = "Save As`t(Ctrl+Shift+S)")
+    {
+        Gui_SaveAs:
+            Gui, 01: +OwnDialogs
+            FileSelectFile, lcfPath, S24, %a_mydocuments%, % "Save File as...", % "Autohotkey (*.ahk)"
+            
+            if !regexmatch(lcfPath, "\.[[:alnum:]]+$")
+                    lcfPath := lcfPath ".ahk"
+            
+            FileDelete, %lcfPath%
+            lcFile := FileOpen(lcfPath, "rw `n", "UTF-8")
+            SCI_GetText(SCI_GetLength($Sci1)+1, _lcCode)
+            lcFile.Write(_lcCode), lcFile.Close()
+        return
+    }
+    
     if (a_thismenuitem = "Import Hotkeys/Hotstrings")
     {
         Gui_Import:
@@ -4697,13 +4736,13 @@ Exe_File=%In_Dir%\lib\AHK-ToolKit.exe
 Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
 [VERSION]
 Set_Version_Info=1
-File_Version=0.7.4.4
+File_Version=0.7.5.4
 Inc_File_Version=0
 Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.7.4.4
+Product_Version=0.7.5.4
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico

@@ -13,7 +13,32 @@ Legend:
     $ Disable
 ==================
 
-commit 51756508f801198ea298dc1dde3590ae0117facf
+commit 4655d4d9f8ba6be6d97e077753f6fac87fbbc4d0
+Author: RaptorX <graptorx@gmail.com>
+Date:   Tue May 22 18:36:39 2012 +0200
+
+    AHK-TK v0.7.5.4
+    
+    Changes:
+    
+    + Add Open option for Live Code
+    + Add Save/Save As... options for Live Code
+    
+    Todo:
+    
+    + Add Screen Tools Preferences
+    + Add check if file exist before hotkeys try to open
+    + Add #ifwindow active functionality to hotkeys/hotstrings
+    + Add Syntax highlighting for Scintilla Controls
+    
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
+    ! Fix Append to exported hotkeys/hotstrings function
+    
+    * Change Disabled option hides List View child
+    * Conditional download of AHK_L backup
+
+commit e92752d7db12cf99f2c951c19b22986816a45379
 Author: RaptorX <graptorx@gmail.com>
 Date:   Fri May 11 22:51:21 2012 +0200
 
@@ -100,13 +125,3 @@ Date:   Sun Apr 1 00:44:35 2012 +0200
     ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
     
     * Change Disabled option hides List View child
-
-commit f7cec6a271f4ce57b5e22679a020e222a59076f7
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sat Mar 31 01:49:57 2012 +0200
-
-    AHK-TK v0.7.1.1
-    
-    Changes:
-    
-    * Change show splash before version check
