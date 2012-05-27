@@ -13,7 +13,32 @@ Legend:
     $ Disable
 ==================
 
-commit 4655d4d9f8ba6be6d97e077753f6fac87fbbc4d0
+commit 169b3a327332117ab918a00a31caf4b47114d362
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sun May 27 18:47:32 2012 +0200
+
+    AHK-TK v0.7.5.5
+    
+    Changes:
+    
+    * Changed README file
+    ! Fix Version not showing up in About GUI
+    
+    Todo:
+    
+    + Add Screen Tools Preferences
+    + Add #ifwindow active functionality to hotkeys/hotstrings
+    + Add Syntax highlighting for Scintilla Controls
+    
+    ! Fix check if file exist before hotkeys try to open
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
+    ! Fix Append to exported hotkeys/hotstrings function
+    
+    * Change Disabled option hides List View child
+    * Conditional download of AHK_L backup
+
+commit effb2c1997db949930d664f0b0f3c54bc69b5b3f
 Author: RaptorX <graptorx@gmail.com>
 Date:   Tue May 22 18:36:39 2012 +0200
 
@@ -100,26 +125,6 @@ Date:   Thu Apr 19 20:43:32 2012 +0200
     
     + Add Auto unzip updates
     + Add Screen Tools Preferences
-    
-    ! Fix General hotkey lists clear all checkboxes if "None" was selected
-    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
-    
-    * Change Disabled option hides List View child
-
-commit a17ddc8c51993de01b0d94aba5def76a626bb41a
-Author: RaptorX <graptorx@gmail.com>
-Date:   Sun Apr 1 00:44:35 2012 +0200
-
-    AHK-TK v0.7.2.1
-    
-    Changes:
-    
-    + Add Forum Tags Hotstrings
-    
-    Todo:
-    
-    + Add Screen Tools
-    + Add Auto unzip updates
     
     ! Fix General hotkey lists clear all checkboxes if "None" was selected
     ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected

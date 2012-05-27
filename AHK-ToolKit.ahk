@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.7.5.4
+ * Script Version   : 0.7.5.5
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: May 21, 2012
+ * Modification Date: May 27, 2012
  *
  * Description      :
  * ------------------
@@ -95,12 +95,12 @@ GroupAdd, ScreenTools, ahk_class Photoshop
 ;[Basic Script Info]{
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.7.5.4"
+           ,version     : "0.7.5.5"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "May 21, 2012"
+           ,moddate     : "May 27, 2012"
            ,conf        : "conf.xml"}, script.getparams(), ForumMenu(), TrayMenu()   ; These function are here so that
                                                                                      ; the Tray Icon is shown early and forum menus are ready.
 
@@ -1105,7 +1105,7 @@ AboutGui(){
     $hwnd8 := WinExist()
 
     info    := "Author`t`t  : " script.author " <" script.email ">`n"
-            .  "Script Version`t  : " " [" (a_isunicode ? "W" : "A") "]`n"
+            .  "Script Version`t  : " script.version " [" (a_isunicode ? "Unicode" : "ANSI") "]`n"
             .  "Homepage`t  : "
 
     info2   := "Creation Date`t  : " script.crtdate "`n"
@@ -4736,13 +4736,13 @@ Exe_File=%In_Dir%\lib\AHK-ToolKit.exe
 Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
 [VERSION]
 Set_Version_Info=1
-File_Version=0.7.5.4
+File_Version=0.7.5.5
 Inc_File_Version=0
 Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.7.5.4
+Product_Version=0.7.5.5
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico
