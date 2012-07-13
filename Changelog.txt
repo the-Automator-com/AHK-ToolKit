@@ -13,9 +13,35 @@ Legend:
     $ Disable
 ==================
 
-commit 169b3a327332117ab918a00a31caf4b47114d362
+commit 8150073d84d007f155d766cc24ba85e6f95236f2
 Author: RaptorX <graptorx@gmail.com>
-Date:   Sun May 27 18:47:32 2012 +0200
+Date:   Fri Jul 13 21:23:54 2012 +0200
+
+    AHK-TK v0.7.6.6
+    
+    Changes:
+    
+    + Screen Tools Preferences Gui
+    + Check if Autohotkey is installed instead of showing syntax error.
+    
+    ! Fix GUI not showing because check for update was in progress
+    
+    Todo:
+    
+    + Add #ifwindow active functionality to hotkeys/hotstrings
+    + Add Syntax highlighting for Scintilla Controls
+    
+    ! Fix check if file exist before hotkeys try to open
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
+    ! Fix Append to exported hotkeys/hotstrings function
+    
+    * Change Disabled option hides List View child
+    * Conditional download of AHK_L backup
+
+commit da279b6ee070a5433787b5d15b6dbd7fe9642fb6
+Author: RaptorX <graptorx@gmail.com>
+Date:   Sun May 27 19:08:15 2012 +0200
 
     AHK-TK v0.7.5.5
     
@@ -97,29 +123,6 @@ Date:   Thu Apr 26 23:00:00 2012 +0200
     Changes:
     
     ! Fix main hotkey not being set correctly on new installations
-    
-    Todo:
-    
-    + Add Auto unzip updates
-    + Add Screen Tools Preferences
-    
-    ! Fix General hotkey lists clear all checkboxes if "None" was selected
-    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
-    
-    * Change Disabled option hides List View child
-
-commit 5ac08873d058cc6bed274fff7e9b62212386e533
-Author: RaptorX <graptorx@gmail.com>
-Date:   Thu Apr 19 20:43:32 2012 +0200
-
-    AHK-TK v0.7.3.2
-    
-    Changes:
-    
-    + Add Screen Tools
-    + Add Encoding to tooltip information
-    
-    ! Fix Hotstrings to match new window title
     
     Todo:
     
