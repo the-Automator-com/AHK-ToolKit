@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.7.5.5
+ * Script Version   : 0.7.6.6
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: May 27, 2012
+ * Modification Date: July 13, 2012
  *
  * Description      :
  * ------------------
@@ -90,34 +90,41 @@ OnExit, Exit
 ; --
 GroupAdd, ScreenTools, ahk_class SWarClass
 GroupAdd, ScreenTools, ahk_class Photoshop
+GroupAdd, ScreenTools, ahk_class illustrator
+GroupAdd, ScreenTools, ahk_class 3DSMAX
+GroupAdd, ScreenTools, ahk_class AE_CApplication_9.0
 ;}
 
 ;[Basic Script Info]{
+Clipboard := null
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.7.5.5"
+           ,version     : "0.7.6.6"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "May 27, 2012"
+           ,moddate     : "July 13, 2012"
            ,conf        : "conf.xml"}, script.getparams(), ForumMenu(), TrayMenu()   ; These function are here so that
                                                                                      ; the Tray Icon is shown early and forum menus are ready.
 
 ;}
 
-;[General Variables]{
-null        := "", Clipboard := null
-sec         := 1000 	            ; 1 second
-min         := 60*sec  	            ; 1 minute
-hour        := 60*min  	            ; 1 hour
-;}
-
 ;[User Configuration]{
 
+if (a_ahkversion < 1.1){
+    Msgbox, 0x10
+          , % "Error"
+          , % "The AutoHotkey installed in your computer is not compatible with`n"
+            . "this version of AutoHotkey Toolkit.`n`n"
+            . "Please use the compiled version of my script or upgrade to AutoHotkey L.`n"
+            . "The application will exit now."
+            
+    Exitapp
+}
+
 ; Trying to fix the issues that result from the script not being run as admin under Win7/Vista
-if !a_isadmin
-{
+if (!a_isadmin){
     If a_iscompiled
        DllCall(ShellExecute,"Uint", 0
                            , "Str", "RunAs"
@@ -211,14 +218,11 @@ node.text != script.version ? (node.text := script.version, conf.save(script.con
 
 ;[Main]{
 script.autostart(options.selectSingleNode("//@sww").text)
+options.selectSingleNode("//@ssi").text ? script.splash("res\img\AHK-TK_Splash.png") : null
 
-if options.selectSingleNode("//@ssi").text
-    script.splash("res\img\AHK-TK_Splash.png")
+CreateGui() ; Creating GUI before checking for updates for avoiding the GUI not showing up because an update check was in progress
+options.selectSingleNode("//@cfu").text ? script.update(script.version) : null
 
-if options.selectSingleNode("//@cfu").text
-    script.update(script.version)
-
-CreateGui()
 Return                      ; [End of Auto-Execute area]
 ;}
 
@@ -881,9 +885,9 @@ PreferencesGui(){
 
     codStat := options.selectSingleNode("//Codet/@status").text
     codMode := options.selectSingleNode("//Codet/@mode").text
-    Gui, 97: add, CheckBox, xp+25 yp+20 HWND$codStat Checked%codStat% gGuiHandler vcodStat
+    Gui, 97: add, CheckBox, xp+7 yp+20 HWND$codStat Checked%codStat% gGuiHandler vcodStat
                           , % "Enable Command Detection"
-    Gui, 97: add, Radio, x28 y+10 HWND$codMode1 gGuiHandler vcodMode, % "Show Popup"
+    Gui, 97: add, Radio, xp y+10 HWND$codMode1 gGuiHandler vcodMode, % "Show Popup"
     Gui, 97: add, Radio, x+10 HWND$codMode2 gGuiHandler, % "Automatic Upload"
 
     selRadio := codMode = 1 ? ("Show Popup", options.selectSingleNode("//Codet/@mode").text := 1)
@@ -893,7 +897,7 @@ PreferencesGui(){
     Gui, 97: show, x165 y36 w350 h245 NoActivate
     ;}
 
-    ;{ Code Detection Keywords Preferences
+    ;{ Code Detection > Keywords Preferences
     Gui, 96: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
     $hwnd96 := WinExist()
 
@@ -918,7 +922,7 @@ PreferencesGui(){
     Gui, 96: show, x165 y36 w350 h245 NoActivate
     ;}
 
-    ;{ Code Detection Pastebin Preferences
+    ;{ Code Detection > Pastebin Preferences
     Gui, 95: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 ; +Border ; -WS_POPUP +WS_CHILD
     $hwnd95 := WinExist()
 
@@ -990,7 +994,7 @@ PreferencesGui(){
     Gui, 93: show, x165 y36 w350 h245 NoActivate
     ;}
     
-    ;{ Command Helper Options
+    ;{ Command Helper > Options
     Gui, 92: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border ; -WS_POPUP   +WS_CHILD
     $hwnd92 := WinExist()
     
@@ -1041,15 +1045,52 @@ PreferencesGui(){
     ;}
 
     ;{ Live Code
-    ; Gui, 98: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
-    ; $hwnd98 := WinExist()
-    ; Gui, 98: show, x165 y36 w350 h245 NoActivate
+    ; Gui, 91: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
+    ; $hwnd91 := WinExist()
+    ; Gui, 91: show, x165 y36 w350 h245 NoActivate
+    ;}
+    
+    ;{ Live Code > Run Code With
+    ; Gui, 90: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
+    ; $hwnd90 := WinExist()
+    ; Gui, 90: show, x165 y36 w350 h245 NoActivate
+    ;}
+    
+    ;{ Live Code > Keywords Preferences
+    ; Gui, 89: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
+    ; $hwnd89 := WinExist()
+    ; Gui, 89: show, x165 y36 w350 h245 NoActivate
+    ;}
+    
+    ;{ Live Code > Syntax Styles Preferences
+    ; Gui, 88: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
+    ; $hwnd88 := WinExist()
+    ; Gui, 88: show, x165 y36 w350 h245 NoActivate
     ;}
 
     ;{ Screen Tools
-    ; Gui, 98: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
-    ; $hwnd98 := WinExist()
-    ; Gui, 98: show, x165 y36 w350 h245 NoActivate
+    Gui, 87: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace  ; +Border -WS_POPUP +WS_CHILD
+    $hwnd87 := WinExist()
+    Gui, 87: show, x165 y36 w350 h245 NoActivate
+    Gui, 87: add, GroupBox, x3 y0 w345 h170, % "Info"
+    Gui, 87: add, Text, xp+10 yp+20 w330
+                      , % "Screen Tools are there to allow you to take screenshots easily.`n`n"
+                        . "The taken shot will be automatically uploaded to imgur and the`n"
+                        . "link will be saved in the clipboard for easy sharing.`n`n"
+                        . "Alt + Drag:   `tTakes a screenshot of selected area`n`n"
+                        . "Alt + Click:  `tTakes a screenshot of active window`n`n"
+                        . "Print Screen: `tIf enabled uploads a picture of the whole screen`n"
+                        . "`t`tby pressing the 'Print Screen' button."
+
+    Gui, 87: add, Text, x0 y+20 w360 0x10
+    Gui, 87: add, GroupBox, x3 yp+10 w345 h50, % "General Preferences"
+
+    scrStat := options.selectSingleNode("//ScrTools/@altdrag").text
+    scrPrnt := options.selectSingleNode("//ScrTools/@prtscr").text
+    Gui, 87: add, CheckBox, xp+7 yp+20 HWND$scrStat Checked%scrStat% gGuiHandler vscrStat
+                          , % "Enable Screen Tools"
+    Gui, 87: add, CheckBox, x+45 yp HWND$scrPrnt Checked%scrPrnt% gGuiHandler vscrPrnt
+                          , % "Upload by Print Screen Hotkey"
     ;}
 
     Gui, 06: add, Text, x165 y+8 w370 0x10                          ; y is 10 - 2px of the Picture control.
@@ -1060,6 +1101,7 @@ PreferencesGui(){
 
     Gui, 01: Default
     Gui, 06: show, w520 h330 Hide, % "Preferences"
+    ; pause
     return
 }
 SnippetGui(){
@@ -1810,7 +1852,7 @@ ApplyPref(){
     global      ; It accesses hotkey variables and others.
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
 
-    ; [General Preferences]{
+    ;{ General Preferences GUI
     ; Startup
     node := options.firstChild                              ; <-- Startup
         node.setAttribute("ssi", _ssi),node.setAttribute("sww", _sww)
@@ -1847,7 +1889,7 @@ ApplyPref(){
     node := null
     ;}
 
-    ; [Code Detection]{
+    ;{ Code Detection Preferences
     ; Status
     options.selectSingleNode("//Codet/@status").text := codStat
     options.selectSingleNode("//Codet/@mode").text := codMode
@@ -1855,12 +1897,12 @@ ApplyPref(){
     GuiControl, 94:, popup, % t := codMode = 1 ? 1 : 0
     ;}
 
-    ; [Code Detection Keywords]{
+    ;{ Code Detection > Keywords Preferences
     options.selectSingleNode("//Codet/Keywords/@min").text := codMin
     options.selectSingleNode("//Codet/Keywords").text := "`n" codKwords
     ;}
 
-    ; [Code Detection Options]{
+    ;{ Code Detection > Pastebin Preferences
     options.selectSingleNode("//Codet/Pastebin/@current").text := pbp_ddl
 
     ; AutoHotkey.net
@@ -1878,7 +1920,7 @@ ApplyPref(){
     }
     ;}
     
-    ; [Command Helper]{
+    ;{ Command Helper
     ; Status
     options.selectSingleNode("//CMDHelper/@global").text := cmdStat
     options.selectSingleNode("//CMDHelper/@sci").text := _eie
@@ -1886,60 +1928,64 @@ ApplyPref(){
     options.selectSingleNode("//CMDHelper/HelpPath/@online").text := _uoh
     ;}
     
-    ; [Command Helper Options]{
+    ;{ Command Helper > Options
     
-    ;{ Help File
+    ; Help File
     node := options.selectSingleNode("//CMDHelper/HelpKey")
-        ;{ Load old hotkey
-        _octrl := node.attributes.item[0].text, _oalt := node.attributes.item[1].text
-        _oshift := node.attributes.item[2].text, _owin := node.attributes.item[3].text
-        _hfhk := node.text
-        ;}
-        
-        ;{ Disable Old Hotkey
-        _mods:=(_octrl ? "^" : null)(_oalt ? "!" : null)(_oshift ? "+" : null)(_owin ? "#" : null)
-        Hotkey, % _mods _hfhk, Off
-        ;}
-
-        ;{ Load new hotkey
-        node.text := (_hfddl = "None" ? ("F1", _hfalt:=_hfshift:=_hfwin:=0, _hfctrl := 1) : _hfddl)
-        node.setAttribute("ctrl", _hfctrl), node.setAttribute("alt", _hfalt)
-        node.setAttribute("shift", _hfshift), node.setAttribute("win", _hfwin)
-        ;}
-
-        ;{ Enable New Hotkey
-        _mods:=(_hfctrl ? "^" : null)(_hfalt ? "!" : null)(_hfshift ? "+" : null)(_hfwin ? "#" : null)
-        Hotkey, % _mods node.text, OpenHelpFile, On
-        ;}
+    ;{ Load old hotkey
+    _octrl := node.attributes.item[0].text, _oalt := node.attributes.item[1].text
+    _oshift := node.attributes.item[2].text, _owin := node.attributes.item[3].text
+    _hfhk := node.text
     ;}
     
-    ;{ Forum Tags
+    ;{ Disable Old Hotkey
+    _mods:=(_octrl ? "^" : null)(_oalt ? "!" : null)(_oshift ? "+" : null)(_owin ? "#" : null)
+    Hotkey, % _mods _hfhk, Off
+    ;}
+
+    ;{ Load new hotkey
+    node.text := (_hfddl = "None" ? ("F1", _hfalt:=_hfshift:=_hfwin:=0, _hfctrl := 1) : _hfddl)
+    node.setAttribute("ctrl", _hfctrl), node.setAttribute("alt", _hfalt)
+    node.setAttribute("shift", _hfshift), node.setAttribute("win", _hfwin)
+    ;}
+
+    ;{ Enable New Hotkey
+    _mods:=(_hfctrl ? "^" : null)(_hfalt ? "!" : null)(_hfshift ? "+" : null)(_hfwin ? "#" : null)
+    Hotkey, % _mods node.text, OpenHelpFile, On
+    ;}
+    
+    ; Forum Tags
     node := options.selectSingleNode("//CMDHelper/TagsKey")
-        ;{ Load old hotkey
-        _octrl := node.attributes.item[0].text, _oalt := node.attributes.item[1].text
-        _oshift := node.attributes.item[2].text, _owin := node.attributes.item[3].text
-        _fthk := node.text
-        ;}
-        
-        ;{ Disable Old Hotkey
-        _mods:=(_octrl ? "^" : null)(_oalt ? "!" : null)(_oshift ? "+" : null)(_owin ? "#" : null)
-        Hotkey, % _mods _fthk, Off
-        ;}
-
-        ;{ Load new hotkey
-        node.text := (_ftddl = "None" ? ("F2", _ftalt:=_ftshift:=_ftwin:=0, _ftctrl := 1) : _ftddl)
-        node.setAttribute("ctrl", _ftctrl), node.setAttribute("alt", _ftalt)
-        node.setAttribute("shift", _ftshift), node.setAttribute("win", _ftwin)
-        ;}
-
-        ;{ Enable New Hotkey
-        _mods:=(_ftctrl ? "^" : null)(_ftalt ? "!" : null)(_ftshift ? "+" : null)(_ftwin ? "#" : null)
-        Hotkey, % _mods node.text, ForumTags, On
-        ;}
+    ;{ Load old hotkey
+    _octrl := node.attributes.item[0].text, _oalt := node.attributes.item[1].text
+    _oshift := node.attributes.item[2].text, _owin := node.attributes.item[3].text
+    _fthk := node.text
     ;}
     
-    ;{ File Path
+    ;{ Disable Old Hotkey
+    _mods:=(_octrl ? "^" : null)(_oalt ? "!" : null)(_oshift ? "+" : null)(_owin ? "#" : null)
+    Hotkey, % _mods _fthk, Off
+    ;}
+
+    ;{ Load new hotkey
+    node.text := (_ftddl = "None" ? ("F2", _ftalt:=_ftshift:=_ftwin:=0, _ftctrl := 1) : _ftddl)
+    node.setAttribute("ctrl", _ftctrl), node.setAttribute("alt", _ftalt)
+    node.setAttribute("shift", _ftshift), node.setAttribute("win", _ftwin)
+    ;}
+
+    ;{ Enable New Hotkey
+    _mods:=(_ftctrl ? "^" : null)(_ftalt ? "!" : null)(_ftshift ? "+" : null)(_ftwin ? "#" : null)
+    Hotkey, % _mods node.text, ForumTags, On
+    ;}
+
+    
+    ; File Path
     options.selectSingleNode("//CMDHelper/HelpPath").text := hfPath
+    ;}
+    
+    ;{ Screen Tools
+    options.selectSingleNode("//ScrTools/@altdrag").text := scrStat
+    options.selectSingleNode("//ScrTools/@prtscr").text := scrPrnt
     ;}
     
     conf.transformNodeToObject(xsl, conf)
@@ -1964,7 +2010,7 @@ ApplyPref(){
         Control,ChooseString,Pastebin.com,, ahk_id %$pb_ddl%
         ControlSetText,,, ahk_id %$pb_name%
     }
-;}
+
 }
 
 ; Handlers
@@ -2528,9 +2574,9 @@ GuiHandler(){
     ; Preferences
     if (a_gui = 06 || a_gui > 80)
     {
-        Loop, 8
+        Loop, 13
         {
-            _gui := a_index + 90
+            _gui := a_index + 86
             Gui, %_gui%: submit, NoHide
         }
 
@@ -3264,9 +3310,9 @@ ListHandler(sParam=0){
 
     if (a_guicontrol = "PrefList")
     {
-        Loop 8
+        Loop, 13
         {
-            _gui := a_index+90
+            _gui := a_index + 86
             Gui, %_gui%: submit, NoHide
         }
 
@@ -3826,8 +3872,13 @@ prefControl(pref=0){
     else
         Gui, 92: hide
         
+    if (pref = $P1C4)
+        Gui, 87: show, x165 y36 w350 NoActivate
+    else
+        Gui, 87: hide
+        
     ; Temporal Code
-    w := $P1 "," $P1C1 "," $C1C1 "," $P1C2 "," $C1C2 "," $C2C1 
+    w := $P1 "," $P1C1 "," $C1C1 "," $C1C2 "," $P1C2 "," $C2C1 "," $P1C4
     
     if pref not in %w%
         GuiControl, 06: show, AHKTK_UC
@@ -4622,15 +4673,15 @@ WM(var){
 ;[Hotkeys/Hotstrings]{
 ^CtrlBreak::Reload
 
-#IfWinNotActive ahk_group ScreenTools
-!LButton::                                                              ;{ [Alt + LButton] Screen Capture Active Window/Area
+#if options.selectSingleNode("//ScrTools/@altdrag").text && !WinActive("ahk_group ScreenTools")
+;} Added for correct folding in C++ Lexer (To be removed when finished)
+!LButton::                                                              ;{ [Alt + LButton] Capture Active Window/Area
     CoordMode, Mouse, Screen
     rect := False
     MouseGetPos, scXL, scYT
     WinMove, % "SelBox",, %scXL%, %scYT%
     Sleep, 150
-    if GetKeyState("LButton", "P")
-    {
+    if GetKeyState("LButton", "P"){
     Gui, 99: Show, w1 h1 x%scXL% y%scYT%, % "SelBox"
     WinSet, Transparent, 120, % "SelBox"
     While GetKeyState("LButton", "P")
@@ -4669,14 +4720,17 @@ WM(var){
         CaptureScreen(scXR "," scYB "," scXL "," scYT, 0, scRect := a_temp . "\scRect_" . rName(0,"png"))
     rect := True
     }
+
+#if options.selectSingleNode("//ScrTools/@prtscr").text
+;} Added for correct folding in C++ Lexer (To be removed when finished)
 PrintScreen::
     if (!rect)
-    CaptureScreen(a_thishotkey = "Printscreen" ? 0 : 1, 0, scWin := a_temp . "\scWin_" . rName(0,"png"))
+        CaptureScreen(a_thishotkey = "Printscreen" ? 0 : 1, 0, scWin := a_temp . "\scWin_" . rName(0,"png"))
 
     if FileExist(scWin)
-    image := scWin
+        image := scWin
     else if FileExist(scRect)
-    image := scRect
+        image := scRect
 
     Tooltip % "Clipboard: " Clipboard := imgUpload(image, "cc6055c88e33af94a7577e2fe845ae66")
     Sleep, 5*sec
@@ -4684,8 +4738,11 @@ PrintScreen::
 
     FileDelete, %scWin%
     FileDelete, %scRect%
+    rect := False
 return
 ;}
+#if
+;} Added for correct folding in C++ Lexer (To be removed when finished)
 #IfWinActive
 
 ^!LButton::                                                             ;{ [Ctrl + Alt + LButton] Run Selected Code
@@ -4723,26 +4780,23 @@ return
 return
 
 #IfWinActive
-
 ;}
-
-;} ; Added for correct folding in C++ Lexer (To be removed when finished)
+;}
 
 /*
  * * * Compile_AHK SETTINGS BEGIN * * *
-
 [AHK2EXE]
 Exe_File=%In_Dir%\lib\AHK-ToolKit.exe
 Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
 [VERSION]
 Set_Version_Info=1
-File_Version=0.7.5.5
+File_Version=0.7.6.6
 Inc_File_Version=0
 Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.7.5.5
+Product_Version=0.7.6.6
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico

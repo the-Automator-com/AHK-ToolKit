@@ -1,4 +1,9 @@
-﻿class scriptobj
+﻿;[General Variables]{
+; Make SuperGlobal variables
+global null:="",sec:=1000,min:=60*sec,hour:=60*min
+;}
+
+class scriptobj
 {
     getparams(){
         global
