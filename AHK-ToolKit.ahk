@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.7.6.6
+ * Script Version   : 0.7.7.7
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: July 13, 2012
+ * Modification Date: September 21, 2012
  *
  * Description      :
  * ------------------
@@ -24,7 +24,7 @@
  * to contact me if you want your changes to be added in the official release.
  *
  * -----------------------------------------------------------------------------------------------
- * License          :       Copyright ©2010-2011 RaptorX <GPLv3>
+ * License          :       Copyright ©2010-2012 RaptorX <GPLv3>
  *
  *          This program is free software: you can redistribute it and/or modify
  *          it under the terms of the GNU General Public License as published by
@@ -63,6 +63,17 @@
  * =============================================================================================== *
  */
 
+ if (a_ahkversion < 1.1){
+    Msgbox, 0x10
+          , % "Error"
+          , % "The AutoHotkey installed in your computer is not compatible with`n"
+            . "this version of AutoHotkey Toolkit.`n`n"
+            . "Please use the compiled version of my script or upgrade to AutoHotkey L.`n"
+            . "The application will exit now."
+            
+    Exitapp
+}
+
 ;[Includes]{
 #include <sc>
 #include <sci>
@@ -99,30 +110,19 @@ GroupAdd, ScreenTools, ahk_class AE_CApplication_9.0
 Clipboard := null
 script := { base        : scriptobj
            ,name        : "AHK-ToolKit"
-           ,version     : "0.7.6.6"
+           ,version     : "0.7.7.7"
            ,author      : "RaptorX"
            ,email       : "graptorx@gmail.com"
            ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
            ,crtdate     : "July 11, 2010"
-           ,moddate     : "July 13, 2012"
-           ,conf        : "conf.xml"}, script.getparams(), ForumMenu(), TrayMenu()   ; These function are here so that
-                                                                                     ; the Tray Icon is shown early and forum menus are ready.
+           ,moddate     : "September 21, 2012"
+           ,conf        : "conf.xml"}, script.getparams(), ForumMenu(), TrayMenu()  ; These function are here so that
+                                                                                    ; the Tray Icon is shown early 
+                                                                                    ; and forum menus are ready.
 
 ;}
 
 ;[User Configuration]{
-
-if (a_ahkversion < 1.1){
-    Msgbox, 0x10
-          , % "Error"
-          , % "The AutoHotkey installed in your computer is not compatible with`n"
-            . "this version of AutoHotkey Toolkit.`n`n"
-            . "Please use the compiled version of my script or upgrade to AutoHotkey L.`n"
-            . "The application will exit now."
-            
-    Exitapp
-}
-
 ; Trying to fix the issues that result from the script not being run as admin under Win7/Vista
 if (!a_isadmin){
     If a_iscompiled
@@ -157,8 +157,8 @@ defBrowser:=monLEFT:=monRIGHT:=monTOP:=monBOTTOM:=waLEFT:=waRIGHT:=waTOP:=waBOTT
 ;--
 ; Configuration file objects
 conf := ComObjCreate("MSXML2.DOMDocument"), xsl := ComObjCreate("MSXML2.DOMDocument")
-style =
-(
+style = ;{
+( 
 <!-- Extracted from: http://www.dpawson.co.uk/xsl/sect2/pretty.html (v2) -->
 <!-- Cdata info from: http://www.altova.com/forum/default.aspx?g=posts&t=1000002342 -->
 <!-- Modified By RaptorX -->
@@ -181,7 +181,9 @@ style =
 </xsl:template>
 </xsl:stylesheet>
 <!-- I have to keep the indentation here in this file as i want it to be on the XML file -->
-)
+) 
+;}
+
 xsl.loadXML(style), style:=null
 if !conf.load(script.conf)
 {
@@ -197,10 +199,12 @@ if !conf.load(script.conf)
 
         IfMsgBox Yes
         {
+            defConf(script.conf)
+            
             Msgbox, 0x40
                   , % "Operation Completed"
                   , % "The default configuration file was successfully created. The script will reload."
-            defConf(script.conf)
+
             Reload
             Pause       ; Fixes the problem of the Main Gui flashing because of being created before
                         ; the Reload is really performed.
@@ -211,9 +215,10 @@ if !conf.load(script.conf)
     else
         FirstRun()
 } root:=conf.documentElement,options:=root.firstChild,hotkeys:=options.nextSibling,hotstrings:=hotkeys.nextSibling
+
 node := root.attributes.item[0]
 node.text != script.version ? (node.text := script.version, conf.save(script.conf)
-                              , conf.load(script.conf), node:=null) : false
+                              , conf.load(script.conf), node:=null) : null
 ;}
 
 ;[Main]{
@@ -1153,7 +1158,7 @@ AboutGui(){
     info2   := "Creation Date`t  : " script.crtdate "`n"
             .  "Modification Date : " script.moddate
 
-    License := "Copyright ©2010-2011 " script.author " <GPLv3>`n`n"
+    License := "Copyright ©2010-2012 " script.author " <GPLv3>`n`n"
             .  "This program is free software: you can redistribute it and/or modify it`n"
             .  "under the terms of the GNU General Public License as published by`n"
             .  "the Free Software Foundation, either version 3 of  the  License,`n"
@@ -2721,6 +2726,7 @@ GuiHandler(){
         }
         
         ; There are no returns because any other control would enable the Apply button.
+        ; and it would mess with the other GUIs by exiting the routine before the other statments are checked.
         Control,enable,,,ahk_id %$Apply%
     }
 
@@ -3034,7 +3040,7 @@ MenuHandler(stat=0){
     {
         Gui_Open:
             Gui, 01: +OwnDialogs
-            FileSelectFile, lcfPath, 1, %a_mydocuments%, % "Please select the file to open.", % "AutoHotkey (*.ahk)"
+            FileSelectFile, lcfPath, 1, %lcfPath%, % "Please select the file to open.", % "AutoHotkey (*.ahk)"
             lcFile := FileOpen(lcfPath, "rw `n", "UTF-8")
             SCI_SetText(lcFile.Read(), $sci1), lcFile.Close()
         return
@@ -3043,6 +3049,15 @@ MenuHandler(stat=0){
     if (a_thismenuitem = "&Save`t(Ctrl+S)")
     {
         Gui_Save:
+            if (!lcfPath)
+            {
+                Gui, 01: +OwnDialogs
+                FileSelectFile, lcfPath, S24, %a_mydocuments%, % "Save File as...", % "Autohotkey (*.ahk)"
+                
+                if !regexmatch(lcfPath, "\.[[:alnum:]]+$")
+                        lcfPath := lcfPath ".ahk"
+            }
+                
             FileDelete, %lcfPath%
             lcFile := FileOpen(lcfPath, "rw `n", "UTF-8")
             SCI_GetText(SCI_GetLength($Sci1)+1, _lcCode)
@@ -3588,8 +3603,12 @@ HotkeyHandler(hk){
         Run, %ahkpath% %lcfPath%
         return
     }
-    else
+    else if (fileExist(_path))
         Run, % _path
+    else
+        Msgbox, 0x10
+          , % "Error"
+          , % "The file this hotkey is trying to access does not exist."
     return
 }
 MsgHandler(wParam,lParam, msg, hwnd){
@@ -4671,6 +4690,7 @@ WM(var){
 ;}
 
 ;[Hotkeys/Hotstrings]{
+^F12::Suspend, Toggle
 ^CtrlBreak::Reload
 
 #if options.selectSingleNode("//ScrTools/@altdrag").text && !WinActive("ahk_group ScreenTools")
@@ -4745,7 +4765,7 @@ return
 ;} Added for correct folding in C++ Lexer (To be removed when finished)
 #IfWinActive
 
-^!LButton::                                                             ;{ [Ctrl + Alt + LButton] Run Selected Code
+^F5::                                                                   ;{ [Ctrl + F5] Run Selected Code
     Send, ^c
     ClipWait
     lcRun()
@@ -4790,13 +4810,13 @@ Exe_File=%In_Dir%\lib\AHK-ToolKit.exe
 Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
 [VERSION]
 Set_Version_Info=1
-File_Version=0.7.6.6
+File_Version=0.7.7.7
 Inc_File_Version=0
 Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.7.6.6
+Product_Version=0.7.7.7
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico

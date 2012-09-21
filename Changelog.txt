@@ -13,18 +13,49 @@ Legend:
     $ Disable
 ==================
 
-commit 8150073d84d007f155d766cc24ba85e6f95236f2
+commit 02d608a998e0dd3a58896d5101d5aeea1f3573a0
 Author: RaptorX <graptorx@gmail.com>
-Date:   Fri Jul 13 21:23:54 2012 +0200
+Date:   Fri Sep 21 12:58:36 2012 +0200
+
+    AHK-TK v0.7.7.7
+    
+    Changes:
+    
+    + Add temporal key binding to suspend all hotkeys
+    + Add use last folder when opening a file in live code tab
+    
+    ! Fix check if file exist before hotkeys try to open
+    ! Fix check autohotkey version before starting up program
+    ! Fix ask for file name when saving for the first time in live code tab
+    
+    * Change run selected code hotkey to Ctrl + F5
+    
+    Todo:
+    
+    + Add #ifwindow active functionality to hotkeys/hotstrings
+    + Add Syntax highlighting for Scintilla Controls
+    
+    ! Fix General hotkey lists clear all checkboxes if "None" was selected
+    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
+    ! Fix Append to exported hotkeys/hotstrings function
+    
+    * Change Disabled option hides List View child
+    * Conditional download of AHK_L backup
+
+commit 85760ec12ded817927df4271121404343181c313
+Author: RaptorX <graptorx@gmail.com>
+Date:   Fri Jul 13 22:00:04 2012 +0200
 
     AHK-TK v0.7.6.6
     
     Changes:
     
     + Screen Tools Preferences Gui
-    + Check if Autohotkey is installed instead of showing syntax error.
+    + Check if Autohotkey is installed instead of showing syntax error
     
     ! Fix GUI not showing because check for update was in progress
+    
+    * Minor code modifications
     
     Todo:
     
@@ -113,23 +144,3 @@ Date:   Fri May 11 22:51:21 2012 +0200
     
     * Change Disabled option hides List View child
     * Conditional download of AHK_L backup.
-
-commit d3647c5625e982eee7f1359704d58d967f057593
-Author: RaptorX <graptorx@gmail.com>
-Date:   Thu Apr 26 23:00:00 2012 +0200
-
-    AHK-TK v0.7.3.3
-    
-    Changes:
-    
-    ! Fix main hotkey not being set correctly on new installations
-    
-    Todo:
-    
-    + Add Auto unzip updates
-    + Add Screen Tools Preferences
-    
-    ! Fix General hotkey lists clear all checkboxes if "None" was selected
-    ! Fix General hotkey lists load default hotkey when re-opening GUI after "None" was selected
-    
-    * Change Disabled option hides List View child
