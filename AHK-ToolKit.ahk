@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.8
+ * Script Version   : 0.8.1.1
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: September 29, 2012
+ * Modification Date: October 14, 2012
  *
  * Description      :
  * ------------------
@@ -109,14 +109,14 @@ GroupAdd, ScreenTools, ahk_class AE_CApplication_9.0
 ;[Basic Script Info]{
 Clipboard := null
 global script := { base        : scriptobj
-                 ,name        : "AHK-ToolKit"
-                 ,version     : "0.8"
-                 ,author      : "RaptorX"
-                 ,email       : "graptorx@gmail.com"
-                 ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
-                 ,crtdate     : "July 11, 2010"
-                 ,moddate     : "September 29, 2012"
-                 ,conf        : "conf.xml"}
+                  ,name        : "AHK-ToolKit"
+                  ,version     : "0.8.1.1"
+                  ,author      : "RaptorX"
+                  ,email       : "graptorx@gmail.com"
+                  ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
+                  ,crtdate     : "July 11, 2010"
+                  ,moddate     : "October 14, 2012"
+                  ,conf        : "conf.xml"}
 script.getparams(), ForumMenu(), TrayMenu()  ; These function are here so that
                                              ; the Tray Icon is shown early
                                              ; and forum menus are ready.
@@ -313,20 +313,20 @@ return
 
 ; Special Labels
 OpenHelpFile:       ;{
-oldclip := ClipboardAll
-Send, {Ctrl Down}{left}+{right}c{CtrlUp}
-ClipWait
-htmlhelp(hwnd, regexreplace(a_ahkpath, "exe$", "chm"), clipboard)
-Clipboard := oldclip
+    oldclip := ClipboardAll
+    Send, {Ctrl Down}{left}+{right}c{CtrlUp}
+    ClipWait
+    htmlhelp(hwnd, regexreplace(a_ahkpath, "exe$", "chm"), clipboard)
+    Clipboard := oldclip
 return
 ;}
 
 ForumTags:          ;{
-oldclip := ClipboardAll
-Send, {Ctrl Down}{left}+{right}c{CtrlUp}
-ClipWait
-htmlhelp("ForumHelper", regexreplace(a_ahkpath, "exe$", "chm"), clipboard)
-Clipboard := oldclip
+    oldclip := ClipboardAll
+    Send, {Ctrl Down}{left}+{right}c{CtrlUp}
+    ClipWait
+    htmlhelp("ForumHelper", regexreplace(a_ahkpath, "exe$", "chm"), clipboard)
+    Clipboard := oldclip
 return
 ;}
 
@@ -852,12 +852,12 @@ PreferencesGui(){
     _mods:=(_ctrl ? "^" : null)(_alt ? "!" : null)(_shift ? "+" : null)(_win ? "#" : null)
 
     Gui, 98: add, GroupBox, x3 y+20 w345 h55, % "Main GUI Hotkey"
-    Gui, 98: add, CheckBox, xp+10 yp+23 Checked%_ctrl% v_ctrl gGuiHandler, % "Ctrl"
-    Gui, 98: add, CheckBox, x+10 Checked%_alt% v_alt gGuiHandler, % "Alt"
-    Gui, 98: add, CheckBox, x+10 Checked%_shift% v_shift gGuiHandler, % "Shift"
-    Gui, 98: add, CheckBox, x+10 Checked%_win% v_win gGuiHandler, % "Win"
+    Gui, 98: add, CheckBox, xp+10 yp+23 Checked%_ctrl% HWND$_ctrl v_ctrl gGuiHandler, % "Ctrl"
+    Gui, 98: add, CheckBox, x+10 Checked%_alt% HWND$_alt v_alt gGuiHandler, % "Alt"
+    Gui, 98: add, CheckBox, x+10 Checked%_shift% HWND$_shift v_shift gGuiHandler, % "Shift"
+    Gui, 98: add, CheckBox, x+10 Checked%_win% HWND$_win v_win gGuiHandler, % "Win"
     Gui, 98: add, DropDownList, x+10 yp-3 w140 HWND$GP_DDL v_hkddl gGuiHandler
-                , % lst := "None  " klist("all^", "mods msb")
+                , % lst := "Default  " klist("all^", "mods msb")
 
     Control,ChooseString,%_mhk%,, ahk_id %$GP_DDL%
     ; SetHotkeys(lst,$GP_DDL, "Preferences")
@@ -1019,7 +1019,7 @@ PreferencesGui(){
     Gui, 92: add, CheckBox, x+10 HWND$_hfshift Checked%_hfshift% v_hfshift gGuiHandler, % "Shift"
     Gui, 92: add, CheckBox, x+10 HWND$_hfwin Checked%_hfwin% v_hfwin gGuiHandler, % "Win"
     Gui, 92: add, DropDownList, x+10 yp-3 w140 HWND$HF_DDL v_hfddl gGuiHandler
-                , % lst := "None  " klist("all^", "mods msb")
+                , % lst := "Default  " klist("all^", "mods msb")
 
     Control,ChooseString,%_hfhk%,, ahk_id %$HF_DDL%
     Hotkey, % _mods _hfhk, OpenHelpFile
@@ -1036,7 +1036,7 @@ PreferencesGui(){
     Gui, 92: add, CheckBox, x+10 HWND$_ftshift Checked%_ftshift% v_ftshift gGuiHandler, % "Shift"
     Gui, 92: add, CheckBox, x+10 HWND$_ftwin Checked%_ftwin% v_ftwin gGuiHandler, % "Win"
     Gui, 92: add, DropDownList, x+10 yp-3 w140 HWND$FT_DDL v_ftddl gGuiHandler
-                , % lst := "None  " klist("all^", "mods msb")
+                , % lst := "Default  " klist("all^", "mods msb")
 
     Control,ChooseString,%_fthk%,, ahk_id %$FT_DDL%
     Hotkey, % _mods _fthk, ForumTags
@@ -2635,6 +2635,7 @@ GuiHandler(){
             Gui, %_gui%: submit, NoHide
         }
 
+        ; tooltip % a_guicontrol
         if (a_guicontrol = "QScod")
         {
             QScod:
@@ -2740,7 +2741,7 @@ GuiHandler(){
 
         if (a_guicontrol = "_eft")
         {
-            ctrls:="ctrl|alt|shift|win"
+            ctrls := "ctrl|alt|shift|win"
             if (_eft)
             {
                 Loop, parse, ctrls, |
@@ -2761,6 +2762,42 @@ GuiHandler(){
             }
         }
 
+        if (a_guicontrol = "_hkddl")
+        {
+            if (_hkddl = "Default")
+            {
+                ctrls := "$_ctrl|$_alt|$_shift"
+                Loop, Parse, ctrls, |
+                    Control, Uncheck,,, % "ahk_id " %a_loopfield%
+                Control, Check,,, % "ahk_id " $_win
+                Control,ChooseString,``,, ahk_id %$GP_DDL%
+            }
+        }
+        
+        if (a_guicontrol = "_hfddl")
+        {
+            if (_hfddl = "Default")
+            {
+                ctrls := "$_hfwin|$_hfalt|$_hfshift"
+                Loop, Parse, ctrls, |
+                    Control, Uncheck,,, % "ahk_id " %a_loopfield%
+                Control, Check,,, % "ahk_id " $_hfctrl
+                Control,ChooseString,F1,, ahk_id %$HF_DDL%
+            }
+        }
+        
+        if (a_guicontrol = "_ftddl")
+        {
+            if (_ftddl = "Default")
+            {
+                ctrls := "$_ftwin|$_ftalt|$_ftshift"
+                Loop, Parse, ctrls, |
+                    Control, Uncheck,,, % "ahk_id " %a_loopfield%
+                Control, Check,,, % "ahk_id " $_ftctrl
+                Control,ChooseString,F2,, ahk_id %$FT_DDL%
+            }
+        }
+        
         if (a_guicontrol = "&Browse...")
         {
             if (a_gui = 92)
@@ -4338,7 +4375,7 @@ updateSB(){
     SB_SetParts(150,150,_w - 378,50) ; including 8 pixes for the borders.
     SB_SetText("`t" root.selectSingleNode("//Hotkeys/@count").text " Hotkeys currently active",1)
     SB_SetText("`t" root.selectSingleNode("//Hotstrings/@count").text " Hotstrings currently active",2)
-    SB_SetText("v" script.version,4)
+    SB_SetText("`tv" script.version,4)
     return
 }
 lcRun(_gui=0){
@@ -4760,13 +4797,13 @@ Exe_File=%In_Dir%\lib\AHK-ToolKit.exe
 Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
 [VERSION]
 Set_Version_Info=1
-File_Version=0.8
+File_Version=0.8.1.1
 Inc_File_Version=0
 Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.8
+Product_Version=0.8.1.1
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico
