@@ -25,18 +25,18 @@ Convert("C:\image.bmp", "C:\image.jpg", 95)
 Convert(0, "C:\clip.png")   ; Save the bitmap in the clipboard to sFileTo if sFileFr is "" or 0.
 */
 
-CaptureScreen(aRect = 0, bCursor = False, sFile = "", nQuality = "")
+CaptureScreen(aRect = 0,  sFile = "", bCursor = false, nQuality = "")
 {
-	If	!aRect
+	If (!aRect)
 	{
 		SysGet, nL, 76
 		SysGet, nT, 77
 		SysGet, nW, 78
 		SysGet, nH, 79
 	}
-	Else If	aRect = 1
+	Else If (aRect = 1)
 		WinGetPos, nL, nT, nW, nH, A
-	Else If	aRect = 2
+	Else If (aRect = 2)
 	{
 		WinGet, hWnd, ID, A
 		VarSetCapacity(rt, 16, 0)
@@ -47,7 +47,7 @@ CaptureScreen(aRect = 0, bCursor = False, sFile = "", nQuality = "")
 		nW := NumGet(rt, 8)
 		nH := NumGet(rt,12)
 	}
-	Else If	aRect = 3
+	Else If (aRect = 3)
 	{
 		VarSetCapacity(mi, 40, 0)
 		DllCall("GetCursorPos", "int64P", pt)
@@ -57,15 +57,16 @@ CaptureScreen(aRect = 0, bCursor = False, sFile = "", nQuality = "")
 		nW := NumGet(mi,12, "int") - nL
 		nH := NumGet(mi,16, "int") - nT
 	}
+	Else If (isObject(aRect))
+	{
+		nL := aRect.Left, nT := aRect.Top, nW := aRect.Right - aRect.Left, nH := aRect.Bottom - aRect.Top
+		znW := aRect.ZoomW, znH := aRect.ZoomH
+	}
 	Else
 	{
 		StringSplit, rt, aRect, `,, %A_Space%%A_Tab%
-		nL := rt1
-		nT := rt2
-		nW := rt3 - rt1
-		nH := rt4 - rt2
-		znW := rt5
-		znH := rt6
+		nL := rt1, nT := rt2, nW := rt3 - rt1, nH := rt4 - rt2
+		znW := rt5, znH := rt6
 	}
 
 	mDC := DllCall("CreateCompatibleDC", "Uint", 0)

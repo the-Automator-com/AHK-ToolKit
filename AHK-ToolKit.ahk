@@ -2,11 +2,11 @@
  * =============================================================================================== *
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.8.1.1
+ * Script Version   : 0.8.2.2
  * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * Creation Date    : July 11, 2010
- * Modification Date: October 14, 2012
+ * Modification Date: October 20, 2012
  *
  * Description      :
  * ------------------
@@ -110,12 +110,12 @@ GroupAdd, ScreenTools, ahk_class AE_CApplication_9.0
 Clipboard := null
 global script := { base        : scriptobj
                   ,name        : "AHK-ToolKit"
-                  ,version     : "0.8.1.1"
+                  ,version     : "0.8.2.2"
                   ,author      : "RaptorX"
                   ,email       : "graptorx@gmail.com"
                   ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
                   ,crtdate     : "July 11, 2010"
-                  ,moddate     : "October 14, 2012"
+                  ,moddate     : "October 20, 2012"
                   ,conf        : "conf.xml"}
 script.getparams(), ForumMenu(), TrayMenu()  ; These function are here so that
                                              ; the Tray Icon is shown early
@@ -314,6 +314,7 @@ return
 ; Special Labels
 OpenHelpFile:       ;{
     oldclip := ClipboardAll
+    Clipboard:=""
     Send, {Ctrl Down}{left}+{right}c{CtrlUp}
     ClipWait
     htmlhelp(hwnd, regexreplace(a_ahkpath, "exe$", "chm"), clipboard)
@@ -1459,14 +1460,14 @@ SetSciStyles(){
             0xFF9000    ; SCE_AHK_NUMBER
             0xFF9000    ; SCE_AHK_IDENTIFIER
             0xFF9000    ; SCE_AHK_VARREF
-            0x0000FF    ; SCE_AHK_LABEL
-            0x0000FF    ; SCE_AHK_WORD_CF
-            0x0000FF    ; SCE_AHK_WORD_CMD
+            0x0000DD    ; SCE_AHK_LABEL
+            0x0000DD    ; SCE_AHK_WORD_CF
+            0x0000DD    ; SCE_AHK_WORD_CMD
             0xFF0090    ; SCE_AHK_WORD_FN
             0xA50000    ; SCE_AHK_WORD_DIR
             0xA2A2A2    ; SCE_AHK_WORD_KB
             0xFF9000    ; SCE_AHK_WORD_VAR
-            0x0000FF    ; SCE_AHK_WORD_SP
+            0x0000DD    ; SCE_AHK_WORD_SP
             0x00F000    ; SCE_AHK_WORD_UD
             0xFF9000    ; SCE_AHK_VARREFKW
             0xFF0000    ; SCE_AHK_ERROR
@@ -2629,6 +2630,7 @@ GuiHandler(){
     ; Preferences
     if (a_gui = 06 || a_gui > 80)
     {
+        Gui, 06: Default
         Loop, 13
         {
             _gui := a_index + 86
@@ -2692,11 +2694,14 @@ GuiHandler(){
             {
                 Control, enable,,, ahk_id %$codMode1%
                 Control, enable,,, ahk_id %$codMode2%
+                TV_Modify($P1C1, "Expand")
+
             }
             else
             {
                 Control, disable,,, ahk_id %$codMode1%
                 Control, disable,,, ahk_id %$codMode2%
+                TV_Modify($P1C1, "-Expand")
             }
         }
 
@@ -2707,12 +2712,14 @@ GuiHandler(){
                 ; Control, enable,,, ahk_id %$_eie%
                 Control, enable,,, ahk_id %$_uoh%
                 Control, enable,,, ahk_id %$_eft%
+                TV_Modify($P1C2, "Expand")
             }
             else
             {
                 ; Control, disable,,, ahk_id %$_eie%
                 Control, disable,,, ahk_id %$_uoh%
                 Control, disable,,, ahk_id %$_eft%
+                TV_Modify($P1C2, "-Expand")
             }
         }
 
@@ -2773,7 +2780,7 @@ GuiHandler(){
                 Control,ChooseString,``,, ahk_id %$GP_DDL%
             }
         }
-        
+
         if (a_guicontrol = "_hfddl")
         {
             if (_hfddl = "Default")
@@ -2785,7 +2792,7 @@ GuiHandler(){
                 Control,ChooseString,F1,, ahk_id %$HF_DDL%
             }
         }
-        
+
         if (a_guicontrol = "_ftddl")
         {
             if (_ftddl = "Default")
@@ -2797,7 +2804,7 @@ GuiHandler(){
                 Control,ChooseString,F2,, ahk_id %$FT_DDL%
             }
         }
-        
+
         if (a_guicontrol = "&Browse...")
         {
             if (a_gui = 92)
@@ -3141,6 +3148,9 @@ MenuHandler(stat=0){
                 Gui, 01: +OwnDialogs
                 FileSelectFile, lcfPath, S24, %a_mydocuments%, % "Save File as...", % "Autohotkey (*.ahk)"
 
+                if !lcfPath
+                    return
+
                 if !regexmatch(lcfPath, "\.[[:alnum:]]+$")
                         lcfPath := lcfPath ".ahk"
             }
@@ -3157,6 +3167,9 @@ MenuHandler(stat=0){
         Gui_SaveAs:
             Gui, 01: +OwnDialogs
             FileSelectFile, lcfPath, S24, %a_mydocuments%, % "Save File as...", % "Autohotkey (*.ahk)"
+
+            if !lcfPath
+                return
 
             if !regexmatch(lcfPath, "\.[[:alnum:]]+$")
                     lcfPath := lcfPath ".ahk"
@@ -4722,9 +4735,9 @@ WM(var){
     Gui, 99: Show, Hide w1 h1 x0 y0, % "SelBox"
     outputdebug, % scXL "-" scXR
     if (scXL < scXR)
-        CaptureScreen(scXL "," scYT "," scXR "," scYB, 0, scRect := a_temp . "\scRect_" . rName(0,"png"))
+        CaptureScreen(scXL "," scYT "," scXR "," scYB, scRect := a_temp . "\scRect_" . rName(0,"png"))
     else
-        CaptureScreen(scXR "," scYB "," scXL "," scYT, 0, scRect := a_temp . "\scRect_" . rName(0,"png"))
+        CaptureScreen(scXR "," scYB "," scXL "," scYT, scRect := a_temp . "\scRect_" . rName(0,"png"))
     rect := True
     }
 
@@ -4732,7 +4745,7 @@ WM(var){
 ;} Added for correct folding in C++ Lexer (To be removed when finished)
 PrintScreen::
     if (!rect)
-        CaptureScreen(a_thishotkey = "Printscreen" ? 0 : 1, 0, scWin := a_temp . "\scWin_" . rName(0,"png"))
+        CaptureScreen(a_thishotkey = "Printscreen" ? 0 : 1, scWin := a_temp . "\scWin_" . rName(0,"png"))
 
     if FileExist(scWin)
         image := scWin
@@ -4797,13 +4810,13 @@ Exe_File=%In_Dir%\lib\AHK-ToolKit.exe
 Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
 [VERSION]
 Set_Version_Info=1
-File_Version=0.8.1.1
+File_Version=0.8.2.2
 Inc_File_Version=0
 Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.8.1.1
+Product_Version=0.8.2.2
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico
