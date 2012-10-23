@@ -1429,7 +1429,11 @@ SetSciStyles(){
     {
         cObj := a_index
         sci[cObj].SetLexer(2) ; SCLEX_AHK
-        sci[cObj].SetWrapMode("SC_WRAP_WORD"), sci[cObj].StyleSetBold("STYLE_DEFAULT", true), sci[cObj].StyleClearAll()
+        sci[cObj].SetWrapMode(SC_WRAP_WORD)
+        
+        ; Setting up default font options
+        sci[cObj].StyleSetFont(STYLE_DEFAULT, "Courier New"), sci[cObj].StyleSetSize(STYLE_DEFAULT, 10)
+        sci[cObj].StyleSetBold(STYLE_DEFAULT, true), sci[cObj].StyleClearAll()
 
         ; Setting up the keywords:
         Loop 7
@@ -1444,7 +1448,7 @@ SetSciStyles(){
                                           : listNum = 6 ? options.selectSingleNode("//LiveCode/Keywords/Parameters").text))
         }
 
-        sci[cObj].StyleSetFore("STYLE_LINENUMBER",0x8A8A8A), sci[cObj].StyleSetBold("STYLE_LINENUMBER", false)
+        sci[cObj].StyleSetFore(STYLE_LINENUMBER,0x8A8A8A), sci[cObj].StyleSetBold(STYLE_LINENUMBER, false)
 
         ; Setting up AHK lexer colors:
         bold := "0|1|2|4|5|6|7|8|9|17"
@@ -2314,7 +2318,7 @@ GuiHandler(){
         {
             Control, enable,,,ahk_id %$hk2Path%
             Control, enable,,,ahk_id %$hk2Browse%
-            sci[2].ClearAll(),sci[2].SetReadOnly(true),sci[2].StyleSetBack("STYLE_DEFAULT", 0xe0dfe3)
+            sci[2].ClearAll(),sci[2].SetReadOnly(true),sci[2].StyleSetBack(STYLE_DEFAULT, 0xe0dfe3)
             sci[2].SetMarginWidthN(0,0),sci[2].SetMarginWidthN(1,0)
         }
 
@@ -2940,7 +2944,7 @@ GuiHandler(){
         if (a_guicontrol = "&Yes")
         {
             Gui, %a_gui%: Submit
-            sci[5].SetText(repIncludes(clipboard))
+            sci[5].SetText(unused, repIncludes(clipboard))
             Gui, 09: Show
             return
         }
@@ -3136,7 +3140,7 @@ MenuHandler(stat=0){
             Gui, 01: +OwnDialogs
             FileSelectFile, lcfPath, 1, %lcfPath%, % "Please select the file to open.", % "AutoHotkey (*.ahk)"
             lcFile := FileOpen(lcfPath, "rw `n", "UTF-8")
-            sci[1].SetText(false, lcFile.Read()), lcFile.Close()
+            sci[1].SetText(unused, lcFile.Read()), lcFile.Close()
         return
     }
 
@@ -3335,7 +3339,7 @@ ListHandler(sParam=0){
         _editNode := _groupNode.selectSingleNode("Snippet[@title='" _seltxt "']")
         GuiControl,07:,slTitle, %_seltxt%
         GuiControl,07: ChooseString,slGroup, %_current%
-        sci[4].SetText(false, _editNode.text)
+        sci[4].SetText(unused, _editNode.text)
 
         Gui, 01: +Disable
         Gui, 07: Show
@@ -3480,12 +3484,12 @@ ListHandler(sParam=0){
             {
                 Control, enable,,,ahk_id %$hk2Path%
                 Control, enable,,,ahk_id %$hk2Browse%
-                sci[2].ClearAll(),sci[2].SetReadOnly(true),sci[2].StyleSetBack("STYLE_DEFAULT", 0xe0dfe3)
+                sci[2].ClearAll(),sci[2].SetReadOnly(true),sci[2].StyleSetBack(STYLE_DEFAULT, 0xe0dfe3)
                 sci[2].SetMarginWidthN(0,0),sci[2].SetMarginWidthN(1,0)
             }
 
             if (_script)
-               sci[2].SetText(false, _script)
+               sci[2].SetText(unused, _script)
 
             _guivars := "hkctrl ^|hkalt !|hkshift +|hkwin #|hkLMod <|hkRMod >|hkWild *|hkSend ~|hkHook $|hkfRel UP"
 
@@ -3555,7 +3559,7 @@ ListHandler(sParam=0){
             else
                 SetSciMargin(sci[3],0,0)
 
-            sci[3].SetText(false, _hs2Expandto)
+            sci[3].SetText(unused, _hs2Expandto)
             Gui, 03: show
         }
 
