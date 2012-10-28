@@ -43,7 +43,7 @@ class scintilla {
             return this
     }
 
-    __call(msg, ByRef wParam=0, ByRef lParam=0, params*){
+    __call(msg, ByRef wParam:=0, ByRef lParam:=0, params*){
 
         if (msg = "Add")
             __SCI(this.hwnd := __Add(wParam, lParam, params*), this)
@@ -64,7 +64,8 @@ class scintilla {
             */
 
             (msg = "GetText") ? (VarSetCapacity(lParam, wParam * (a_isunicode ? 2 : 1)+8), lParam := &lParam, buf:=true) : null
-            (msg = "GetLine") ? (VarSetCapacity(lParam, this.linelength(wParam)+1 * (a_isunicode ? 2 : 1)), lParam := &lParam, buf:=true) : null
+            (msg = "GetLine") ? (VarSetCapacity(lParam, this.linelength(wParam)+1 * (a_isunicode ? 2 : 1)),lParam := &lParam, buf:=true) : null
+	    (msg = "GetCurLine") ? (VarSetCapacity(lParam, this.linelength(wParam)+1 * (a_isunicode ? 2 : 1)), lParam := &lParam, buf:=true) : null
             (msg = "GetTextRange") ? (range:=abs(wParam.1 - wParam.2)+1, dSize :=  __sendEditor(this.hwnd, "GetLength")
                                      ,VarSetCapacity(lParam, range > dSize ? (dSize, wParam.2 := dSize) : range)
                                      ,VarSetCapacity(textRange, 12, 0)
@@ -73,11 +74,8 @@ class scintilla {
                                      ,NumPut(&lParam,textRange,8,"UInt")
                                      ,blParam := &lParam, wParam := false,lParam := &textRange, buf:=true) : null
 
-            if (inStr(msg, "StyleSet")) ; only shift bytes if we are setting style colors.
-            {
-                inStr(lParam, "0x") ? (lParam := (lParam & 0xFF) <<16 | (lParam & 0xFF00) | (lParam >>16),lParam := SubStr(lParam, 0x1)) : null
-                inStr(wParam, "0x") ? (wParam := (wParam & 0xFF) <<16 | (wParam & 0xFF00) | (wParam >>16),wParam := SubStr(wParam, 0x1)) : null
-            }
+            __isHexColor(lParam, msg) ? lParam := (lParam & 0xFF) <<16 | (lParam & 0xFF00) | (lParam >>16) : null
+            __isHexColor(wParam, msg) ? wParam := (wParam & 0xFF) <<16 | (wParam & 0xFF00) | (wParam >>16) : null
 
             res := __sendEditor(this.hwnd, msg, wParam, lParam)
 
@@ -92,7 +90,7 @@ class scintilla {
 
 class sciCharRange {
 
-    __new(_cMin=0, _cMax=0){
+    __new(_cMin:=0, _cMax:=0){
 
         this.cMin := _cMin
         this.cMax := _cMax
@@ -100,7 +98,7 @@ class sciCharRange {
 }
 class sciTextRange {
 
-    __new(_chrg=0, _pStr=0){
+    __new(_chrg:=0, _pStr:=0){
 
         if (!isObject(_chrg)){
             Msgbox % 0x0
@@ -115,7 +113,7 @@ class sciTextRange {
 }
 class sciTextToFind {
 
-    __new(_chrg=0, _text="", _found=0){
+    __new(_chrg:=0, _text:="", _found:=0){
 
         if (!isObject(_chrg) || !isObject(_found)) {
             Msgbox % 0x0
@@ -131,7 +129,7 @@ class sciTextToFind {
 }
 class sciRectangle {
 
-    __new(_left=0, _top=0, _right=0, _bottom=0){
+    __new(_left:=0, _top:=0, _right:=0, _bottom:=0){
 
         this.left    := _left
         this.top     := _top
@@ -141,7 +139,7 @@ class sciRectangle {
 }
 class sciRangeToFormat {
 
-    __new(_hdc=0, _hdcTarget=0, _rc=0, _rcPage=0, _chrg=0){
+    __new(_hdc:=0, _hdcTarget:=0, _rc:=0, _rcPage:=0, _chrg:=0){
         this.hdc         := _hdc                                        ; The Surface ID we print to
         this.hdcTarget   := _hdcTarget                                  ; The Surface ID we use for measuring (may be same as hdc)
         this.rc          := _rc ? _rc : new sciRectangle                ; Rectangle in which to print
@@ -153,98 +151,98 @@ class sciRangeToFormat {
 ; | Internal Functions |
 
 /*
-        Function: __Add
-        Creates a Scintilla component and adds it to the Parent GUI.
+    Function: __Add
+    Creates a Scintilla component and adds it to the Parent GUI.
 
-        This function initializes the Scintilla Component.
-        See <http://www.scintilla.org/Steps.html> for more information on how to add the component to a GUI/Control.
+    This function initializes the Scintilla Component.
+    See <http://www.scintilla.org/Steps.html> for more information on how to add the component to a GUI/Control.
 
-        Parameters:
-        __Add(hParent, [x, y, w, h, DllPath, Styles])
+    Parameters:
+    __Add(hParent, [x, y, w, h, DllPath, Styles])
 
-        hParent     -   Hwnd of the parent control who will host the Scintilla Component
-        x           -   x position for the control (default 5)
-        y           -   y position for the control (default 5)
-        w           -   Width of the control (default 590)
-        h           -   Height of the control (default 390)
-        DllPath     -   Path to the SciLexer.dll file, if omitted the function looks for it in *a_scriptdir*.
-        Styles      -   List of window style variable names separated by spaces.
-                        The WS_ prefix for the variables is optional.
-                        Full list of Style names can be found at
-                        <http://msdn.microsoft.com/en-us/library/czada357.aspx>.
+    hParent     -   Hwnd of the parent control who will host the Scintilla Component
+    x           -   x position for the control (default 5)
+    y           -   y position for the control (default 5)
+    w           -   Width of the control (default 590)
+    h           -   Height of the control (default 390)
+    DllPath     -   Path to the SciLexer.dll file, if omitted the function looks for it in *a_scriptdir*.
+    Styles      -   List of window style variable names separated by spaces.
+                    The WS_ prefix for the variables is optional.
+                    Full list of Style names can be found at
+                    <http://msdn.microsoft.com/en-us/library/czada357.aspx>.
 
-        Returns:
-        HWND        -   Component handle.
+    Returns:
+    HWND        -   Component handle.
 
-        Examples:
-        (start code)
-        #include ..\SCI.ahk
-        #singleinstance force
+    Examples:
+    (start code)
+    #include ..\SCI.ahk
+    #singleinstance force
 
-        ;---------------------
-        ; This script adds a component with default values.
-        ; If no path was specified when creating the object it expects scilexer.dll to be on the script's location.
-        ; The default values are calculated to fit optimally on a 600x400 GUI/Control
+    ;---------------------
+    ; This script adds a component with default values.
+    ; If no path was specified when creating the object it expects scilexer.dll to be on the script's location.
+    ; The default values are calculated to fit optimally on a 600x400 GUI/Control
 
-        Gui +LastFound
-        sci := new scintilla(WinExist())
+    Gui +LastFound
+    sci := new scintilla(WinExist())
 
-        Gui, show, w600 h400
-        return
+    Gui, show, w600 h400
+    return
 
-        GuiClose:
-            exitapp
+    GuiClose:
+        exitapp
 
-        ;---------------------
-        #include ..\SCI.ahk
-        #singleinstance force
+    ;---------------------
+    #include ..\SCI.ahk
+    #singleinstance force
 
-        ; Add multiple components.
+    ; Add multiple components.
 
-        Gui +LastFound
-        hwnd:=WinExist()
+    Gui +LastFound
+    hwnd:=WinExist()
 
-        sci1 := new scintilla(hwnd, 0, 0, 590, 190) ; you can put the parameters here
-        sci2 := new scintilla
+    sci1 := new scintilla(hwnd, 0, 0, 590, 190) ; you can put the parameters here
+    sci2 := new scintilla
 
-        sci2.add(hwnd, 0, 200, 590, 190) ; or you can use the add function like this
+    sci2.add(hwnd, 0, 200, 590, 190) ; or you can use the add function like this
 
-        Gui, show, w600 h400
-        return
+    Gui, show, w600 h400
+    return
 
-        GuiClose:
-            exitapp
+    GuiClose:
+        exitapp
 
-        ;---------------------
-        #include ..\SCI.ahk
-        #singleinstance force
+    ;---------------------
+    #include ..\SCI.ahk
+    #singleinstance force
 
-        ; Here we add a component embedded in a tab.
-        ; If the variables "x,w,h" are empty the default values are used.
+    ; Here we add a component embedded in a tab.
+    ; If the variables "x,w,h" are empty the default values are used.
 
-        Gui, add, Tab2, HWNDhwndtab x0 y0 w600 h420 gtabHandler vtabLast,one|two
+    Gui, add, Tab2, HWNDhwndtab x0 y0 w600 h420 gtabHandler vtabLast,one|two
 
-        sci := new scintilla
-        sci.Add(hwndtab, x, 25, w, h, a_scriptdir "\scilexer.dll")
+    sci := new scintilla
+    sci.Add(hwndtab, x, 25, w, h, a_scriptdir "\scilexer.dll")
 
-        Gui, show, w600 h420
-        return
+    Gui, show, w600 h420
+    return
 
-        ; This additional code is for hiding/showing the component depending on which tab is open
-        ; In this example the Tab named "one" is the one that contains the control.
-        ; If you switch the words "show" and "hide" the component will be shown when the tab called "two" is active.
+    ; This additional code is for hiding/showing the component depending on which tab is open
+    ; In this example the Tab named "one" is the one that contains the control.
+    ; If you switch the words "show" and "hide" the component will be shown when the tab called "two" is active.
 
-        tabHandler:                                 ; Tab Handler for the Scintilla Control
-        Gui, submit, Nohide
-        action := tabLast = "one" ? "Show" : "Hide" ; decide which action to take
-        Control,%action%,,, % "ahk_id " sci.hwnd
-        return
+    tabHandler:                                 ; Tab Handler for the Scintilla Control
+    Gui, submit, Nohide
+    action := tabLast = "one" ? "Show" : "Hide" ; decide which action to take
+    Control,%action%,,, % "ahk_id " sci.hwnd
+    return
 
-        GuiClose:
-            exitapp
-        (end)
-    */
-__Add(hParent=0, x=5, y=5, w=590, h=390, DllPath="", Styles=""){
+    GuiClose:
+        exitapp
+    (end)
+*/
+__Add(hParent:=0, x:=5, y:=5, w:=590, h:=390, DllPath:="", Styles:=""){
     static WS_OVERLAPPED:=0x00000000,WS_POPUP:=0x80000000,WS_CHILD:=0x40000000,WS_MINIMIZE:=0x20000000
     ,WS_VISIBLE:=0x10000000,WS_DISABLED:=0x08000000,WS_CLIPSIBLINGS:=0x04000000,WS_CLIPCHILDREN:=0x02000000
     ,WS_MAXIMIZE:=0x01000000,WS_CAPTION:=0x00C00000,WS_BORDER:=0x00800000,WS_DLGFRAME:=0x00400000
@@ -253,7 +251,7 @@ __Add(hParent=0, x=5, y=5, w=590, h=390, DllPath="", Styles=""){
     ,WS_TILED:=0x00000000,WS_ICONIC:=0x20000000,WS_SIZEBOX:=0x00040000,WS_EX_CLIENTEDGE:=0x00000200
     ,GuiID:=311210,init:=false, null:=0
 
-    DllPath := !DllPath ? "SciLexer.dll" : inStr(DllPath, "SciLexer.dll") ? DllPath : DllPath "\SciLexer.dll"
+    DllPath := !DllPath ? "SciLexer.dll" : inStr(DllPath, ".dll") ? DllPath : DllPath "\SciLexer.dll"
     if !init        ;  WM_NOTIFY = 0x4E
         old:=OnMessage(0x4E,"__sciNotify"),init:=true
 
@@ -315,25 +313,25 @@ __Add(hParent=0, x=5, y=5, w=590, h=390, DllPath="", Styles=""){
     __sendEditor(hSci2, "SCI_SETMARGINWIDTHN",0,50)  ; Set the margin 0 to 50px on the second component.
     (End)
 */
-__sendEditor(hwnd, msg=0, wParam=0, lParam=0){
+__sendEditor(hwnd, msg:=0, wParam:=0, lParam:=0){
     static
 
     hwnd := !hwnd ? oldhwnd : hwnd, oldhwnd := hwnd, msg := !(msg+0) ? "SCI_" msg : msg
 
-    if !%hwnd%_df
+    if !df_%hwnd%
 	{
         SendMessage, SCI_GETDIRECTFUNCTION,0,0,,ahk_id %hwnd%
-        %hwnd%_df := ErrorLevel
+        df_%hwnd% := ErrorLevel
         SendMessage, SCI_GETDIRECTPOINTER,0,0,,ahk_id %hwnd%
-        %hwnd%_dp := ErrorLevel
+        dp_%hwnd% := ErrorLevel
 	}
 
     if !msg && !wParam && !lParam   ; called only with the hwnd param from SCI_Add
         return                      ; Exit because we did what we needed to do already.
 
     ; The fast way to control Scintilla
-    return DllCall(%hwnd%_df            ; DIRECT FUNCTION
-                  ,"UInt" ,%hwnd%_dp    ; DIRECT POINTER
+    return DllCall(df_%hwnd%            ; DIRECT FUNCTION
+                  ,"UInt" ,dp_%hwnd%    ; DIRECT POINTER
                   ,"UInt" ,!(msg+0) ? %msg% : msg
                   ,"Int"  ,inStr(wParam, "-") ? wParam : (%wParam%+0 ? %wParam% : wParam) ; handles negative ints
                   ,"Int"  ,%lParam%+0 ? %lParam% : lParam)
@@ -363,40 +361,48 @@ __sendEditor(hwnd, msg=0, wParam=0, lParam=0){
     Examples:
 */
 __sciNotify(wParam, lParam, msg, hwnd){
-    
+
+    ; fix int for x64 bit systems
     __sciObj                 := __SCI(NumGet(lParam + 0))               ; Returns original object
-    __sciObj.idFrom          := NumGet(lParam + 4)
-    __sciObj.scnCode         := NumGet(lParam + 8)
+    __sciObj.idFrom          := NumGet(lParam + a_Ptrsize * 1)
+    __sciObj.scnCode         := NumGet(lParam + a_Ptrsize * 2)
 
-    __sciObj.position        := NumGet(lParam + 12)
-    __sciObj.ch              := NumGet(lParam + 16)
-    __sciObj.modifiers       := NumGet(lParam + 20)
-    __sciObj.modType         := NumGet(lParam + 24)
-    __sciObj.text            := NumGet(lParam + 28)
-    __sciObj.length          := NumGet(lParam + 32)
-    __sciObj.linesAdded      := NumGet(lParam + 36)
+    __sciObj.position        := NumGet(lParam + a_Ptrsize * 3)
+    __sciObj.ch              := NumGet(lParam + a_Ptrsize * 4)
+    __sciObj.modifiers       := NumGet(lParam + a_Ptrsize * 5)
+    __sciObj.modType         := NumGet(lParam + a_Ptrsize * 6)
+    __sciObj.text            := NumGet(lParam + a_Ptrsize * 7)
+    __sciObj.length          := NumGet(lParam + a_Ptrsize * 8)
+    __sciObj.linesAdded      := NumGet(lParam + a_Ptrsize * 9)
 
-    __sciObj.macMessage      := NumGet(lParam + 40)
-    __sciObj.macwParam       := NumGet(lParam + 44)
-    __sciObj.maclParam       := NumGet(lParam + 48)
+    __sciObj.macMessage      := NumGet(lParam + a_Ptrsize * 10)
+    __sciObj.macwParam       := NumGet(lParam + a_Ptrsize * 11)
+    __sciObj.maclParam       := NumGet(lParam + a_Ptrsize * 12)
 
-    __sciObj.line            := NumGet(lParam + 52)
-    __sciObj.foldLevelNow    := NumGet(lParam + 56)
-    __sciObj.foldLevelPrev   := NumGet(lParam + 60)
-    __sciObj.margin          := NumGet(lParam + 64)
-    __sciObj.listType        := NumGet(lParam + 68)
-    __sciObj.x               := NumGet(lParam + 72)
-    __sciObj.y               := NumGet(lParam + 76)
+    __sciObj.line            := NumGet(lParam + a_Ptrsize * 13)
+    __sciObj.foldLevelNow    := NumGet(lParam + a_Ptrsize * 14)
+    __sciObj.foldLevelPrev   := NumGet(lParam + a_Ptrsize * 15)
+    __sciObj.margin          := NumGet(lParam + a_Ptrsize * 16)
+    __sciObj.listType        := NumGet(lParam + a_Ptrsize * 17)
+    __sciObj.x               := NumGet(lParam + a_Ptrsize * 18)
+    __sciObj.y               := NumGet(lParam + a_Ptrsize * 19)
 
-    __sciObj.token           := NumGet(lParam + 80)
-    __sciObj.annotLinesAdded := NumGet(lParam + 84)
-    __sciObj.updated         := NumGet(lParam + 88)
+    __sciObj.token           := NumGet(lParam + a_Ptrsize * 20)
+    __sciObj.annotLinesAdded := NumGet(lParam + a_Ptrsize * 21)
+    __sciObj.updated         := NumGet(lParam + a_Ptrsize * 22)
 
     __sciObj.notify(wParam, lParam, msg, hwnd, __sciObj)                ; Call user defined Notify Function and passes object to it as last parameter
     return __sciObj := ""                                               ; free object
 }
 
-__SCI(var, val=""){
+__isHexColor(hex, msg){
+    if (RegexMatch(hex, "^0x[0-9a-fA-F]{6}$"))
+        return true
+    else
+        return false
+}
+
+__SCI(var, val:=""){
     static
 
     if (RegExMatch(var,"i)[ `n-\.%,(\\\/=&^]")) ; Check if it is a valid variable name
@@ -535,16 +541,27 @@ global SCMOD_NORM:=0, SCMOD_SHIFT:=1,SCMOD_CTRL:=2,SCMOD_ALT:=4, SCK_DOWN:=300,S
 
 ; Lexing
 {
-global SCLEX_CONTAINER:=0,SCLEX_NULL:=1,SCLEX_PYTHON:=2,SCLEX_CPP:=3,SCLEX_HTML:=4,SCLEX_XML:=5,SCLEX_PERL:=6,SCLEX_SQL:=7
-,SCLEX_VB:=8,SCLEX_PROPERTIES:=9,SCLEX_ERRORLIST:=10,SCLEX_MAKEFILE:=11,SCLEX_BATCH:=12,SCLEX_XCODE:=13,SCLEX_LATEX:=14,SCLEX_LUA:=15
-,SCLEX_DIFF:=16,SCLEX_CONF:=17,SCLEX_PASCAL:=18,SCLEX_AVE:=19,SCLEX_ADA:=20,SCLEX_LISP:=21,SCLEX_RUBY:=22,SCLEX_EIFFEL:=23,SCLEX_EIFFELKW:=24
-,SCLEX_TCL:=25,SCLEX_NNCRONTAB:=26,SCLEX_BULLANT:=27,SCLEX_VBSCRIPT:=28,SCLEX_BAAN:=31,SCLEX_MATLAB:=32,SCLEX_SCRIPTOL:=33,SCLEX_ASM:=34
-,SCLEX_CPPNOCASE:=35,SCLEX_FORTRAN:=36,SCLEX_F77:=37,SCLEX_CSS:=38,SCLEX_POV:=39,SCLEX_LOUT:=40,SCLEX_ESCRIPT:=41,SCLEX_PS:=42,SCLEX_NSIS:=43
-,SCLEX_MMIXAL:=44,SCLEX_CLW:=45,SCLEX_CLWNOCASE:=46,SCLEX_LOT:=47,SCLEX_YAML:=48,SCLEX_TEX:=49,SCLEX_METAPOST:=50,SCLEX_POWERBASIC:=51
-,SCLEX_FORTH:=52,SCLEX_ERLANG:=53,SCLEX_OCTAVE:=54,SCLEX_MSSQL:=55,SCLEX_VERILOG:=56,SCLEX_KIX:=57,SCLEX_GUI4CLI:=58,SCLEX_SPECMAN:=59
-,SCLEX_AU3:=60,SCLEX_APDL:=61,SCLEX_BASH:=62,SCLEX_ASN1:=63,SCLEX_VHDL:=64,SCLEX_CAML:=65,SCLEX_BLITZBASIC:=66,SCLEX_PUREBASIC:=67
-,SCLEX_HASKELL:=68,SCLEX_PHPSCRIPT:=69,SCLEX_TADS3:=70,SCLEX_REBOL:=71,SCLEX_SMALLTALK:=72,SCLEX_FLAGSHIP:=73,SCLEX_CSOUND:=74
-,SCLEX_FREEBASIC:=75,SCLEX_INNOSETUP:=76,SCLEX_OPAL:=77,SCLEX_BLITZMAX:=78,SCLEX_AUTOMATIC:=1000
+global SCLEX_CONTAINER:=0,SCLEX_NULL:=1,SCLEX_PYTHON:=2,SCLEX_CPP:=3,SCLEX_HTML:=4,SCLEX_XML:=5,SCLEX_PERL:=6,SCLEX_SQL:=7,SCLEX_VB:=8
+,SCLEX_PROPERTIES:=9,SCLEX_ERRORLIST:=10,SCLEX_MAKEFILE:=11,SCLEX_BATCH:=12,SCLEX_XCODE:=13,SCLEX_LATEX:=14,SCLEX_LUA:=15,SCLEX_DIFF:=16
+,SCLEX_CONF:=17,SCLEX_PASCAL:=18,SCLEX_AVE:=19,SCLEX_ADA:=20,SCLEX_LISP:=21,SCLEX_RUBY:=22,SCLEX_EIFFEL:=23,SCLEX_EIFFELKW:=24
+,SCLEX_TCL:=25,SCLEX_NNCRONTAB:=26,SCLEX_BULLANT:=27,SCLEX_VBSCRIPT:=28,SCLEX_BAAN:=31,SCLEX_MATLAB:=32,SCLEX_SCRIPTOL:=33
+,SCLEX_ASM:=34,SCLEX_CPPNOCASE:=35,SCLEX_FORTRAN:=36,SCLEX_F77:=37,SCLEX_CSS:=38,SCLEX_POV:=39,SCLEX_LOUT:=40,SCLEX_ESCRIPT:=41
+,SCLEX_PS:=42,SCLEX_NSIS:=43,SCLEX_MMIXAL:=44,SCLEX_CLW:=45,SCLEX_CLWNOCASE:=46,SCLEX_LOT:=47,SCLEX_YAML:=48,SCLEX_TEX:=49
+,SCLEX_METAPOST:=50,SCLEX_POWERBASIC:=51,SCLEX_FORTH:=52,SCLEX_ERLANG:=53,SCLEX_OCTAVE:=54,SCLEX_MSSQL:=55,SCLEX_VERILOG:=56,SCLEX_KIX:=57
+,SCLEX_GUI4CLI:=58,SCLEX_SPECMAN:=59,SCLEX_AU3:=60,SCLEX_APDL:=61,SCLEX_BASH:=62,SCLEX_ASN1:=63,SCLEX_VHDL:=64,SCLEX_CAML:=65
+,SCLEX_BLITZBASIC:=66,SCLEX_PUREBASIC:=67,SCLEX_HASKELL:=68,SCLEX_PHPSCRIPT:=69,SCLEX_TADS3:=70,SCLEX_REBOL:=71,SCLEX_SMALLTALK:=72
+,SCLEX_FLAGSHIP:=73,SCLEX_CSOUND:=74,SCLEX_FREEBASIC:=75,SCLEX_INNOSETUP:=76,SCLEX_OPAL:=77,SCLEX_SPICE:=78,SCLEX_D:=79,SCLEX_CMAKE:=80
+,SCLEX_GAP:=81,SCLEX_PLM:=82,SCLEX_PROGRESS:=83,SCLEX_ABAQUS:=84,SCLEX_ASYMPTOTE:=85,SCLEX_R:=86,SCLEX_MAGIK:=87,SCLEX_POWERSHELL:=88
+,SCLEX_MYSQL:=89,SCLEX_PO:=90,SCLEX_TAL:=91,SCLEX_COBOL:=92,SCLEX_TACL:=93,SCLEX_SORCUS:=94,SCLEX_POWERPRO:=95,SCLEX_NIMROD:=96,SCLEX_SML:=97
+,SCLEX_MARKDOWN:=98,SCLEX_TXT2TAGS:=99,SCLEX_A68K:=100,SCLEX_MODULA:=101,SCLEX_COFFEESCRIPT:=102,SCLEX_TCMD:=103,SCLEX_AVS:=104,SCLEX_ECL:=105
+,SCLEX_OSCRIPT:=106,SCLEX_VISUALPROLOG:=107,SCLEX_LITERATEHASKELL:=108,SCLEX_AHKL:=109
+,SCE_AHKL_NEUTRAL:=0,SCE_AHKL_IDENTIFIER:=1,SCE_AHKL_COMMENTDOC:=2,SCE_AHKL_COMMENTLINE:=3,SCE_AHKL_COMMENTBLOCK:=4,SCE_AHKL_COMMENTKEYWORD:=5
+,SCE_AHKL_STRING:=6,SCE_AHKL_STRINGOPTS:=7,SCE_AHKL_STRINGBLOCK:=8,SCE_AHKL_STRINGCOMMENT:=9,SCE_AHKL_LABEL:=10,SCE_AHKL_HOTKEY:=11
+,SCE_AHKL_HOTSTRING:=12,SCE_AHKL_HOTSTRINGOPT:=13,SCE_AHKL_HEXNUMBER:=14,SCE_AHKL_DECNUMBER:=15,SCE_AHKL_VAR:=16,SCE_AHKL_VARREF:=17
+,SCE_AHKL_OBJECT:=18,SCE_AHKL_USERFUNCTION:=19,SCE_AHKL_DIRECTIVE:=20,SCE_AHKL_COMMAND:=21,SCE_AHKL_PARAM:=22,SCE_AHKL_CONTROLFLOW:=23
+,SCE_AHKL_BUILTINFUNCTION:=24,SCE_AHKL_BUILTINVAR:=25,SCE_AHKL_KEY:=26,SCE_AHKL_USERDEFINED1:=27,SCE_AHKL_USERDEFINED2:=28,SCE_AHKL_ESCAPESEQ:=30
+,SCE_AHKL_ERROR:=31,AHKL_LIST_DIRECTIVES:=0,AHKL_LIST_COMMANDS:=1,AHKL_LIST_PARAMETERS:=2,AHKL_LIST_CONTROLFLOW:=3,AHKL_LIST_FUNCTIONS:=4
+,AHKL_LIST_VARIABLES:=5,AHKL_LIST_KEYS:=6,AHKL_LIST_USERDEFINED1:=7,AHKL_LIST_USERDEFINED2:=8,SCLEX_AUTOMATIC:=1000
 }
 
 ; Notifications
@@ -576,12 +593,14 @@ global SCI_LINEDOWN:=2300,SCI_LINEDOWNEXTEND:=2301,SCI_LINEDOWNRECTEXTEND:=2426
 ,SCI_FORMFEED:=2330,SCI_TAB:=2327,SCI_BACKTAB:=2328,SCI_SELECTIONDUPLICATE:=2469,SCI_SCROLLTOSTART:=2628,SCI_SCROLLTOEND:=2629
 ,SCI_DELWORDRIGHTEND:=2518,SCI_VERTICALCENTRECARET:=2619,SCI_MOVESELECTEDLINESUP:=2620,SCI_MOVESELECTEDLINESDOWN:=2621
 ,SC_TIME_FOREVER:=10000000,SC_WRAP_NONE:=0,SC_WRAP_WORD:=1,SC_WRAP_CHAR:=2,SC_WRAPVISUALFLAG_NONE:=0x0000,SC_WRAPVISUALFLAG_END:=0x0001
-,SC_WRAPVISUALFLAG_START:=0x0002,SC_WRAPVISUALFLAGLOC_DEFAULT:=0x0000,SC_WRAPVISUALFLAGLOC_END_BY_TEXT:=0x0001
+,SC_WRAPVISUALFLAG_START:=0x0002,SC_WRAPVISUALFLAG_MARGIN:=0x0004, SC_WRAPVISUALFLAGLOC_DEFAULT:=0x0000,SC_WRAPVISUALFLAGLOC_END_BY_TEXT:=0x0001
 ,SC_WRAPVISUALFLAGLOC_START_BY_TEXT:=0x0002,SC_CACHE_NONE:=0,SC_CACHE_CARET:=1,SC_CACHE_PAGE:=2,SC_CACHE_DOCUMENT:=3,EDGE_NONE:=0,EDGE_LINE:=1
 ,EDGE_BACKGROUND:=2,SC_CURSORNORMAL:=-1,SC_CURSORWAIT:=4,VISIBLE_SLOP:=0x01,VISIBLE_STRICT:=0x04,CARET_SLOP:=0x01,CARET_STRICT:=0x04
 ,CARET_JUMPS:=0x10,CARET_EVEN:=0x08,SC_SEL_STREAM:=0,SC_SEL_RECTANGLE:=1,SC_SEL_LINES:=2,SC_ALPHA_TRANSPARENT:=0,SC_ALPHA_OPAQUE:=255
 ,SC_ALPHA_NOALPHA:=256,KEYWORDSET_MAX:=8,SC_MOD_INSERTTEXT:=0x1,SC_MOD_DELETETEXT:=0x2,SC_MOD_CHANGESTYLE:=0x4,SC_MOD_CHANGEFOLD:=0x8
 ,SC_PERFORMED_USER:=0x10,SC_PERFORMED_UNDO:=0x20,SC_PERFORMED_REDO:=0x40,SC_MULTISTEPUNDOREDO:=0x80,SC_LASTSTEPINUNDOREDO:=0x100
 ,SC_MOD_CHANGEMARKER:=0x200,SC_MOD_BEFOREINSERT:=0x400,SC_MOD_BEFOREDELETE:=0x800,SC_MULTILINEUNDOREDO:=0x1000,SC_MODEVENTMASKALL:=0x1FFF
+,SC_WEIGHT_NORMAL:=400, SC_WEIGHT_SEMIBOLD:=600, SC_WEIGHT_BOLD:=700
 }
+
 }

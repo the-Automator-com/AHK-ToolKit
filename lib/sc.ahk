@@ -1,5 +1,5 @@
 ﻿/*
-CaptureScreen(aRect, bCursor, sFileTo, nQuality)
+CaptureScreen(aRect, sFileTo, bCursor, nQuality)
 1) If the optional parameter bCursor is True, captures the cursor too.
 2) If the optional parameter sFileTo is 0, set the image to Clipboard.
    If it is omitted or "", saves to screen.bmp in the script folder,

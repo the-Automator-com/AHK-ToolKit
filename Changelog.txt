@@ -1,20 +1,30 @@
 Versioning:
-    Main.Feature.Changes.Bugs
+     Major.Minor.Fix-Build
 
-Legend:
+ Legend:
 ==================
     + Add
     - Remove
-    * Change
     ! Fix
+    * Change
     ^ Update
-    % Test
-    & Enable
-    $ Disable
 ==================
 
+AHK-TK v0.8.7.2
+Date: Sun Oct 13 08:44:19 2013 -0400
+
+    Changes:
+
+    + Add LexAHK styles
+    + Add Folding logic
+
+    ^ Update scintilla wrapper to latest version
+    
+Date: Sun Oct 28 15:38:29 2012 +0100
+
+
 AHK-TK v0.8.5.2
-Date: Tue Oct 23 02:01:30 2012 +0200     
+Date: Tue Oct 23 02:01:30 2012 +0200
 
     Changes:
 
@@ -28,49 +38,4 @@ Date: Tue Oct 23 02:01:30 2012 +0200
 
     ! Fix Append to exported hotkeys/hotstrings function
 
-    * Conditional download of AHK_L backup
-
-AHK-TK v0.8.2.2
-Date: Sat Oct 20 05:15:05 2012 +0200     
-
-    Changes:
-
-    ! Fix Live Code saving to empty file name
-
-    * Change Screen Capture function to use objects
-    * Change Disabled option hides List View child
-
-    Todo:
-
-    + Add #ifwindow active functionality to hotkeys/hotstrings
-
-    ! Fix Append to exported hotkeys/hotstrings function
-
-    * Conditional download of AHK_L backup
-
-AHK-TK v0.8.1.1
-Date: Fri Oct 5 10:30:14 2012 +0200     
-
-    Changes:
-
-    + Add Syntax highlighting for Scintilla Controls
-
-    ! Fix debugging ternary
-    ! Fix getparams() function
-    ! Fix Status Bar to have info centered
-    ! Fix update() function on compiled version
-    ! Fix General hotkey lists clear all checkboxes if "Default" was selected
-    ! Fix General hotkey lists load default hotkey when re-opening GUI after "Default" was selected
-
-    * Change update function to be part of scriptobj
-    * Change formatting
-
-    Todo:
-
-    + Add #ifwindow active functionality to hotkeys/hotstrings
-
-    ! Fix Append to exported hotkeys/hotstrings function
-    ! Fix Live Code saving to empty file name
-
-    * Change Disabled option hides List View child
     * Conditional download of AHK_L backup
