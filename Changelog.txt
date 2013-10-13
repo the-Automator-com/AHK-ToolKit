@@ -10,8 +10,15 @@ Versioning:
     ^ Update
 ==================
 
+AHK-TK v0.8.7.3
+Date: Sun Oct 13 10:10:54 2013 -0400
+
+    Changes:
+
+    ! Fix Codet pop up not showing
+
 AHK-TK v0.8.7.2
-Date: Sun Oct 13 08:44:19 2013 -0400
+Date: Sun Oct 28 15:38:29 2012 +0100
 
     Changes:
 
@@ -19,9 +26,6 @@ Date: Sun Oct 13 08:44:19 2013 -0400
     + Add Folding logic
 
     ^ Update scintilla wrapper to latest version
-    
-Date: Sun Oct 28 15:38:29 2012 +0100
-
 
 AHK-TK v0.8.5.2
 Date: Tue Oct 23 02:01:30 2012 +0200

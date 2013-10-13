@@ -1235,7 +1235,6 @@ CodetPopup(){
     global
 
     Gui, 94: +LastFound -Caption +Border +AlwaysOnTop +ToolWindow
-    ; $hwnd94 := WinExist()
     WinGet, $hwnd94, ID
 
     Gui, 94: Font, s10 w600, Verdana
@@ -4466,8 +4465,10 @@ lcRun(_gui=0){
     return
 }
 pasteUpload(mode=""){
-    conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
 
+    global $Hwnd94
+
+    conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
     FormatTime,pb_time,,[MMM/dd/yyyy - HH:mm:ss]
     sci[5].GetText(sci[5].GetLength()+1,pb_code)
     node := options.selectSingleNode("//Codet/Pastebin")
