@@ -1,15 +1,15 @@
 ﻿/*
  * =============================================================================================== *
- * Author           : RaptorX   <graptorx@gmail.com>
- * Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * Script Version   : 0.8.1.1
- * Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
+ * @Author           : RaptorX <graptorx@gmail.com>
+ * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
+ * @Script Version   : 0.9.0-161030
+ * @Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
- * Creation Date    : July 11, 2010
- * Modification Date: October 14, 2012
+ * @Creation Date    : July 11, 2010
+ * @Modification Date: October 20, 2012
  *
- * Description      :
- * ------------------
+ * @Description      :
+ * -------------------
  * This small program is a set of "tools" that i use regularly.
  *
  * A convenient GUI that serves as a hotkey and hotstring manager allows you to keep all of them
@@ -24,20 +24,18 @@
  * to contact me if you want your changes to be added in the official release.
  *
  * -----------------------------------------------------------------------------------------------
- * License          :       Copyright ©2010-2012 RaptorX <GPLv3>
+ * @License          :       Copyright ©2010-2012 RaptorX <GPLv3>
  *
- *          This program is free software: you can redistribute it and/or modify
- *          it under the terms of the GNU General Public License as published by
- *          the Free Software Foundation, either version 3 of  the  License,  or
- *          (at your option) any later version.
+ *	This program is free software: you can redistribute it and/or modify it under the terms of
+ *	the GNU General Public License as published by the Free Software Foundation,
+ * 	either version 3 of  the  License,  or (at your option) any later version.
  *
- *          This program is distributed in the hope that it will be useful,
- *          but WITHOUT ANY WARRANTY; without even the implied warranty  of
- *          MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE.  See  the
- *          GNU General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; WITHOUT EVEN THE IMPLIED WARRANTY  OF MERCHANTABILITY
+ *	or FITNESS FOR A PARTICULAR  PURPOSE.  See  the GNU General Public License for more details.
  *
- *          You should have received a copy of the GNU General Public License
- *          along with this program.  If not, see <http://www.gnu.org/licenses/gpl-3.0.txt>
+ *	You should have received a copy of the GNU General Public License along with this program.
+ *	If not, see <http://www.gnu.org/licenses/gpl-3.0.txt>
  * -----------------------------------------------------------------------------------------------
  *
  * [GUI Number Index]
@@ -104,18 +102,19 @@ GroupAdd, ScreenTools, ahk_class Photoshop
 GroupAdd, ScreenTools, ahk_class illustrator
 GroupAdd, ScreenTools, ahk_class 3DSMAX
 GroupAdd, ScreenTools, ahk_class AE_CApplication_9.0
+GroupAdd, ScreenTools, ahk_class triuiScreen
 ;}
 
 ;[Basic Script Info]{
 Clipboard := null
 global script := { base        : scriptobj
                   ,name        : "AHK-ToolKit"
-                  ,version     : "0.8.1.1"
+                  ,version     : "0.9.0-161030"
                   ,author      : "RaptorX"
                   ,email       : "graptorx@gmail.com"
                   ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
                   ,crtdate     : "July 11, 2010"
-                  ,moddate     : "October 14, 2012"
+                  ,moddate     : "October 20, 2012"
                   ,conf        : "conf.xml"}
 script.getparams(), ForumMenu(), TrayMenu()  ; These function are here so that
                                              ; the Tray Icon is shown early
@@ -124,23 +123,11 @@ script.getparams(), ForumMenu(), TrayMenu()  ; These function are here so that
 ;}
 
 ;[User Configuration]{
-; Trying to fix the issues that result from the script not being run as admin under Win7/Vista
-if (!a_isadmin){
-    If a_iscompiled
-       DllCall(ShellExecute,"Uint", 0
-                           , "Str", "RunAs"
-                           , "Str", a_scriptfullpath
-                           , "Str", params
-                           , "Str", a_workingdir
-                           ,"Uint", 1)
-    Else
-       DllCall(ShellExecute,"Uint", 0
-                           , "Str", "RunAs"
-                           , "Str", a_ahkpath
-                           , "Str", """" a_scriptfullpath """" a_space params
-                           , "Str", a_workingdir
-                           ,"Uint", 1)
-}
+
+;if !(a_isadmin) {
+	;Run, *RunAs "%A_ScriptFullPath%"
+	;ExitApp
+;}
 
 global system := {}, sci := {} ; Scintilla array
 global conf := ComObjCreate("MSXML2.DOMDocument"), xsl := ComObjCreate("MSXML2.DOMDocument"), root, options, hotkeys, hotstrings
@@ -314,6 +301,7 @@ return
 ; Special Labels
 OpenHelpFile:       ;{
     oldclip := ClipboardAll
+    Clipboard:=""
     Send, {Ctrl Down}{left}+{right}c{CtrlUp}
     ClipWait
     htmlhelp(hwnd, regexreplace(a_ahkpath, "exe$", "chm"), clipboard)
@@ -625,7 +613,7 @@ MainGui(){
 
     Gui, 01: Tab, Live Code
     options.selectSingleNode("//@snplib").text ? w:=640 : w:=790
-    sci[1] := new scintilla($hwnd1,5,25,w,320, "lib", "hidden")
+    sci[1] := new scintilla($hwnd1,5,25,w,320, "lib\LexAHKL.dll", "hidden")
 
     Gui, 01: add, Text, x650 y25 w145 h17 HWND$slTitle Center Border Hidden, % "Snippet Library"
     Gui, 01: add, DropDownList, xp y+5 w145 HWND$slDDL Hidden gGuiHandler Sort vslDDL
@@ -701,7 +689,7 @@ AddHKGui(){
     Gui, 02: add, Checkbox, vhkHook, % "Install hook"
     Gui, 02: add, Checkbox, vhkfRel, % "Fire when releasing key"
 
-    sci[2] := new scintilla($hwnd2,10,220,750,250,"lib")
+    sci[2] := new scintilla($hwnd2,10,220,750,250,"lib\LexAHKL.dll")
 
     Gui, 02: add, Text, x0 y+280 w785 0x10 HWND$hk2Delim
     Gui, 02: add, Button, x600 yp+10 w75 HWND$hk2Add Default gGuiHandler, % "&Add"
@@ -740,7 +728,7 @@ AddHSGui(){
     Gui, 03: font
 
     Gui, 03: add, GroupBox, x10 w400 h300 HWND$hs2GBox, % "Expand to"
-    sci[3] := new scintilla($hwnd3,20,195,380,265,"lib")
+    sci[3] := new scintilla($hwnd3,20,195,380,265,"lib\LexAHKL.dll")
 
     Gui, 03: add, Text, x0 y+10 w440 0x10 HWND$hs2Delim
     Gui, 03: add, Button, xp+250 yp+10 w75 Default HWND$hs2Add gGuiHandler, % "&Add"
@@ -1133,7 +1121,7 @@ SnippetGui(){
     }
 
     Gui, 07: add, GroupBox, x10 w470 h300 HWND$slGBox, % "Snippet"
-    sci[4] := new scintilla($hwnd7,20,110,450,270,"lib")
+    sci[4] := new scintilla($hwnd7,20,110,450,270,"lib\LexAHKL.dll")
 
     Gui, 07: add, Text, x0 y400 w500 0x10 HWND$slDelim
     Gui, 07: add, Button, xp+320 yp+10 w75 Default HWND$slAdd gGuiHandler, % "&Add"
@@ -1200,7 +1188,7 @@ PasteUploadGui(){
     curr:=options.selectSingleNode("//Codet/Pastebin/@current").text
     ahknet := curr = "AutoHotkey.net" ? 1 : 0
 
-    sci[5] := new scintilla($hwnd9,10,5,620,400,"lib")
+    sci[5] := new scintilla($hwnd9,10,5,620,400,"lib\LexAHKL.dll")
     Gui, 09: add, Text, HWND$puText1 x0 y410 w650 0x10
     Gui, 09: add, GroupBox, HWND$puGBox1 x10 yp+5 w620 h80, % "Options"
     Gui, 09: add, Text, HWND$puText2 xp+10 yp+20, % "Upload  to:"
@@ -1247,7 +1235,6 @@ CodetPopup(){
     global
 
     Gui, 94: +LastFound -Caption +Border +AlwaysOnTop +ToolWindow
-    ; $hwnd94 := WinExist()
     WinGet, $hwnd94, ID
 
     Gui, 94: Font, s10 w600, Verdana
@@ -1419,66 +1406,94 @@ SetHotkeys(list=0, $hwnd=0, title=0){
 }
 SetSciMargin(lSci, n0=40, n1=10){
 
-    lSci.SetMarginWidthN(0,n0),lSci.SetMarginWidthN(1,0),lSci.SetMarginWidthN(2,n1)
+    lSci.SetMarginWidthN(0, n0), lSci.SetMarginMaskN(1, SC_MASK_FOLDERS), lSci.SetMarginSensitiveN(1, true)
 }
 SetSciStyles(){
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
 
+
     Loop, % sci.MaxIndex()
     {
         cObj := a_index
-        sci[cObj].SetLexer(2) ; SCLEX_AHK
-        sci[cObj].SetWrapMode("SC_WRAP_WORD"), sci[cObj].StyleSetBold("STYLE_DEFAULT", true), sci[cObj].StyleClearAll()
+        sci[cObj].Notify := "SCI_NOTIFY"
 
-        ; Setting up the keywords:
+	; Set up Margin Symbols
+	sci[cObj].MarkerDefine(SC_MARKNUM_FOLDER, SC_MARK_BOXPLUS)
+	sci[cObj].MarkerDefine(SC_MARKNUM_FOLDEROPEN, SC_MARK_BOXMINUS)
+	sci[cObj].MarkerDefine(SC_MARKNUM_FOLDERSUB, SC_MARK_VLINE)
+	sci[cObj].MarkerDefine(SC_MARKNUM_FOLDERTAIL, SC_MARK_LCORNER)
+	sci[cObj].MarkerDefine(SC_MARKNUM_FOLDEREND, SC_MARK_BOXPLUSCONNECTED)
+	sci[cObj].MarkerDefine(SC_MARKNUM_FOLDEROPENMID, SC_MARK_BOXMINUSCONNECTED)
+	sci[cObj].MarkerDefine(SC_MARKNUM_FOLDERMIDTAIL, SC_MARK_TCORNER)
+
+	; Change margin symbols colors
+	sci[cObj].MarkerSetFore(SC_MARKNUM_FOLDER       , 0xFFFFFF)
+	sci[cObj].MarkerSetBack(SC_MARKNUM_FOLDER       , 0x5A5A5A)
+	sci[cObj].MarkerSetFore(SC_MARKNUM_FOLDEROPEN   , 0xFFFFFF)
+	sci[cObj].MarkerSetBack(SC_MARKNUM_FOLDEROPEN   , 0x5A5A5A)
+	sci[cObj].MarkerSetFore(SC_MARKNUM_FOLDERSUB    , 0xFFFFFF)
+	sci[cObj].MarkerSetBack(SC_MARKNUM_FOLDERSUB    , 0x5A5A5A)
+	sci[cObj].MarkerSetFore(SC_MARKNUM_FOLDERTAIL   , 0xFFFFFF)
+	sci[cObj].MarkerSetBack(SC_MARKNUM_FOLDERTAIL   , 0x5A5A5A)
+	sci[cObj].MarkerSetFore(SC_MARKNUM_FOLDEREND    , 0xFFFFFF)
+	sci[cObj].MarkerSetBack(SC_MARKNUM_FOLDEREND    , 0x5A5A5A)
+	sci[cObj].MarkerSetFore(SC_MARKNUM_FOLDEROPENMID, 0xFFFFFF)
+	sci[cObj].MarkerSetBack(SC_MARKNUM_FOLDEROPENMID, 0x5A5A5A)
+	sci[cObj].MarkerSetFore(SC_MARKNUM_FOLDERMIDTAIL, 0xFFFFFF)
+	sci[cObj].MarkerSetBack(SC_MARKNUM_FOLDERMIDTAIL, 0x5A5A5A)
+
+	; Set Autohotkey Lexer and default options
+	sci[cObj].SetWrapMode(SC_WRAP_WORD), sci[cObj].SetLexer(SCLEX_AHKL)
+	sci[cObj].StyleSetFont(STYLE_DEFAULT, "Courier New"), sci[cObj].StyleSetSize(STYLE_DEFAULT, 10), sci[cObj].StyleClearAll()
+
+	; Set Style Colors
+	sci[cObj].StyleSetFore(SCE_AHKL_IDENTIFIER     , 0x000000)
+
+	sci[cObj].StyleSetFore(SCE_AHKL_COMMENTDOC     , 0x008888)
+	sci[cObj].StyleSetFore(SCE_AHKL_COMMENTLINE    , 0x008800)
+	sci[cObj].StyleSetFore(SCE_AHKL_COMMENTBLOCK   , 0x008800), sci[cObj].StyleSetBold(SCE_AHKL_COMMENTBLOCK, true)
+	sci[cObj].StyleSetFore(SCE_AHKL_COMMENTKEYWORD , 0xA50000), sci[cObj].StyleSetBold(SCE_AHKL_COMMENTKEYWORD, true)
+	sci[cObj].StyleSetFore(SCE_AHKL_STRING         , 0xA2A2A2)
+	sci[cObj].StyleSetFore(SCE_AHKL_STRINGOPTS     , 0x00EEEE)
+	sci[cObj].StyleSetFore(SCE_AHKL_STRINGBLOCK    , 0xA2A2A2), sci[cObj].StyleSetBold(SCE_AHKL_STRINGBLOCK, true)
+	sci[cObj].StyleSetFore(SCE_AHKL_STRINGCOMMENT  , 0xFF0000)
+	sci[cObj].StyleSetFore(SCE_AHKL_LABEL          , 0x0000DD)
+	sci[cObj].StyleSetFore(SCE_AHKL_HOTKEY         , 0x00AADD)
+	sci[cObj].StyleSetFore(SCE_AHKL_HOTSTRING      , 0x00BBBB)
+	sci[cObj].StyleSetFore(SCE_AHKL_HOTSTRINGOPT   , 0x990099)
+	sci[cObj].StyleSetFore(SCE_AHKL_HEXNUMBER      , 0x880088)
+	sci[cObj].StyleSetFore(SCE_AHKL_DECNUMBER      , 0xFF9000)
+	sci[cObj].StyleSetFore(SCE_AHKL_VAR            , 0xFF9000)
+	sci[cObj].StyleSetFore(SCE_AHKL_VARREF         , 0x990055)
+	sci[cObj].StyleSetFore(SCE_AHKL_OBJECT         , 0x008888)
+	sci[cObj].StyleSetFore(SCE_AHKL_USERFUNCTION   , 0x0000DD)
+
+	sci[cObj].StyleSetFore(SCE_AHKL_DIRECTIVE      , 0x4A0000), sci[cObj].StyleSetBold(SCE_AHKL_DIRECTIVE, true)
+	sci[cObj].StyleSetFore(SCE_AHKL_COMMAND        , 0x0000DD), sci[cObj].StyleSetBold(SCE_AHKL_COMMAND, true)
+	sci[cObj].StyleSetFore(SCE_AHKL_PARAM          , 0x0085DD)
+	sci[cObj].StyleSetFore(SCE_AHKL_CONTROLFLOW    , 0x0000DD)
+	sci[cObj].StyleSetFore(SCE_AHKL_BUILTINFUNCTION, 0xDD00DD)
+	sci[cObj].StyleSetFore(SCE_AHKL_BUILTINVAR     , 0xEE3010), sci[cObj].StyleSetBold(SCE_AHKL_BUILTINVAR, true)
+	sci[cObj].StyleSetFore(SCE_AHKL_KEY            , 0xA2A2A2), sci[cObj].StyleSetBold(SCE_AHKL_KEY, true), sci[cObj].StyleSetItalic(SCE_AHKL_KEY, true)
+	sci[cObj].StyleSetFore(SCE_AHKL_USERDEFINED1   , 0x000000)
+	sci[cObj].StyleSetFore(SCE_AHKL_USERDEFINED2   , 0x000000)
+
+	sci[cObj].StyleSetFore(SCE_AHKL_ESCAPESEQ      , 0x660000), sci[cObj].StyleSetItalic(SCE_AHKL_ESCAPESEQ, true)
+	sci[cObj].StyleSetFore(SCE_AHKL_ERROR          , 0xFF0000)
+
+	; Setting up the keywords:
         Loop 7
         {
             listNum:=a_index-1
-            sci[cObj].SetKeywords(listNum, (listNum = 0 ? options.selectSingleNode("//LiveCode/Keywords/FlowControl").text
-                                          : listNum = 1 ? options.selectSingleNode("//LiveCode/Keywords/Commands").text
-                                          : listNum = 2 ? options.selectSingleNode("//LiveCode/Keywords/Functions").text
-                                          : listNum = 3 ? options.selectSingleNode("//LiveCode/Keywords/Directives").text
-                                          : listNum = 4 ? options.selectSingleNode("//LiveCode/Keywords/Keys").text
-                                          : listNum = 5 ? options.selectSingleNode("//LiveCode/Keywords/BuiltInVars").text
-                                          : listNum = 6 ? options.selectSingleNode("//LiveCode/Keywords/Parameters").text))
+            sci[cObj].SetKeywords(listNum, ( listNum = 0 ? options.selectSingleNode("//LiveCode/Keywords/Directives").text
+                                           : listNum = 1 ? options.selectSingleNode("//LiveCode/Keywords/Commands").text
+                                           : listNum = 2 ? options.selectSingleNode("//LiveCode/Keywords/Parameters").text
+                                           : listNum = 3 ? options.selectSingleNode("//LiveCode/Keywords/FlowControl").text
+                                           : listNum = 4 ? options.selectSingleNode("//LiveCode/Keywords/Functions").text
+                                           : listNum = 5 ? options.selectSingleNode("//LiveCode/Keywords/BuiltInVars").text
+                                           : listNum = 6 ? options.selectSingleNode("//LiveCode/Keywords/Keys").text
+					   : null))
         }
-
-        sci[cObj].StyleSetFore("STYLE_LINENUMBER",0x8A8A8A), sci[cObj].StyleSetBold("STYLE_LINENUMBER", false)
-
-        ; Setting up AHK lexer colors:
-        bold := "0|1|2|4|5|6|7|8|9|17"
-        colors=
-        (LTrim Join| c
-            0x000000    ; SCE_AHK_DEFAULT
-            0x007700    ; SCE_AHK_COMMENTLINE
-            0x007700    ; SCE_AHK_COMMENTBLOCK
-            0xFF0000    ; SCE_AHK_ESCAPE
-            0x000080    ; SCE_AHK_SYNOPERATOR
-            0x000080    ; SCE_AHK_EXPOPERATOR
-            0xA2A2A2    ; SCE_AHK_STRING
-            0xFF9000    ; SCE_AHK_NUMBER
-            0xFF9000    ; SCE_AHK_IDENTIFIER
-            0xFF9000    ; SCE_AHK_VARREF
-            0x0000FF    ; SCE_AHK_LABEL
-            0x0000FF    ; SCE_AHK_WORD_CF
-            0x0000FF    ; SCE_AHK_WORD_CMD
-            0xFF0090    ; SCE_AHK_WORD_FN
-            0xA50000    ; SCE_AHK_WORD_DIR
-            0xA2A2A2    ; SCE_AHK_WORD_KB
-            0xFF9000    ; SCE_AHK_WORD_VAR
-            0x0000FF    ; SCE_AHK_WORD_SP
-            0x00F000    ; SCE_AHK_WORD_UD
-            0xFF9000    ; SCE_AHK_VARREFKW
-            0xFF0000    ; SCE_AHK_ERROR
-        )
-
-        Loop, Parse, colors, |
-            sci[cObj].StyleSetFore(a_index-1, a_loopfield)
-
-        Loop, Parse, bold, |
-            sci[cObj].StyleSetBold(a_loopfield, false)
-
-        sci[cObj].StyleSetItalic(15, true) ; SCE_AHK_WORD_KB
     }
 }
 Add(type){
@@ -2313,7 +2328,7 @@ GuiHandler(){
         {
             Control, enable,,,ahk_id %$hk2Path%
             Control, enable,,,ahk_id %$hk2Browse%
-            sci[2].ClearAll(),sci[2].SetReadOnly(true),sci[2].StyleSetBack("STYLE_DEFAULT", 0xe0dfe3)
+            sci[2].ClearAll(),sci[2].SetReadOnly(true),sci[2].StyleSetBack(STYLE_DEFAULT, 0xe0dfe3)
             sci[2].SetMarginWidthN(0,0),sci[2].SetMarginWidthN(1,0)
         }
 
@@ -2629,6 +2644,7 @@ GuiHandler(){
     ; Preferences
     if (a_gui = 06 || a_gui > 80)
     {
+        Gui, 06: Default
         Loop, 13
         {
             _gui := a_index + 86
@@ -2692,11 +2708,14 @@ GuiHandler(){
             {
                 Control, enable,,, ahk_id %$codMode1%
                 Control, enable,,, ahk_id %$codMode2%
+                TV_Modify($P1C1, "Expand")
+
             }
             else
             {
                 Control, disable,,, ahk_id %$codMode1%
                 Control, disable,,, ahk_id %$codMode2%
+                TV_Modify($P1C1, "-Expand")
             }
         }
 
@@ -2707,12 +2726,14 @@ GuiHandler(){
                 ; Control, enable,,, ahk_id %$_eie%
                 Control, enable,,, ahk_id %$_uoh%
                 Control, enable,,, ahk_id %$_eft%
+                TV_Modify($P1C2, "Expand")
             }
             else
             {
                 ; Control, disable,,, ahk_id %$_eie%
                 Control, disable,,, ahk_id %$_uoh%
                 Control, disable,,, ahk_id %$_eft%
+                TV_Modify($P1C2, "-Expand")
             }
         }
 
@@ -2773,7 +2794,7 @@ GuiHandler(){
                 Control,ChooseString,``,, ahk_id %$GP_DDL%
             }
         }
-        
+
         if (a_guicontrol = "_hfddl")
         {
             if (_hfddl = "Default")
@@ -2785,7 +2806,7 @@ GuiHandler(){
                 Control,ChooseString,F1,, ahk_id %$HF_DDL%
             }
         }
-        
+
         if (a_guicontrol = "_ftddl")
         {
             if (_ftddl = "Default")
@@ -2797,7 +2818,7 @@ GuiHandler(){
                 Control,ChooseString,F2,, ahk_id %$FT_DDL%
             }
         }
-        
+
         if (a_guicontrol = "&Browse...")
         {
             if (a_gui = 92)
@@ -2933,7 +2954,7 @@ GuiHandler(){
         if (a_guicontrol = "&Yes")
         {
             Gui, %a_gui%: Submit
-            sci[5].SetText(repIncludes(clipboard))
+            sci[5].SetText(unused, repIncludes(clipboard))
             Gui, 09: Show
             return
         }
@@ -3129,7 +3150,7 @@ MenuHandler(stat=0){
             Gui, 01: +OwnDialogs
             FileSelectFile, lcfPath, 1, %lcfPath%, % "Please select the file to open.", % "AutoHotkey (*.ahk)"
             lcFile := FileOpen(lcfPath, "rw `n", "UTF-8")
-            sci[1].SetText(false, lcFile.Read()), lcFile.Close()
+            sci[1].SetText(unused, lcFile.Read()), lcFile.Close()
         return
     }
 
@@ -3140,6 +3161,9 @@ MenuHandler(stat=0){
             {
                 Gui, 01: +OwnDialogs
                 FileSelectFile, lcfPath, S24, %a_mydocuments%, % "Save File as...", % "Autohotkey (*.ahk)"
+
+                if !lcfPath
+                    return
 
                 if !regexmatch(lcfPath, "\.[[:alnum:]]+$")
                         lcfPath := lcfPath ".ahk"
@@ -3157,6 +3181,9 @@ MenuHandler(stat=0){
         Gui_SaveAs:
             Gui, 01: +OwnDialogs
             FileSelectFile, lcfPath, S24, %a_mydocuments%, % "Save File as...", % "Autohotkey (*.ahk)"
+
+            if !lcfPath
+                return
 
             if !regexmatch(lcfPath, "\.[[:alnum:]]+$")
                     lcfPath := lcfPath ".ahk"
@@ -3322,9 +3349,9 @@ ListHandler(sParam=0){
         _editNode := _groupNode.selectSingleNode("Snippet[@title='" _seltxt "']")
         GuiControl,07:,slTitle, %_seltxt%
         GuiControl,07: ChooseString,slGroup, %_current%
-        sci[4].SetText(false, _editNode.text)
+        sci[4].SetText(unused, _editNode.text)
 
-        Gui, 01: +Disable
+        ; Gui, 01: +Disable
         Gui, 07: Show
         return
     }
@@ -3467,12 +3494,12 @@ ListHandler(sParam=0){
             {
                 Control, enable,,,ahk_id %$hk2Path%
                 Control, enable,,,ahk_id %$hk2Browse%
-                sci[2].ClearAll(),sci[2].SetReadOnly(true),sci[2].StyleSetBack("STYLE_DEFAULT", 0xe0dfe3)
+                sci[2].ClearAll(),sci[2].SetReadOnly(true),sci[2].StyleSetBack(STYLE_DEFAULT, 0xe0dfe3)
                 sci[2].SetMarginWidthN(0,0),sci[2].SetMarginWidthN(1,0)
             }
 
             if (_script)
-               sci[2].SetText(false, _script)
+               sci[2].SetText(unused, _script)
 
             _guivars := "hkctrl ^|hkalt !|hkshift +|hkwin #|hkLMod <|hkRMod >|hkWild *|hkSend ~|hkHook $|hkfRel UP"
 
@@ -3542,7 +3569,7 @@ ListHandler(sParam=0){
             else
                 SetSciMargin(sci[3],0,0)
 
-            sci[3].SetText(false, _hs2Expandto)
+            sci[3].SetText(unused, _hs2Expandto)
             Gui, 03: show
         }
 
@@ -3696,7 +3723,7 @@ HotkeyHandler(hk){
           , % "The file this hotkey is trying to access does not exist."
     return
 }
-MsgHandler(wParam,lParam, msg, hwnd){
+MsgHandler(wParam, lParam, msg, hwnd){
     static
     hCurs:=DllCall("LoadCursor","UInt",0,"Int",32649,"UInt") ;IDC_HAND
     global cList1,hList1,cList2,hList2,cList3,hList3,$QShk,$QShs,$QSlc,$QScod
@@ -3803,6 +3830,12 @@ MsgHandler(wParam,lParam, msg, hwnd){
             }
         }
     }
+}
+SCI_NOTIFY(wParam, lParam, msg, hwnd, sciObj) {
+
+	line := sciObj.LineFromPosition(sciObj.position)
+	if (sciObj.scnCode == SCN_MARGINCLICK && (sciObj.GetFoldLevel(line) & SC_FOLDLEVELHEADERFLAG))
+		sciObj.ToggleFold(line)
 }
 
 ; Other
@@ -4008,8 +4041,8 @@ defConf(path){
             </Pastebin>
             <History max="10"/>
             <Keywords min="5">
-if exitapp gosub goto ifequal ifexist ifgreater ifgreaterorequal ifinstring ifless iflessorequal ifmsgbox ifnotequal ifnotexist ifnotinstring ifwinactive ifwinexist ifwinnotactive ifwinnotexist onexit setbatchlines settimer suspend static global local byref autotrim blockinput clipwait click control controlclick controlfocus controlget controlgetfocus controlgetpos controlgettext controlmove controlsend controlsendraw controlsettext coordmode critical detecthiddentext detecthiddenwindows driveget drivespacefree endrepeat envadd envdiv envget envmult envset envsub envupdate fileappend filecopy filecopydir filecreatedir filecreateshortcut filedelete filegetattrib filegetshortcut filegetsize filegettime filegetversion fileinstall filemove filemovedir fileread filereadline filerecycle filerecycleempty fileremovedir fileselectfile fileselectfolder filesetattrib filesettime formattime getkeystate groupactivate groupadd groupclose groupdeactivate gui guicontrol guicontrolget hideautoitwin hotkey imagesearch inidelete iniread iniwrite input inputbox keyhistory keywait listhotkeys listlines listvars mouseclick mouseclickdrag mousegetpos mousemove msgbox numget numset outputdebug pixelgetcolor pixelsearch postmessage regdelete registercallback regread regwrite reload runas runwait send sendevent sendinput sendmessage sendmode sendplay sendraw setcapslockstate setcontroldelay setdefaultmousespeed setenv setformat setkeydelay setmousedelay setnumlockstate setscrolllockstate setstorecapslockmode settitlematchmode setwindelay setworkingdir soundbeep soundget soundgetwavevolume soundplay soundset soundsetwavevolume splashimage splashtextoff splashtexton splitpath statusbargettext statusbarwait stringcasesense stringgetpos stringleft stringlen stringlower stringmid stringreplace stringright stringsplit stringtrimleft stringtrimright stringupper sysget thread tooltip transform traytip urldownloadtofile winactivate winactivatebottom winclose winget wingetactivestats wingetactivetitle wingetclass wingetpos wingettext wingettitle winhide winkill winmaximize winmenuselectitem winminimize winminimizeall winminimizeallundo winmove winrestore winset winsettitle winshow winwait winwaitactive winwaitclose winwaitnotactive abs acos asc asin atan ceil chr cos dllcall exp fileexist floor il_add il_create il_destroy instr islabel ln log lv_add lv_delete lv_deletecol lv_getcount lv_getnext lv_gettext lv_insert lv_insertcol lv_modify lv_modifycol lv_setimagelist mod onmessage round regexmatch regexreplace sb_seticon sb_setparts sb_settext sin sqrt strlen substr tan tv_add tv_delete tv_getchild tv_getcount tv_getnext tv_get tv_getparent tv_getprev tv_getselection tv_gettext tv_modify varsetcapacity winactive winexist allowsamelinecomments clipboardtimeout commentflag errorstdout escapechar hotkeyinterval hotkeymodifiertimeout hotstring include includeagain installkeybdhook installmousehook maxhotkeysperinterval maxmem maxthreads maxthreadsbuffer maxthreadsperhotkey noenv notrayicon singleinstance usehook winactivateforce shift lshift rshift alt lalt ralt lcontrol rcontrol ctrl lctrl rctrl lwin rwin appskey altdown altup shiftdown shiftup ctrldown ctrlup lwindown lwinup rwindown rwinup lbutton rbutton mbutton wheelup wheeldown xbutton1 xbutton2 joy1 joy2 joy3 joy4 joy5 joy6 joy7 joy8 joy9 joy10 joy11 joy12 joy13 joy14 joy15 joy16 joy17 joy18 joy19 joy20 joy21 joy22 joy23 joy24 joy25 joy26 joy27 joy28 joy29 joy30 joy31 joy32 joyx joyy joyz joyr joyu joyv joypov joyname joybuttons joyaxes joyinfo space tab enter escape backspace delete insert pgup pgdn printscreen ctrlbreak scrolllock capslock numlock numpad0 numpad1 numpad2 numpad3 numpad4 numpad5 numpad6 numpad7 numpad8 numpad9 numpadmult numpadadd numpadsub numpaddiv numpaddot numpaddel numpadins numpadclear numpadup numpaddown numpadleft numpadright numpadhome numpadend numpadpgup numpadpgdn numpadenter f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14 f15 f16 f17 f18 f19 f20 f21 f22 f23 f24 browser_back browser_forward browser_refresh browser_stop browser_search browser_favorites browser_home volume_mute volume_down volume_up media_next media_prev media_stop media_play_pause launch_mail launch_media launch_app1 launch_app2 a_ahkpath a_ahkversion a_appdata a_appdatacommon a_autotrim a_batchlines a_caretx a_carety a_computername a_controldelay a_cursor a_dd a_ddd a_dddd a_defaultmousespeed a_desktop a_desktopcommon a_detecthiddentext a_detecthiddenwindows a_endchar a_eventinfo a_exitreason a_formatfloat a_formatinteger a_gui a_guievent a_guicontrol a_guicontrolevent a_guiheight a_guiwidth a_guix a_guiy a_hour a_iconfile a_iconhidden a_iconnumber a_icontip a_index a_ipaddress1 a_ipaddress2 a_ipaddress3 a_ipaddress4 a_isadmin a_iscompiled a_issuspended a_keydelay a_language a_lasterror a_linefile a_linenumber a_loopfield a_loopfileattrib a_loopfiledir a_loopfileext a_loopfilefullpath a_loopfilelongpath a_loopfilename a_loopfileshortname a_loopfileshortpath a_loopfilesize a_loopfilesizekb a_loopfilesizemb a_loopfiletimeaccessed a_loopfiletimecreated a_loopfiletimemodified a_loopreadline a_loopregkey a_loopregname a_loopregsubkey a_loopregtimemodified a_loopregtype a_mday a_min a_mm a_mmm a_mmmm a_mon a_mousedelay a_msec a_mydocuments a_now a_nowutc a_numbatchlines a_ostype a_osversion a_priorhotkey a_programfiles a_programs a_programscommon a_screenheight a_screenwidth a_scriptdir a_scriptfullpath a_scriptname a_sec a_space a_startmenu a_startmenucommon a_startup a_startupcommon a_stringcasesense a_tab a_temp a_thisfunc a_thishotkey a_thislabel a_thismenu a_thismenuitem a_thismenuitempos a_tickcount a_timeidle a_timeidlephysical a_timesincepriorhotkey a_timesincethishotkey a_titlematchmode a_titlematchmodespeed a_username a_wday a_windelay a_windir a_workingdir a_yday a_year a_yweek a_yyyy clipboard clipboardall comspec errorlevel programfiles true false ltrim rtrim ahk_id ahk_pid ahk_class ahk_group processname minmax controllist statuscd filesystem setlabel alwaysontop mainwindow nomainwindow useerrorlevel altsubmit hscroll vscroll imagelist wantctrla wantf2 visfirst return wantreturn backgroundtrans minimizebox maximizebox sysmenu toolwindow exstyle check3 checkedgray readonly notab lastfound lastfoundexist alttab shiftalttab alttabmenu alttabandmenu alttabmenudismiss controllisthwnd hwnd deref pow bitnot bitand bitor bitxor bitshiftleft bitshiftright sendandmouse mousemouveoff hkey_local_machine hkey_users hkey_current_user hkey_classes_root hkey_current_config hklm hku hkcu hkcr hkcc reg_sz reg_expand_sz reg_multi_sz reg_dword reg_qword reg_binary reg_link reg_resource_list reg_full_resource_descriptor reg_resource_requirements_list reg_dword_big_endian regex rgb belownormal abovenormal xdigit alpha upper lower alnum topmost transparent transcolor redraw idlast togglecheck toggleenable nodefault nostandard deleteall noicon groupbox button checkbox dropdownlist ddl combobox statusbar treeview listbox listview datetime monthcal updown iconsmall sortdesc nosort nosorthdr hdr autosize range font resize owner nohide minimize maximize restore noactivate cancel destroy center margin owndialogs guiescape guiclose guisize guicontextmenu guidropfiles tabstop choosestring enabled disabled visible notimers interrupt priority waitclose OnClipboardChange OnGUIClose OnGUIEscape OnGUICancel
-            </Keywords>
+if exitapp gosub goto ifequal ifexist ifgreater ifgreaterorequal ifinstring ifless iflessorequal ifmsgbox ifnotequal ifnotexist ifnotinstring ifwinactive ifwinexist ifwinnotactive ifwinnotexist onexit setbatchlines settimer suspend static global local byref autotrim blockinput clipwait click control controlclick controlfocus controlget controlgetfocus controlgetpos controlgettext controlmove controlsend controlsendraw controlsettext coordmode critical detecthiddentext detecthiddenwindows driveget drivespacefree endrepeat envadd envdiv envget envmult envset envsub envupdate fileappend filecopy filecopydir filecreatedir filecreateshortcut filedelete filegetattrib filegetshortcut filegetsize filegettime filegetversion fileinstall filemove filemovedir fileread filereadline filerecycle filerecycleempty fileremovedir fileselectfile fileselectfolder filesetattrib filesettime formattime getkeystate groupactivate groupadd groupclose groupdeactivate gui guicontrol guicontrolget hideautoitwin hotkey imagesearch inidelete iniread iniwrite input inputbox keyhistory keywait listhotkeys listlines listvars mouseclick mouseclickdrag mousegetpos mousemove msgbox numget numset outputdebug pixelgetcolor pixelsearch postmessage regdelete registercallback regread regwrite reload runas runwait send sendevent sendinput sendmessage sendmode sendplay sendraw setcapslockstate setcontroldelay setdefaultmousespeed setenv setformat setkeydelay setmousedelay setnumlockstate setscrolllockstate setstorecapslockmode settitlematchmode setwindelay setworkingdir soundbeep soundget soundgetwavevolume soundplay soundset soundsetwavevolume splashimage splashtextoff splashtexton splitpath statusbargettext statusbarwait stringcasesense stringgetpos stringleft stringlen stringlower stringmid stringreplace stringright stringsplit stringtrimleft stringtrimright stringupper sysget thread tooltip transform traytip urldownloadtofile winactivate winactivatebottom winclose winget wingetactivestats wingetactivetitle wingetclass wingetpos wingettext wingettitle winhide winkill winmaximize winmenuselectitem winminimize winminimizeall winminimizeallundo winmove winrestore winset winsettitle winshow winwait winwaitactive winwaitclose winwaitnotactive abs acos asc asin atan ceil chr cos dllcall exp fileexist floor il_add il_create il_destroy instr islabel ln log lv_add lv_delete lv_deletecol lv_getcount lv_getnext lv_gettext lv_insert lv_insertcol lv_modify lv_modifycol lv_setimagelist mod onmessage round regexmatch regexreplace sb_seticon sb_setparts sb_settext sin sqrt strlen substr tan tv_add tv_delete tv_getchild tv_getcount tv_getnext tv_get tv_getparent tv_getprev tv_getselection tv_gettext tv_modify varsetcapacity winactive winexist #allowsamelinecomments #clipboardtimeout #commentflag #errorstdout #escapechar #hotkeyinterval #hotkeymodifiertimeout #hotstring #if #iftimeout #ifwinactive #ifwinexist #include #includeagain #installkeybdhook #installmousehook #keyhistory #ltrim #maxhotkeysperinterval #maxmem #maxthreads #maxthreadsbuffer #maxthreadsperhotkey #menumaskkey #noenv #notrayicon #persistent #singleinstance #usehook #warn #winactivateforce shift lshift rshift alt lalt ralt lcontrol rcontrol ctrl lctrl rctrl lwin rwin appskey altdown altup shiftdown shiftup ctrldown ctrlup lwindown lwinup rwindown rwinup lbutton rbutton mbutton wheelup wheeldown xbutton1 xbutton2 joy1 joy2 joy3 joy4 joy5 joy6 joy7 joy8 joy9 joy10 joy11 joy12 joy13 joy14 joy15 joy16 joy17 joy18 joy19 joy20 joy21 joy22 joy23 joy24 joy25 joy26 joy27 joy28 joy29 joy30 joy31 joy32 joyx joyy joyz joyr joyu joyv joypov joyname joybuttons joyaxes joyinfo space tab enter escape backspace delete insert pgup pgdn printscreen ctrlbreak scrolllock capslock numlock numpad0 numpad1 numpad2 numpad3 numpad4 numpad5 numpad6 numpad7 numpad8 numpad9 numpadmult numpadadd numpadsub numpaddiv numpaddot numpaddel numpadins numpadclear numpadup numpaddown numpadleft numpadright numpadhome numpadend numpadpgup numpadpgdn numpadenter f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14 f15 f16 f17 f18 f19 f20 f21 f22 f23 f24 browser_back browser_forward browser_refresh browser_stop browser_search browser_favorites browser_home volume_mute volume_down volume_up media_next media_prev media_stop media_play_pause launch_mail launch_media launch_app1 launch_app2 a_ahkpath a_ahkversion a_appdata a_appdatacommon a_autotrim a_batchlines a_caretx a_carety a_computername a_controldelay a_cursor a_dd a_ddd a_dddd a_defaultmousespeed a_desktop a_desktopcommon a_detecthiddentext a_detecthiddenwindows a_endchar a_eventinfo a_exitreason a_formatfloat a_formatinteger a_gui a_guievent a_guicontrol a_guicontrolevent a_guiheight a_guiwidth a_guix a_guiy a_hour a_iconfile a_iconhidden a_iconnumber a_icontip a_index a_ipaddress1 a_ipaddress2 a_ipaddress3 a_ipaddress4 a_isadmin a_iscompiled a_issuspended a_keydelay a_language a_lasterror a_linefile a_linenumber a_loopfield a_loopfileattrib a_loopfiledir a_loopfileext a_loopfilefullpath a_loopfilelongpath a_loopfilename a_loopfileshortname a_loopfileshortpath a_loopfilesize a_loopfilesizekb a_loopfilesizemb a_loopfiletimeaccessed a_loopfiletimecreated a_loopfiletimemodified a_loopreadline a_loopregkey a_loopregname a_loopregsubkey a_loopregtimemodified a_loopregtype a_mday a_min a_mm a_mmm a_mmmm a_mon a_mousedelay a_msec a_mydocuments a_now a_nowutc a_numbatchlines a_ostype a_osversion a_priorhotkey a_programfiles a_programs a_programscommon a_screenheight a_screenwidth a_scriptdir a_scriptfullpath a_scriptname a_sec a_space a_startmenu a_startmenucommon a_startup a_startupcommon a_stringcasesense a_tab a_temp a_thisfunc a_thishotkey a_thislabel a_thismenu a_thismenuitem a_thismenuitempos a_tickcount a_timeidle a_timeidlephysical a_timesincepriorhotkey a_timesincethishotkey a_titlematchmode a_titlematchmodespeed a_username a_wday a_windelay a_windir a_workingdir a_yday a_year a_yweek a_yyyy clipboard clipboardall comspec errorlevel programfiles true false ltrim rtrim ahk_id ahk_pid ahk_class ahk_group processname minmax controllist statuscd filesystem setlabel alwaysontop mainwindow nomainwindow useerrorlevel altsubmit hscroll vscroll imagelist wantctrla wantf2 visfirst return wantreturn backgroundtrans minimizebox maximizebox sysmenu toolwindow exstyle check3 checkedgray readonly notab lastfound lastfoundexist alttab shiftalttab alttabmenu alttabandmenu alttabmenudismiss controllisthwnd hwnd deref pow bitnot bitand bitor bitxor bitshiftleft bitshiftright sendandmouse mousemouveoff hkey_local_machine hkey_users hkey_current_user hkey_classes_root hkey_current_config hklm hku hkcu hkcr hkcc reg_sz reg_expand_sz reg_multi_sz reg_dword reg_qword reg_binary reg_link reg_resource_list reg_full_resource_descriptor reg_resource_requirements_list reg_dword_big_endian regex rgb belownormal abovenormal xdigit alpha upper lower alnum topmost transparent transcolor redraw idlast togglecheck toggleenable nodefault nostandard deleteall noicon groupbox button checkbox dropdownlist ddl combobox statusbar treeview listbox listview datetime monthcal updown iconsmall sortdesc nosort nosorthdr hdr autosize range font resize owner nohide minimize maximize restore noactivate cancel destroy center margin owndialogs guiescape guiclose guisize guicontextmenu guidropfiles tabstop choosestring enabled disabled visible notimers interrupt priority waitclose OnClipboardChange OnGUIClose OnGUIEscape OnGUICancel
+	    </Keywords>
     )
     template2=
     (
@@ -4285,27 +4318,28 @@ sleep 10
     (
 			<Keywords>
 				<Directives list="0">
-allowsamelinecomments clipboardtimeout commentflag errorstdout escapechar hotkeyinterval hotkeymodifiertimeout hotstring if iftimeout ifwinactive ifwinexist include includeagain installkeybdhook installmousehook keyhistory ltrim maxhotkeysperinterval maxmem maxthreads maxthreadsbuffer maxthreadsperhotkey menumaskkey noenv notrayicon persistent singleinstance usehook warn winactivateforce
-                </Directives>
+#allowsamelinecomments #clipboardtimeout #commentflag #errorstdout #escapechar #hotkeyinterval #hotkeymodifiertimeout #hotstring #if #iftimeout #ifwinactive #ifwinexist #include #includeagain #installkeybdhook #installmousehook #keyhistory #ltrim #maxhotkeysperinterval #maxmem #maxthreads #maxthreadsbuffer #maxthreadsperhotkey #menumaskkey #noenv #notrayicon #persistent #singleinstance #usehook #warn #winactivateforce
+;};};};}
+				</Directives>
 				<Commands list="1">
 autotrim blockinput clipwait control controlclick controlfocus controlget controlgetfocus controlgetpos controlgettext controlmove controlsend controlsendraw controlsettext coordmode critical detecthiddentext detecthiddenwindows drive driveget drivespacefree edit endrepeat envadd envdiv envget envmult envset envsub envupdate fileappend filecopy filecopydir filecreatedir filecreateshortcut filedelete filegetattrib filegetshortcut filegetsize filegettime filegetversion fileinstall filemove filemovedir fileread filereadline filerecycle filerecycleempty fileremovedir fileselectfile fileselectfolder filesetattrib filesettime formattime getkeystate groupactivate groupadd groupclose groupdeactivate gui guicontrol guicontrolget hideautoitwin hotkey if ifequal ifexist ifgreater ifgreaterorequal ifinstring ifless iflessorequal ifmsgbox ifnotequal ifnotexist ifnotinstring ifwinactive ifwinexist ifwinnotactive ifwinnotexist imagesearch inidelete iniread iniwrite input inputbox keyhistory keywait listhotkeys listlines listvars menu mouseclick mouseclickdrag mousegetpos mousemove msgbox outputdebug pixelgetcolor pixelsearch postmessage process progress random regdelete regread regwrite reload run runas runwait send sendevent sendinput sendmessage sendmode sendplay sendraw setbatchlines setcapslockstate setcontroldelay setdefaultmousespeed setenv setformat setkeydelay setmousedelay setnumlockstate setscrolllockstate setstorecapslockmode settitlematchmode setwindelay setworkingdir shutdown sort soundbeep soundget soundgetwavevolume soundplay soundset soundsetwavevolume splashimage splashtextoff splashtexton splitpath statusbargettext statusbarwait stringcasesense stringgetpos stringleft stringlen stringlower stringmid stringreplace stringright stringsplit stringtrimleft stringtrimright stringupper sysget thread tooltip transform traytip urldownloadtofile winactivate winactivatebottom winclose winget wingetactivestats wingetactivetitle wingetclass wingetpos wingettext wingettitle winhide winkill winmaximize winmenuselectitem winminimize winminimizeall winminimizeallundo winmove winrestore winset winsettitle winshow winwait winwaitactive winwaitclose winwaitnotactive fileencoding true false
-                </Commands>
+				</Commands>
 				<FlowControl list="2">
 break continue else exit exitapp gosub goto loop onexit pause repeat return settimer sleep suspend static global local byref while until for
-                </FlowControl>
+				</FlowControl>
 				<Functions list="3">
 abs acos asc asin atan ceil chr cos dllcall exp fileexist floor getkeystate numget numput registercallback il_add il_create il_destroy instr islabel isfunc ln log lv_add lv_delete lv_deletecol lv_getcount lv_getnext lv_gettext lv_insert lv_insertcol lv_modify lv_modifycol lv_setimagelist mod onmessage round regexmatch regexreplace sb_seticon sb_setparts sb_settext sin sqrt strlen substr tan tv_add tv_delete tv_getchild tv_getcount tv_getnext tv_get tv_getparent tv_getprev tv_getselection tv_gettext tv_modify varsetcapacity winactive winexist trim ltrim rtrim fileopen strget strput object isobject objinsert objremove objminindex objmaxindex objsetcapacity objgetcapacity objgetaddress objnewenum objaddref objrelease objclone _insert _remove _minindex _maxindex _setcapacity _getcapacity _getaddress _newenum _addref _release _clone comobjcreate comobjget comobjconnect comobjerror comobjactive comobjenwrap comobjunwrap comobjparameter comobjmissing comobjtype comobjvalue comobjarray
-                </Functions>
+				</Functions>
 				<BuiltInVars list="4">
 a_ahkpath a_ahkversion a_appdata a_appdatacommon a_autotrim a_batchlines a_caretx a_carety a_computername a_controldelay a_cursor a_dd a_ddd a_dddd a_defaultmousespeed a_desktop a_desktopcommon a_detecthiddentext a_detecthiddenwindows a_endchar a_eventinfo a_exitreason a_formatfloat a_formatinteger a_gui a_guievent a_guicontrol a_guicontrolevent a_guiheight a_guiwidth a_guix a_guiy a_hour a_iconfile a_iconhidden a_iconnumber a_icontip a_index a_ipaddress1 a_ipaddress2 a_ipaddress3 a_ipaddress4 a_isadmin a_iscompiled a_issuspended a_keydelay a_language a_lasterror a_linefile a_linenumber a_loopfield a_loopfileattrib a_loopfiledir a_loopfileext a_loopfilefullpath a_loopfilelongpath a_loopfilename a_loopfileshortname a_loopfileshortpath a_loopfilesize a_loopfilesizekb a_loopfilesizemb a_loopfiletimeaccessed a_loopfiletimecreated a_loopfiletimemodified a_loopreadline a_loopregkey a_loopregname a_loopregsubkey a_loopregtimemodified a_loopregtype a_mday a_min a_mm a_mmm a_mmmm a_mon a_mousedelay a_msec a_mydocuments a_now a_nowutc a_numbatchlines a_ostype a_osversion a_priorhotkey a_programfiles a_programs a_programscommon a_screenheight a_screenwidth a_scriptdir a_scriptfullpath a_scriptname a_sec a_space a_startmenu a_startmenucommon a_startup a_startupcommon a_stringcasesense a_tab a_temp a_thishotkey a_thismenu a_thismenuitem a_thismenuitempos a_tickcount a_timeidle a_timeidlephysical a_timesincepriorhotkey a_timesincethishotkey a_titlematchmode a_titlematchmodespeed a_username a_wday a_windelay a_windir a_workingdir a_yday a_year a_yweek a_yyyy clipboard clipboardall comspec programfiles a_thisfunc a_thislabel a_ispaused a_iscritical a_isunicode a_ptrsize errorlevel
-                </BuiltInVars>
+				</BuiltInVars>
 				<Keys list="5">
 shift lshift rshift alt lalt ralt control lcontrol rcontrol ctrl lctrl rctrl lwin rwin appskey altdown altup shiftdown shiftup ctrldown ctrlup lwindown lwinup rwindown rwinup lbutton rbutton mbutton wheelup wheeldown xbutton1 xbutton2 joy1 joy2 joy3 joy4 joy5 joy6 joy7 joy8 joy9 joy10 joy11 joy12 joy13 joy14 joy15 joy16 joy17 joy18 joy19 joy20 joy21 joy22 joy23 joy24 joy25 joy26 joy27 joy28 joy29 joy30 joy31 joy32 joyx joyy joyz joyr joyu joyv joypov joyname joybuttons joyaxes joyinfo space tab enter escape esc backspace bs delete del insert ins pgup pgdn home end up down left right printscreen ctrlbreak pause scrolllock capslock numlock numpad0 numpad1 numpad2 numpad3 numpad4 numpad5 numpad6 numpad7 numpad8 numpad9 numpadmult numpadadd numpadsub numpaddiv numpaddot numpaddel numpadins numpadclear numpadup numpaddown numpadleft numpadright numpadhome numpadend numpadpgup numpadpgdn numpadenter f1 f2 f3 f4 f5 f6 f7 f8 f9 f10 f11 f12 f13 f14 f15 f16 f17 f18 f19 f20 f21 f22 f23 f24 browser_back browser_forward browser_refresh browser_stop browser_search browser_favorites browser_home volume_mute volume_down volume_up media_next media_prev media_stop media_play_pause launch_mail launch_media launch_app1 launch_app2 blind click raw wheelleft wheelright
-                </Keys>
+				</Keys>
 				<Parameters list="6">
 ltrim rtrim join ahk_id ahk_pid ahk_class ahk_group processname minmax controllist statuscd filesystem setlabel alwaysontop mainwindow nomainwindow useerrorlevel altsubmit hscroll vscroll imagelist wantctrla wantf2 vis visfirst wantreturn backgroundtrans minimizebox maximizebox sysmenu toolwindow exstyle check3 checkedgray readonly notab lastfound lastfoundexist alttab shiftalttab alttabmenu alttabandmenu alttabmenudismiss controllisthwnd hwnd deref pow bitnot bitand bitor bitxor bitshiftleft bitshiftright sendandmouse mousemove mousemoveoff hkey_local_machine hkey_users hkey_current_user hkey_classes_root hkey_current_config hklm hku hkcu hkcr hkcc reg_sz reg_expand_sz reg_multi_sz reg_dword reg_qword reg_binary reg_link reg_resource_list reg_full_resource_descriptor caret reg_resource_requirements_list reg_dword_big_endian regex pixel mouse screen relative rgb low belownormal normal abovenormal high realtime between contains in is integer float number digit xdigit alpha upper lower alnum time date not or and topmost top bottom transparent transcolor redraw region id idlast count list capacity eject lock unlock label serial type status seconds minutes hours days read parse logoff close error single shutdown menu exit reload tray add rename check uncheck togglecheck enable disable toggleenable default nodefault standard nostandard color delete deleteall icon noicon tip click show edit progress hotkey text picture pic groupbox button checkbox radio dropdownlist ddl combobox statusbar treeview listbox listview datetime monthcal updown slider tab tab2 iconsmall tile report sortdesc nosort nosorthdr grid hdr autosize range xm ym ys xs xp yp font resize owner submit nohide minimize maximize restore noactivate na cancel destroy center margin owndialogs guiescape guiclose guisize guicontextmenu guidropfiles tabstop section wrap border top bottom buttons expand first lines number uppercase lowercase limit password multi group background bold italic strike underline norm theme caption delimiter flash style checked password hidden left right center section move focus hide choose choosestring text pos enabled disabled visible notimers interrupt priority waitclose unicode tocodepage fromcodepage yes no ok cancel abort retry ignore force on off all send wanttab monitorcount monitorprimary monitorname monitorworkarea pid base useunsetlocal useunsetglobal localsameasglobal
-                </Parameters>
-            </Keywords>
+				</Parameters>
+			</Keywords>
     )
     template4=
     (
@@ -4372,7 +4406,7 @@ updateSB(){
     global $hwnd1
 
     WinGetPos,,, _w,, ahk_id %$hwnd1%
-    SB_SetParts(150,150,_w - 378,50) ; including 8 pixes for the borders.
+    SB_SetParts(150,150,_w - 388,50) ; including 8 pixes for the borders.
     SB_SetText("`t" root.selectSingleNode("//Hotkeys/@count").text " Hotkeys currently active",1)
     SB_SetText("`t" root.selectSingleNode("//Hotstrings/@count").text " Hotstrings currently active",2)
     SB_SetText("`tv" script.version,4)
@@ -4431,8 +4465,10 @@ lcRun(_gui=0){
     return
 }
 pasteUpload(mode=""){
-    conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
 
+    global $Hwnd94
+
+    conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
     FormatTime,pb_time,,[MMM/dd/yyyy - HH:mm:ss]
     sci[5].GetText(sci[5].GetLength()+1,pb_code)
     node := options.selectSingleNode("//Codet/Pastebin")
@@ -4677,74 +4713,80 @@ WM(var){
 ;}
 
 ;[Hotkeys/Hotstrings]{
-^F12::Suspend, Toggle
+^+F12::Suspend, Toggle
 ^CtrlBreak::Reload
 
-#if options.selectSingleNode("//ScrTools/@altdrag").text && !WinActive("ahk_group ScreenTools")
+#if options.selectSingleNode("//ScrTools/@altdrag").text && !WinActive("ahk_group ScreenTools") ;&& !WinActive("Store Manager")
 ;} Added for correct folding in C++ Lexer (To be removed when finished)
-!LButton::                                                              ;{ [Alt + LButton] Capture Active Window/Area
++!LButton::                                                              ;{ [Alt + LButton] Capture Active Window/Area
     CoordMode, Mouse, Screen
-    rect := False
+    rect := rectBox := False
     MouseGetPos, scXL, scYT
     WinMove, % "SelBox",, %scXL%, %scYT%
     Sleep, 150
     if GetKeyState("LButton", "P"){
-    Gui, 99: Show, w1 h1 x%scXL% y%scYT%, % "SelBox"
-    WinSet, Transparent, 120, % "SelBox"
-    While GetKeyState("LButton", "P")
-    {
-        ; amazing solution by adabo
-        ; first we check which direction we are dragging the mouse
-        ; then we calculate the width and height and finally show the GUI
-        MouseGetPos, scXR, scYB
-        if (scXL < scXR) and (scYT < scYB) ; direction - right up
-            Gui, 99:Show, % "x"(scXL) "y"(scYT) "w"(scXR - scXL) "h"(scYB - scYT), % "SelBox"
+		
+		Gui, 99: Show, w1 h1 x%scXL% y%scYT%, % "SelBox"
+		WinSet, Transparent, 120, % "SelBox"
+		While GetKeyState("LButton", "P")
+		{
+			; amazing solution by adabo
+			; first we check which direction we are dragging the mouse
+			; then we calculate the width and height and finally show the GUI
+			MouseGetPos, scXR, scYB
+			if (scXL < scXR) and (scYT < scYB) ; direction - right up
+				Gui, 99:Show, % "x"(scXL) "y"(scYT) "w"(scXR - scXL) "h"(scYB - scYT), % "SelBox"
 
-        if (scXL < scXR) and (scYT > scYB) ; direction - right down
-            Gui, 99:Show, % "x"(scXL) "y"(scYB) "w"(scXR - scXL) "h"(scYT - scYB), % "SelBox"
+			if (scXL < scXR) and (scYT > scYB) ; direction - right down
+				Gui, 99:Show, % "x"(scXL) "y"(scYB) "w"(scXR - scXL) "h"(scYT - scYB), % "SelBox"
 
-        if (scXL > scXR) and (scYT < scYB) ; direction - left up
-            Gui, 99:Show, % "x"(scXR) "y"(scYT) "w"(scXL - scXR) "h"(scYB - scYT), % "SelBox"
+			if (scXL > scXR) and (scYT < scYB) ; direction - left up
+				Gui, 99:Show, % "x"(scXR) "y"(scYT) "w"(scXL - scXR) "h"(scYB - scYT), % "SelBox"
 
-        if (scXL > scXR) and (scYT > scYB) ; direction - left down
-            Gui, 99:Show, % "x"(scXR) "y"(scYB) "w"(scXL - scXR) "h"(scYT - scYB), % "SelBox"
+			if (scXL > scXR) and (scYT > scYB) ; direction - left down
+				Gui, 99:Show, % "x"(scXR) "y"(scYB) "w"(scXL - scXR) "h"(scYT - scYB), % "SelBox"
 
-        WinGetPos,,, guiw, guih, % "SelBox"
-        ToolTip, % guiw "," guih
-        if GetKeyState("RButton", "P")
-        {
-            ToolTip
-            Gui, 99: Show, Hide w1 h1 x0 y0, % "SelBox"
-            return
-        }
-    }
-    ToolTip
-    Gui, 99: Show, Hide w1 h1 x0 y0, % "SelBox"
-    outputdebug, % scXL "-" scXR
-    if (scXL < scXR)
-        CaptureScreen(scXL "," scYT "," scXR "," scYB, 0, scRect := a_temp . "\scRect_" . rName(0,"png"))
-    else
-        CaptureScreen(scXR "," scYB "," scXL "," scYT, 0, scRect := a_temp . "\scRect_" . rName(0,"png"))
-    rect := True
+			WinGetPos,,, guiw, guih, % "SelBox"
+			ToolTip, % guiw "," guih
+			if GetKeyState("RButton", "P")
+			{
+				ToolTip
+				Gui, 99: Show, Hide w1 h1 x0 y0, % "SelBox"
+				return
+			}
+			
+			; if GetKeyState("LButton", "P")
+				; rectBox := True
+		}
+		
+		ToolTip
+		Gui, 99: Show, Hide w1 h1 x0 y0, % "SelBox"
+		outputdebug, % scXL "-" scXR
+		if (scXL < scXR)
+			CaptureScreen(scXL "," scYT "," scXR "," scYB, scRect := a_temp . "\scRect_" . rName(0,"png"))
+		else
+			CaptureScreen(scXR "," scYB "," scXL "," scYT, scRect := a_temp . "\scRect_" . rName(0,"png"))
+		rect := True
+		
     }
 
 #if options.selectSingleNode("//ScrTools/@prtscr").text
 ;} Added for correct folding in C++ Lexer (To be removed when finished)
 PrintScreen::
     if (!rect)
-        CaptureScreen(a_thishotkey = "Printscreen" ? 0 : 1, 0, scWin := a_temp . "\scWin_" . rName(0,"png"))
+        CaptureScreen(a_thishotkey = "Printscreen" ? 0 : 1, scWin := a_temp . "\scWin_" . rName(0,"png"))
 
-    if FileExist(scWin)
+	if FileExist(scWin)
         image := scWin
     else if FileExist(scRect)
         image := scRect
 
-    Tooltip % "Clipboard: " Clipboard := imgUpload(image, "cc6055c88e33af94a7577e2fe845ae66")
-    Sleep, 5*sec
-    Tooltip
+    ; Tooltip % "Clipboard: " Clipboard := imgUpload(image, "cc6055c88e33af94a7577e2fe845ae66")
+    ; Sleep, 5*sec
+    ; Tooltip
 
-    FileDelete, %scWin%
-    FileDelete, %scRect%
+    FileMove, %scWin%, D:\Isaias\Google Drive\Preparados\Temp
+    FileMove, %scRect%, D:\Isaias\Google Drive\Preparados\Temp
     rect := False
 return
 ;}
@@ -4759,8 +4801,23 @@ return
 return
 ;}
 
+;{ Temp
+; Del::Home
+; pgDn::End
+; pgUp::PgDn
+; Home::Ins
+; End::PgUp
+; Ins::Del
+; Appskey::RWin
+
+#ifwinactive, .*Nikronius
+pgDn::Send !{Space}n
+#ifwinactive
+
+;}
+
 ;{ Forum Hotstrings
-#IfWinActive AutoHotkey Community
+#IfWinActive .* AutoHotkey Community
 :*B0:[b]::[/b]{Left 4}
 :*B0:[c]::[/c]{Left 4}
 :*B0:[i]::[/i]{Left 4}
@@ -4797,13 +4854,13 @@ Exe_File=%In_Dir%\lib\AHK-ToolKit.exe
 Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
 [VERSION]
 Set_Version_Info=1
-File_Version=0.8.1.1
+File_Version=0.9.0-161030
 Inc_File_Version=0
 Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.8.1.1
+Product_Version=0.9.0-161030
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico
