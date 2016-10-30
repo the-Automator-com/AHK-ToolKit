@@ -40,9 +40,12 @@
     
     if !DllCall("hhctrl.ocx\HtmlHelp", "Ptr", hwndCaller, "Str", pszFile, "Uint", HH_KEYWORD_LOOKUP, "Ptr", &HH_AKLINK)
     {
+		SetTitleMatchMode, 2
         Run, % pszFile
-        Sleep 1000
-        Send, !n%clipboard%{Enter}
+		WinWait, AutoHotkey Help
+		WinActivate, AutoHotkey Help
+        if WinActive("AutoHotkey Help")
+			Send, !n%clipboard%{Enter}
     }
     return 0
 }

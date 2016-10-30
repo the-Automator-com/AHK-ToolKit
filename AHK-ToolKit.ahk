@@ -2,7 +2,7 @@
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * @Script Version   : 0.8.7.2
+ * @Script Version   : 0.9.0-161030
  * @Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * @Creation Date    : July 11, 2010
@@ -109,7 +109,7 @@ GroupAdd, ScreenTools, ahk_class triuiScreen
 Clipboard := null
 global script := { base        : scriptobj
                   ,name        : "AHK-ToolKit"
-                  ,version     : "0.8.7.2"
+                  ,version     : "0.9.0-161030"
                   ,author      : "RaptorX"
                   ,email       : "graptorx@gmail.com"
                   ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
@@ -124,10 +124,10 @@ script.getparams(), ForumMenu(), TrayMenu()  ; These function are here so that
 
 ;[User Configuration]{
 
-if !(a_isadmin) {
-	Run, *RunAs "%A_ScriptFullPath%"
-	ExitApp
-}
+;if !(a_isadmin) {
+	;Run, *RunAs "%A_ScriptFullPath%"
+	;ExitApp
+;}
 
 global system := {}, sci := {} ; Scintilla array
 global conf := ComObjCreate("MSXML2.DOMDocument"), xsl := ComObjCreate("MSXML2.DOMDocument"), root, options, hotkeys, hotstrings
@@ -3351,7 +3351,7 @@ ListHandler(sParam=0){
         GuiControl,07: ChooseString,slGroup, %_current%
         sci[4].SetText(unused, _editNode.text)
 
-        Gui, 01: +Disable
+        ; Gui, 01: +Disable
         Gui, 07: Show
         return
     }
@@ -4716,52 +4716,58 @@ WM(var){
 ^+F12::Suspend, Toggle
 ^CtrlBreak::Reload
 
-#if options.selectSingleNode("//ScrTools/@altdrag").text && !WinActive("ahk_group ScreenTools")
+#if options.selectSingleNode("//ScrTools/@altdrag").text && !WinActive("ahk_group ScreenTools") ;&& !WinActive("Store Manager")
 ;} Added for correct folding in C++ Lexer (To be removed when finished)
-!LButton::                                                              ;{ [Alt + LButton] Capture Active Window/Area
++!LButton::                                                              ;{ [Alt + LButton] Capture Active Window/Area
     CoordMode, Mouse, Screen
-    rect := False
+    rect := rectBox := False
     MouseGetPos, scXL, scYT
     WinMove, % "SelBox",, %scXL%, %scYT%
     Sleep, 150
     if GetKeyState("LButton", "P"){
-    Gui, 99: Show, w1 h1 x%scXL% y%scYT%, % "SelBox"
-    WinSet, Transparent, 120, % "SelBox"
-    While GetKeyState("LButton", "P")
-    {
-        ; amazing solution by adabo
-        ; first we check which direction we are dragging the mouse
-        ; then we calculate the width and height and finally show the GUI
-        MouseGetPos, scXR, scYB
-        if (scXL < scXR) and (scYT < scYB) ; direction - right up
-            Gui, 99:Show, % "x"(scXL) "y"(scYT) "w"(scXR - scXL) "h"(scYB - scYT), % "SelBox"
+		
+		Gui, 99: Show, w1 h1 x%scXL% y%scYT%, % "SelBox"
+		WinSet, Transparent, 120, % "SelBox"
+		While GetKeyState("LButton", "P")
+		{
+			; amazing solution by adabo
+			; first we check which direction we are dragging the mouse
+			; then we calculate the width and height and finally show the GUI
+			MouseGetPos, scXR, scYB
+			if (scXL < scXR) and (scYT < scYB) ; direction - right up
+				Gui, 99:Show, % "x"(scXL) "y"(scYT) "w"(scXR - scXL) "h"(scYB - scYT), % "SelBox"
 
-        if (scXL < scXR) and (scYT > scYB) ; direction - right down
-            Gui, 99:Show, % "x"(scXL) "y"(scYB) "w"(scXR - scXL) "h"(scYT - scYB), % "SelBox"
+			if (scXL < scXR) and (scYT > scYB) ; direction - right down
+				Gui, 99:Show, % "x"(scXL) "y"(scYB) "w"(scXR - scXL) "h"(scYT - scYB), % "SelBox"
 
-        if (scXL > scXR) and (scYT < scYB) ; direction - left up
-            Gui, 99:Show, % "x"(scXR) "y"(scYT) "w"(scXL - scXR) "h"(scYB - scYT), % "SelBox"
+			if (scXL > scXR) and (scYT < scYB) ; direction - left up
+				Gui, 99:Show, % "x"(scXR) "y"(scYT) "w"(scXL - scXR) "h"(scYB - scYT), % "SelBox"
 
-        if (scXL > scXR) and (scYT > scYB) ; direction - left down
-            Gui, 99:Show, % "x"(scXR) "y"(scYB) "w"(scXL - scXR) "h"(scYT - scYB), % "SelBox"
+			if (scXL > scXR) and (scYT > scYB) ; direction - left down
+				Gui, 99:Show, % "x"(scXR) "y"(scYB) "w"(scXL - scXR) "h"(scYT - scYB), % "SelBox"
 
-        WinGetPos,,, guiw, guih, % "SelBox"
-        ToolTip, % guiw "," guih
-        if GetKeyState("RButton", "P")
-        {
-            ToolTip
-            Gui, 99: Show, Hide w1 h1 x0 y0, % "SelBox"
-            return
-        }
-    }
-    ToolTip
-    Gui, 99: Show, Hide w1 h1 x0 y0, % "SelBox"
-    outputdebug, % scXL "-" scXR
-    if (scXL < scXR)
-        CaptureScreen(scXL "," scYT "," scXR "," scYB, scRect := a_temp . "\scRect_" . rName(0,"png"))
-    else
-        CaptureScreen(scXR "," scYB "," scXL "," scYT, scRect := a_temp . "\scRect_" . rName(0,"png"))
-    rect := True
+			WinGetPos,,, guiw, guih, % "SelBox"
+			ToolTip, % guiw "," guih
+			if GetKeyState("RButton", "P")
+			{
+				ToolTip
+				Gui, 99: Show, Hide w1 h1 x0 y0, % "SelBox"
+				return
+			}
+			
+			; if GetKeyState("LButton", "P")
+				; rectBox := True
+		}
+		
+		ToolTip
+		Gui, 99: Show, Hide w1 h1 x0 y0, % "SelBox"
+		outputdebug, % scXL "-" scXR
+		if (scXL < scXR)
+			CaptureScreen(scXL "," scYT "," scXR "," scYB, scRect := a_temp . "\scRect_" . rName(0,"png"))
+		else
+			CaptureScreen(scXR "," scYB "," scXL "," scYT, scRect := a_temp . "\scRect_" . rName(0,"png"))
+		rect := True
+		
     }
 
 #if options.selectSingleNode("//ScrTools/@prtscr").text
@@ -4770,17 +4776,17 @@ PrintScreen::
     if (!rect)
         CaptureScreen(a_thishotkey = "Printscreen" ? 0 : 1, scWin := a_temp . "\scWin_" . rName(0,"png"))
 
-    if FileExist(scWin)
+	if FileExist(scWin)
         image := scWin
     else if FileExist(scRect)
         image := scRect
 
-    Tooltip % "Clipboard: " Clipboard := imgUpload(image, "cc6055c88e33af94a7577e2fe845ae66")
-    Sleep, 5*sec
-    Tooltip
+    ; Tooltip % "Clipboard: " Clipboard := imgUpload(image, "cc6055c88e33af94a7577e2fe845ae66")
+    ; Sleep, 5*sec
+    ; Tooltip
 
-    FileDelete, %scWin%
-    FileDelete, %scRect%
+    FileMove, %scWin%, D:\Isaias\Google Drive\Preparados\Temp
+    FileMove, %scRect%, D:\Isaias\Google Drive\Preparados\Temp
     rect := False
 return
 ;}
@@ -4796,13 +4802,13 @@ return
 ;}
 
 ;{ Temp
-Del::Home
-pgDn::End
-pgUp::PgDn
-Home::Ins
-End::PgUp
-Ins::Del
-Appskey::RWin
+; Del::Home
+; pgDn::End
+; pgUp::PgDn
+; Home::Ins
+; End::PgUp
+; Ins::Del
+; Appskey::RWin
 
 #ifwinactive, .*Nikronius
 pgDn::Send !{Space}n
@@ -4848,13 +4854,13 @@ Exe_File=%In_Dir%\lib\AHK-ToolKit.exe
 Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
 [VERSION]
 Set_Version_Info=1
-File_Version=0.8.7.2
+File_Version=0.9.0-161030
 Inc_File_Version=0
 Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.8.7.2
+Product_Version=0.9.0-161030
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico
