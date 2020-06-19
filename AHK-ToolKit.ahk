@@ -94,8 +94,8 @@ SetBatchLines, -1
 SetTitleMatchMode, RegEx
 CoordMode, Caret, Screen
 CoordMode, Tooltip, Screen
-SetWorkingDir, %a_scriptdir%
 OnExit, Exit
+SetWorkingDir, %a_scriptdir%
 ; --
 GroupAdd, ScreenTools, ahk_class SWarClass
 GroupAdd, ScreenTools, ahk_class Photoshop
@@ -106,7 +106,9 @@ GroupAdd, ScreenTools, ahk_class triuiScreen
 ;}
 
 ;[Basic Script Info]{
-Clipboard := null
+realexit := false
+Gosub, Exit
+realexit := true
 global script := { base        : scriptobj
                   ,name        : "AHK-ToolKit"
                   ,version     : "0.9.0-161030"
@@ -275,7 +277,8 @@ return
 OnClipboardChange:  ;{
     Critical
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
-    if options.selectSingleNode("//Codet/@status").text
+    
+	if options.selectSingleNode("//Codet/@status").text
     {
         if (Clipboard = oldScript)
             return
@@ -295,6 +298,24 @@ OnClipboardChange:  ;{
                 pasteUpload("show")
         }
     }
+	
+	if (instr(clipboard, "77CG") || instr(clipboard, "77CF"))
+		return
+	
+	ifwinactive, Google Maps
+	if (regexmatch(clipboard, "(\w{4}\+\w{2})")){
+		
+		if clipboard contains HV,HW,HX,GV,GW,GX,FV,FW,FX
+			clipboard := "77CF" regexreplace(clipboard, "\s.*")
+		else
+			clipboard := "77CG" regexreplace(clipboard, "\s.*")
+		tooltip % clipboard		
+	}
+		
+	sleep 3*sec
+	tooltip
+	
+
 return
 ;}
 
@@ -320,15 +341,19 @@ return
 
 
 Exit:
-    Process,Close, %hslPID%
+	
     if FileExist(a_temp "\ahkl.bak")
         FileDelete, %a_temp%\ahkl.bak
-
-    if FileExist(a_temp "\*.code")
+	
+	Process,Close, %hslPID%
+    if (FileExist(a_temp "\*.code"))
         Loop, % a_temp "\*.code"
             FileDelete, %a_loopfilefullpath%
 
-    ExitApp
+if (realexit)
+	ExitApp
+else
+	return
 ;}
 
 ;[Functions]{
@@ -4709,6 +4734,8 @@ WM(var){
 }
 ;}
 
+;}
+
 ;[Classes]{
 ;}
 
@@ -4725,7 +4752,7 @@ WM(var){
     WinMove, % "SelBox",, %scXL%, %scYT%
     Sleep, 150
     if GetKeyState("LButton", "P"){
-		
+
 		Gui, 99: Show, w1 h1 x%scXL% y%scYT%, % "SelBox"
 		WinSet, Transparent, 120, % "SelBox"
 		While GetKeyState("LButton", "P")
@@ -4754,11 +4781,11 @@ WM(var){
 				Gui, 99: Show, Hide w1 h1 x0 y0, % "SelBox"
 				return
 			}
-			
+
 			; if GetKeyState("LButton", "P")
 				; rectBox := True
 		}
-		
+
 		ToolTip
 		Gui, 99: Show, Hide w1 h1 x0 y0, % "SelBox"
 		outputdebug, % scXL "-" scXR
@@ -4767,7 +4794,7 @@ WM(var){
 		else
 			CaptureScreen(scXR "," scYB "," scXL "," scYT, scRect := a_temp . "\scRect_" . rName(0,"png"))
 		rect := True
-		
+
     }
 
 #if options.selectSingleNode("//ScrTools/@prtscr").text
@@ -4785,16 +4812,33 @@ PrintScreen::
     ; Sleep, 5*sec
     ; Tooltip
 
-    FileMove, %scWin%, D:\Isaias\Google Drive\Preparados\Temp
-    FileMove, %scRect%, D:\Isaias\Google Drive\Preparados\Temp
+    FileMove, %scWin%, D:\RaptorX\Google Drive\Preparados\Temp
+    FileMove, %scRect%, D:\RaptorX\Google Drive\Preparados\Temp
     rect := False
 return
 ;}
-#if
-;} Added for correct folding in C++ Lexer (To be removed when finished)
-#IfWinActive
 
-^F5::                                                                   ;{ [Ctrl + F5] Run Selected Code
+Pause::
+Gui, MuteNotification:  New, +AlwaysOnTop +ToolWindow -Caption 
+
+SoundSet, +1, WAVE, MUTE,10
+SoundGet, mic_stat, WAVE, MUTE, 10
+
+Gui, MuteNotification: font, s20 w600 cRed
+Gui, MuteNotification: add, text,, Muted
+
+Gui, MuteNotification: Show, x5 y5
+
+if (mic_stat = "Off")
+	Gui, MuteNotification:  Destroy
+return
+
+#if
+;#IfWinActive
+
+;} Added for correct folding in C++ Lexer (To be removed when finished)
+
+^+F5::                                                                   ;{ [Ctrl + Shift + F5] Run Selected Code
     Send, ^c
     ClipWait
     lcRun()
@@ -4811,7 +4855,7 @@ return
 ; Appskey::RWin
 
 #ifwinactive, .*Nikronius
-pgDn::Send !{Space}n
+; pgDn::Send !{Space}n
 #ifwinactive
 
 ;}
