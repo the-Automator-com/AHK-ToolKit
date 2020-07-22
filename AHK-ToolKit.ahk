@@ -248,9 +248,10 @@ GuiSize:            ;{
     if (a_gui = 1)
     {
         _lists := "hkList|shkList|hsList|shsList"
-        _guiwidth := a_guiwidth, _guiheight:= a_guiheight
-        SB_SetParts(150,150,a_guiwidth-378,50)
-
+        _guiwidth := a_guiwidth, _guiheight := a_guiheight, versize := strlen(script.version)*10
+        
+		updateSB(a_guiwidth)
+		
         Loop, Parse, _lists, |
         {
             Gui, 01: ListView, % a_loopfield
@@ -4427,11 +4428,14 @@ rName(length="", filext=""){
 	Else
 		return rName . "." . filext
 }
-updateSB(){
+updateSB(window=""){
     global $hwnd1
 
     WinGetPos,,, _w,, ahk_id %$hwnd1%
-    SB_SetParts(150,150,_w - 388,50) ; including 8 pixes for the borders.
+	versize := strlen(script.version)*7 						; 7 pixels per character
+	emptysize := (window ? window : _w)- (150+150+versize) - 35 ; window size minus the sum of all parts minus 35 pixel padding
+	
+	SB_SetParts(150,150,emptysize,versize)
     SB_SetText("`t" root.selectSingleNode("//Hotkeys/@count").text " Hotkeys currently active",1)
     SB_SetText("`t" root.selectSingleNode("//Hotstrings/@count").text " Hotstrings currently active",2)
     SB_SetText("`tv" script.version,4)
