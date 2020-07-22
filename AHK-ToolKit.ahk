@@ -305,7 +305,7 @@ OnClipboardChange:  ;{
 	ifwinactive, Google Maps
 	if (regexmatch(clipboard, "(\w{4}\+\w{2})")){
 		
-		if clipboard contains HV,HW,HX,GV,GW,GX,FV,FW,FX
+		if regexmatch(clipboard, "(HV|HW|HX|GV|GW|GX|FV|FW|FX)\w{2}\+")
 			clipboard := "77CF" regexreplace(clipboard, "\s.*")
 		else
 			clipboard := "77CG" regexreplace(clipboard, "\s.*")
@@ -3197,7 +3197,7 @@ MenuHandler(stat=0){
             FileDelete, %lcfPath%
             lcFile := FileOpen(lcfPath, "rw `n", "UTF-8")
             sci[1].GetText(sci[1].GetLength()+1, _lcCode)
-            lcFile.Write(_lcCode), lcFile.Close()
+            lcFile.Write(_lcCode), lcFile.Close(), lcfPath := "" ; clean path to be able to save other files
         return
     }
 
@@ -4799,6 +4799,7 @@ WM(var){
 
 #if options.selectSingleNode("//ScrTools/@prtscr").text
 ;} Added for correct folding in C++ Lexer (To be removed when finished)
+/*
 PrintScreen::
     if (!rect)
         CaptureScreen(a_thishotkey = "Printscreen" ? 0 : 1, scWin := a_temp . "\scWin_" . rName(0,"png"))
@@ -4812,56 +4813,26 @@ PrintScreen::
     ; Sleep, 5*sec
     ; Tooltip
 
-    FileMove, %scWin%, D:\RaptorX\Google Drive\Preparados\Temp
-    FileMove, %scRect%, D:\RaptorX\Google Drive\Preparados\Temp
+    ;FileMove, %scWin%, D:\RaptorX\Google Drive\Preparados\Temp
+    ;FileMove, %scRect%, D:\RaptorX\Google Drive\Preparados\Temp
     rect := False
 return
+*/
 ;}
 
-Pause::
-Gui, MuteNotification:  New, +AlwaysOnTop +ToolWindow -Caption 
-
-SoundSet, +1, WAVE, MUTE,10
-SoundGet, mic_stat, WAVE, MUTE, 10
-
-Gui, MuteNotification: font, s20 w600 cRed
-Gui, MuteNotification: add, text,, Muted
-
-Gui, MuteNotification: Show, x5 y5
-
-if (mic_stat = "Off")
-	Gui, MuteNotification:  Destroy
-return
-
-#if
-;#IfWinActive
-
-;} Added for correct folding in C++ Lexer (To be removed when finished)
+#if 
+;}
 
 ^+F5::                                                                   ;{ [Ctrl + Shift + F5] Run Selected Code
     Send, ^c
     ClipWait
     lcRun()
 return
-;}
-
-;{ Temp
-; Del::Home
-; pgDn::End
-; pgUp::PgDn
-; Home::Ins
-; End::PgUp
-; Ins::Del
-; Appskey::RWin
-
-#ifwinactive, .*Nikronius
-; pgDn::Send !{Space}n
-#ifwinactive
 
 ;}
 
 ;{ Forum Hotstrings
-#IfWinActive .* AutoHotkey Community
+#IfWinActive AutoHotkey Community .*
 :*B0:[b]::[/b]{Left 4}
 :*B0:[c]::[/c]{Left 4}
 :*B0:[i]::[/i]{Left 4}
