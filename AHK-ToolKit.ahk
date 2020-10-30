@@ -89,6 +89,7 @@
 #NoEnv
 #SingleInstance Force
 ; --
+FileEncoding, UTF-8-RAW
 SendMode, Input
 SetBatchLines, -1
 SetTitleMatchMode, RegEx
@@ -131,6 +132,7 @@ script.getparams(), ForumMenu(), TrayMenu()  ; These function are here so that
 	;ExitApp
 ;}
 
+
 global system := {}, sci := {} ; Scintilla array
 global conf := ComObjCreate("MSXML2.DOMDocument"), xsl := ComObjCreate("MSXML2.DOMDocument"), root, options, hotkeys, hotstrings
 system.mon := {}, system.wa := {}
@@ -139,7 +141,6 @@ RegRead,defBrowser,HKCR,.html                               ; Get default browsw
 RegRead,defBrowser,HKCR,%defBrowser%\Shell\Open\Command     ; Get path to default browser + options
 SysGet, mon, Monitor                                        ; Get the boundaries of the current screen
 SysGet, wa, MonitorWorkArea                                 ; Get the working area of the current screen
-
 system.defBrowser := defBrowser
 system.mon.left := monLEFT, system.mon.right := monRIGHT, system.mon.top := monTOP, system.mon.bottom := monBOTTOM
 system.wa.left := waLEFT, system.wa.right := waRIGHT, system.wa.top := waTOP, system.wa.bottom := waBOTTOM
@@ -249,9 +250,9 @@ GuiSize:            ;{
     {
         _lists := "hkList|shkList|hsList|shsList"
         _guiwidth := a_guiwidth, _guiheight := a_guiheight, versize := strlen(script.version)*10
-        
+
 		updateSB(a_guiwidth)
-		
+
         Loop, Parse, _lists, |
         {
             Gui, 01: ListView, % a_loopfield
@@ -278,7 +279,7 @@ return
 OnClipboardChange:  ;{
     Critical
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
-    
+
 	if options.selectSingleNode("//Codet/@status").text
     {
         if (Clipboard = oldScript)
@@ -299,23 +300,23 @@ OnClipboardChange:  ;{
                 pasteUpload("show")
         }
     }
-	
+
 	if (instr(clipboard, "77CG") || instr(clipboard, "77CF"))
 		return
-	
+
 	ifwinactive, Google Maps
 	if (regexmatch(clipboard, "(\w{4}\+\w{2})")){
-		
+
 		if regexmatch(clipboard, "(HV|HW|HX|GV|GW|GX|FV|FW|FX)\w{2}\+")
 			clipboard := "77CF" regexreplace(clipboard, "\s.*")
 		else
 			clipboard := "77CG" regexreplace(clipboard, "\s.*")
-		tooltip % clipboard		
+		tooltip % clipboard
 	}
-		
+
 	sleep 3*sec
 	tooltip
-	
+
 
 return
 ;}
@@ -342,10 +343,10 @@ return
 
 
 Exit:
-	
+
     if FileExist(a_temp "\ahkl.bak")
         FileDelete, %a_temp%\ahkl.bak
-	
+
 	Process,Close, %hslPID%
     if (FileExist(a_temp "\*.code"))
         Loop, % a_temp "\*.code"
@@ -4434,7 +4435,7 @@ updateSB(window=""){
     WinGetPos,,, _w,, ahk_id %$hwnd1%
 	versize := strlen(script.version)*7 						; 7 pixels per character
 	emptysize := (window ? window : _w)- (150+150+versize) - 35 ; window size minus the sum of all parts minus 35 pixel padding
-	
+
 	SB_SetParts(150,150,emptysize,versize)
     SB_SetText("`t" root.selectSingleNode("//Hotkeys/@count").text " Hotkeys currently active",1)
     SB_SetText("`t" root.selectSingleNode("//Hotstrings/@count").text " Hotstrings currently active",2)
@@ -4824,7 +4825,7 @@ return
 */
 ;}
 
-#if 
+#if
 ;}
 
 ^+F5::                                                                   ;{ [Ctrl + Shift + F5] Run Selected Code
