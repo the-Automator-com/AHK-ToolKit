@@ -338,7 +338,7 @@ OpenHelpFile:       ;{
     Clipboard:=""
     Send, {Ctrl Down}{left}+{right}c{CtrlUp}
     ClipWait
-    htmlhelp(hwnd, regexreplace(a_ahkpath, "exe$", "chm"), clipboard)
+    htmlhelp(hwnd, regexreplace(a_ahkpath, "(U32)?\.exe$", ".chm"), clipboard)
     Clipboard := oldclip
 return
 ;}
@@ -347,7 +347,7 @@ ForumTags:          ;{
     oldclip := ClipboardAll
     Send, {Ctrl Down}{left}+{right}c{CtrlUp}
     ClipWait
-    htmlhelp("ForumHelper", regexreplace(a_ahkpath, "exe$", "chm"), clipboard)
+    htmlhelp("ForumHelper", regexreplace(a_ahkpath, "(U32)?\.exe$", "chm"), clipboard)
     Clipboard := oldclip
 return
 ;}
