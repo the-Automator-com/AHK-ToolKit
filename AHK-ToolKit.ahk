@@ -72,6 +72,18 @@
     Exitapp
 }
 
+if (a_is64bitos && !a_iscompiled && A_PtrSize = 8){
+
+	ahkpath := regexreplace(a_ahkpath, "i)\\Autohotkey.exe", "\AutoHotkeyU32.exe")
+
+	if (!FileExist(ahkpath)){
+		ahkpath := a_temp "\ahkl.bak"
+		FileInstall, res\ahkl.bak, %ahkpath%, true
+	}
+	Run % ahkpath " """ A_ScriptFullPath """"
+	ExitApp
+}
+
 ;[Includes]{
 #include <sc>
 #include <sci>
