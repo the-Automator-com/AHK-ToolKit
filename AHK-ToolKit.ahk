@@ -101,7 +101,6 @@ if (a_is64bitos && !a_iscompiled && A_PtrSize = 8){
 #NoEnv
 #SingleInstance Force
 ; --
-FileEncoding, UTF-8-RAW
 SendMode, Input
 SetBatchLines, -1
 SetTitleMatchMode, RegEx

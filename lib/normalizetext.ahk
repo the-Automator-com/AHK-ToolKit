@@ -1,8 +1,8 @@
-/*
+﻿/*
     function: normalizeText
 
     description:
-    This function strips text from unwanted characters and returns a properly formatted Text and 
+    This function strips text from unwanted characters and returns a properly formatted Text and
 	provides some specific dominican address fixes.
 
     The normalization process is done in steps.
@@ -33,7 +33,7 @@ normalizeText(value){
 
 	for k,v in accnt
 		if (instr(value, k))
-			msgbox % value := RegexReplace(value, k, v)
+			value := RegexReplace(value, k, v)
 
     /*
         remove period at the end because this is not a sentence
@@ -64,13 +64,13 @@ normalizeText(value){
 	value := regexreplace(value, "i)av\s", "Av. ")
 	value := regexreplace(value, "i)(Apartamento|\bapto\.?\b|\bapart\.?\b)", "Apt. ")
 	value := regexreplace(value, "i)(distrito nacional|sto\.?\s?dgo\.?|(\bd\.?\s?n\.?\b|\bs\.?\s?d\.?\b)\W)", "Santo Domingo")
-	
+
 	/*
         remove special non meaningful and non printable characters
     */
     value := regexreplace(value, "[^a-zA-Z0-9ñÑ\-\s\.\'\#]")
 
-	
+
 	/*
 		convert to proper case
 	*/
