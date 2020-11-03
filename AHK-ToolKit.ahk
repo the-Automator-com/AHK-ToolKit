@@ -4496,7 +4496,7 @@ lcRun(_gui=0){
     FileAppend, %live_code%, %lcfPath%
 
     ahkpath := options.selectSingleNode("//RCPaths/" options.selectSingleNode("//RCPaths/@current").text).text
-    if !ahkpath
+    if (!fileExist(ahkpath) && !ahkpath := a_ahkpath)
     {
         ahkpath := a_temp "\ahkl.bak"
         FileInstall, res\ahkl.bak, %ahkpath%
