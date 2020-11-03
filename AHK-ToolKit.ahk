@@ -4462,6 +4462,9 @@ lcRun(_gui=0){
     else
         _code := Clipboard
 
+	if (_code == 5)
+		_code := "" ; fix sci wrapper error that sets variable to 5 when calling GetText on blank buffer
+
     if !InStr(_code,"Gui")
         _code .= "`n`nExitApp"
     else if !InStr(_code,"GuiClose")
