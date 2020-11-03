@@ -72,11 +72,11 @@
     Exitapp
 }
 
-if (a_is64bitos && !a_iscompiled && A_PtrSize = 8){
+if ((A_PtrSize = 8 && !a_iscompiled) || !a_isunicode){
 
 	ahkpath := regexreplace(a_ahkpath, "i)\\Autohotkey.exe", "\AutoHotkeyU32.exe")
 
-	if (!FileExist(ahkpath)){
+	if (!FileExist(ahkpath) && !ahkpath := a_ahkpath){
 		ahkpath := a_temp "\ahkl.bak"
 		FileInstall, res\ahkl.bak, %ahkpath%, true
 	}
