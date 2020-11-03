@@ -226,9 +226,10 @@ node.text != script.version ? (node.text := script.version, conf.save(script.con
 
 ;[Main]{
 script.autostart(options.selectSingleNode("//@sww").text)
-options.selectSingleNode("//@ssi").text ? script.splash("res\img\AHK-TK_Splash.png") : null
 
 CreateGui() ; Creating GUI before checking for updates for avoiding the GUI not showing up because an update check was in progress
+
+options.selectSingleNode("//@ssi").text ? script.splash("res\img\AHK-TK_Splash.png", 10) : null
 options.selectSingleNode("//@cfu").text ? script.update(script.version) : null
 
 Return                      ; [End of Auto-Execute area]

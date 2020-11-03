@@ -3,7 +3,7 @@
  * Author           : RaptorX   <graptorx@gmail.com>
  * Script Name      : Script Object
  * Script Version   : 1.0
- * Homepage         : 
+ * Homepage         :
  *
  * Creation Date    : September 03, 2011
  * Modification Date: October 05, 2012
@@ -11,7 +11,7 @@
  * Description      :
  * ------------------
  * This is an object used to have a few common functions between scripts
- * Those are functions related to script information 
+ * Those are functions related to script information
  *
  * -----------------------------------------------------------------------------------------------
  * License          :       Copyright ©2010-2012 RaptorX <GPLv3>
@@ -32,7 +32,7 @@
  *                                          Script Object
  * =============================================================================================== *
  */
- 
+
 ;[General Variables]{
 ; Make SuperGlobal variables
 global unused:=0, null:="",sec:=1000,min:=60*sec,hour:=60*min
@@ -52,7 +52,7 @@ class scriptobj
     dbg         := false
     sdbg        := false
     src         := false
-    
+
     getparams(){
         global
         ; First we organize the parameters by priority [-sd, then -d , then everything else]
@@ -179,7 +179,7 @@ class scriptobj
             node.text := script.version
             conf.save(script.conf), conf.load(script.conf), node:=root:=options:=null             ; Save & Clean
         }
-        
+
         if a_thismenuitem = Check for Updates
             Progress, 50,,, % "Updating..."
 
@@ -197,15 +197,15 @@ class scriptobj
             UrlDownloadToFile, %logurl%, %a_temp%\logurl
             FileReadLine, logurl, %a_temp%\logurl, %vline%
             FileDelete, %a_temp%\logurl
-            
+
             script.dbg ? script.debug("* Version: " logurl) : null
             RegexMatch(logurl, "v(.*)", Version)
-            rfile := rfile = "github" ? ("https://www.github.com/"  
-                                      . script.author "/" 
+            rfile := rfile = "github" ? ("https://www.github.com/"
+                                      . script.author "/"
                                       . script.name "/zipball/" (a_iscompiled ? "latest-compiled" : "latest"))
                                       : rfile
             script.dbg ? script.debug("* Local Version: " lversion " Remote Version: " Version1) : null
-            
+
             if (Version1 > lversion){
                 Progress, Off
                 script.dbg ? script.debug("* There is a new update available") : null
@@ -229,7 +229,7 @@ class scriptobj
                 oShell := ComObjCreate("Shell.Application")
                 oDir := oShell.NameSpace(a_temp), oZip := oShell.NameSpace(a_temp "\" script.name ".zip") ; slashes are sensitive
                 oDir.CopyHere(oZip.Items), oShell := oDir := oZip := ""
-                
+
                 ; FileCopy instead of FileMove so that file permissions are inherited correctly.
                 Loop, % a_temp "/" script.author "*", 1
                 {
@@ -252,11 +252,11 @@ class scriptobj
                         FileRemoveDir, % a_temp "/" a_loopfilename, 1
                     }
                 }
-                
+
                 ; Clean
                 FileDelete, % a_temp "/" script.name ".zip"
                 FileRemoveDir, % a_temp "/Temporary Directory 1 for " script.name ".zip", 1
-                
+
                 Msgbox, 0x40040
                       , % "Installation Complete"
                       , % "The application will now restart."
@@ -296,31 +296,31 @@ class scriptobj
             return 3
         }
     }
-    splash(img=""){
+    splash(img="", speed=5){
         global
 
-        Gui, 99: -Caption +LastFound +Border +AlwaysOnTop +Owner
-        $hwnd := WinExist()
+        Gui, Splash: -Caption +LastFound +Border +AlwaysOnTop +Owner
+        $hwnd := WinExist(), alpha := 0
         WinSet, Transparent, 0
 
-        Gui, 99: add, Picture, x0 y0, % img
-        Gui, 99: show, w500 h200 NoActivate
+		Gui, Splash: add, Picture, x0 y0, % img
+        Gui, Splash: show, w500 h200 ;NoActivate
 
+		SetBatchLines 3
         Loop, 255
         {
-            alpha += 1
+            alpha += speed
             WinSet, Transparent, %alpha%
         }
 
-        Sleep, 2.5*sec
-
-        Loop, 255
-        {
-            alpha--
-            WinSet, Transparent, %alpha%
+		Loop, 255
+		{
+            alpha -= speed
+			WinSet, Transparent, %alpha%
         }
+		SetBatchLines -1
 
-        Gui, 99: destroy
+        Gui, Splash: destroy
         return
     }
     autostart(status){
@@ -339,7 +339,7 @@ class scriptobj
         }
     }
     debug(msg,delimiter = false){
-    
+
         static ft := true   ; First time
 
         t := delimiter = 1 ? msg := "* ------------------------------------------`n" msg
@@ -368,7 +368,7 @@ Download(url, file)
     static vt
     SplitPath file, dFile
     x:=(a_screenwidth/2)-(330/2), y:=(a_screenheight/2)-(52/2), VarSetCapacity(_cu, 100), VarSetCapacity(tn, 520)
-    
+
     if !VarSetCapacity(vt)
     {
         VarSetCapacity(vt, A_PtrSize*11), nPar := "31132253353"
@@ -378,7 +378,7 @@ Download(url, file)
 
     DllCall("shlwapi\PathCompactPathEx", "str", _cu, "str", url, "uint", 50, "uint", 0)
     Progress, Hide CWE0E0E0 CT000020 CB1111DD x%x% y%y% w330 h52 B1 FM8 FS8 WM700 WS700 ZH12 ZY3 C11,, %_cu%, % script.name, Tahoma
-    
+
     if (0 = DllCall("urlmon\URLDownloadToCacheFile", "ptr", 0, "str", url, "str", tn, "uint", 260, "uint", 0x10, "ptr*", &vt))
         FileCopy %tn%, %file%
     else
