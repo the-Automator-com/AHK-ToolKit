@@ -1,4 +1,4 @@
-﻿/*
+/*
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
@@ -193,7 +193,7 @@ if !conf.load(script.conf)
     if FileExist(script.conf)
     {
         Msgbox, 0x14
-              , % "Error while reading the configuration file."
+			  , % "Error while reading the configuration file."
               , % "The configuration file is corrupt.`n"
                 . "Do you want to load the default configuration file?`n`n"
                 . "Note: `n"
