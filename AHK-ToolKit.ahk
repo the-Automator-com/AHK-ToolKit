@@ -4843,11 +4843,13 @@ return
 #if
 ;}
 
+/*
 ^+F5::                                                                   ;{ [Ctrl + Shift + F5] Run Selected Code
     Send, ^c
     ClipWait
     lcRun()
 return
+*/
 
 ;}
 
