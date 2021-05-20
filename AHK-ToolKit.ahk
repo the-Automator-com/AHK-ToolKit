@@ -546,10 +546,12 @@ MainMenu(){
     Menu, View, add, Line Wrap, MenuHandler
     Menu, View, disable, Line Wrap
 
-    Menu, RCW, add, L-Ansi, MenuHandler
-    Menu, RCW, add, L-Unicode, MenuHandler
-    Menu, RCW, add, Basic, MenuHandler
-    Menu, RCW, add, IronAHK, MenuHandler
+    Menu, RCW, add, Ansi32v1, MenuHandler
+    Menu, RCW, add, Unicode32v1, MenuHandler
+    Menu, RCW, add, Unicode64v1, MenuHandler
+    Menu, RCW, add
+    Menu, RCW, add, Unicode32v2, MenuHandler
+    Menu, RCW, add, Unicode64v2, MenuHandler
 
     Menu, Settings, add, Run Code With, :RCW
     Menu, Settings, disable, Run Code With
@@ -3366,8 +3368,7 @@ MenuHandler(stat=0){
         return
     }
 
-    if (a_thismenuitem = "L-Ansi" || a_thismenuitem = "L-Unicode"
-    ||  a_thismenuitem = "Basic"  || a_thismenuitem = "IronAHK")
+    if RegExMatch(a_thismenuitem, "\w+v(1|2)")
     {
         rcwSet(a_thismenuitem)
         return
@@ -4034,7 +4035,7 @@ hotExtract(file, path){
     return 1
 }
 rcwSet(menu=0){
-    static names:="L-Ansi|L-Unicode|Basic|IronAHK"
+    static names:="Ansi32v1|Unicode32v1|Unicode64v1|Unicode32v2|Unicode64v2"
 
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
     node := options.selectSingleNode("//RCPaths").childNodes
@@ -4115,7 +4116,7 @@ prefControl(pref=0){
 }
 defConf(path){
     s_version := script.version, hlpPath := RegexReplace(a_ahkpath, "exe$", "chm")
-    a_isunicode ? (unicode := a_ahkpath, current := "L-Unicode") : (ansi := a_ahkpath, current := "L-Ansi")
+    a_isunicode ? (unicode := a_ahkpath, current := "Unicode32v1") : (ansi := a_ahkpath, current := "Ansi32v1")
     template=
     (
 <?xml version="1.0" encoding="UTF-8"?>
@@ -4146,10 +4147,11 @@ if exitapp gosub goto ifequal ifexist ifgreater ifgreaterorequal ifinstring ifle
 		</CMDHelper>
 		<LiveCode linewrap="1" highlighting="1" url="1" symbols="0" snplib="0">
 			<RCPaths current="%current%">
-				<L-Ansi>%ansi%</L-Ansi>
-				<L-Unicode>%unicode%</L-Unicode>
-				<Basic/>
-				<IronAHK/>
+				<Ansi32v1>%ansi%</Ansi32v1>
+				<Unicode32v1>%unicode%</Unicode32v1>
+				<Unicode64v1></Unicode64v1>
+				<Unicode32v2></Unicode32v2>
+				<Unicode64v2></Unicode64v2>
 			</RCPaths>
             <SnippetLib current="Example Snippets">
 				<Group name="Example Snippets" count="4">
