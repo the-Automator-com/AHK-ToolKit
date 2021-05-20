@@ -357,18 +357,51 @@ return
 OpenHelpFile:       ;{
     oldclip := ClipboardAll
     Clipboard:=""
-    Send, {Ctrl Down}{left}+{right}c{CtrlUp}
-    ClipWait
-    htmlhelp(hwnd, regexreplace(a_ahkpath, "(U32)?\.exe$", ".chm"), clipboard)
+
+	SendInput ^c
+	if (clipboard == "")
+	{
+		SendInput +{Left}^c{Right}
+		ClipWait 0
+		LeftChar := regexmatch(clipboard, "\w")
+
+		sleep 100
+
+		clipboard := ""
+		SendInput % (leftChar ? "^{left}" : "") "^+{right}^c"
+		ClipWait 0
+		RegExMatch(clipboard, "\w+", searchTerm)
+	}
+	else
+		searchTerm := trim(clipboard)
+
+	htmlhelp(hwnd, regexreplace(a_ahkpath, "(U32)?\.exe$", ".chm"), searchTerm)
     Clipboard := oldclip
 return
 ;}
 
 ForumTags:          ;{
     oldclip := ClipboardAll
-    Send, {Ctrl Down}{left}+{right}c{CtrlUp}
-    ClipWait
-    htmlhelp("ForumHelper", regexreplace(a_ahkpath, "(U32)?\.exe$", "chm"), clipboard)
+	Clipboard:=""
+
+	SendInput ^c
+	if (clipboard == "")
+	{
+		SendInput +{Left}^c{Right}
+		ClipWait 0
+		LeftChar := regexmatch(clipboard, "\w")
+
+		sleep 100
+
+		clipboard := ""
+		SendInput % (leftChar ? "^{left}" : "") "^+{right}^c"
+		ClipWait 0
+		RegExMatch(clipboard, "\w+", searchTerm)
+	}
+	else
+		searchTerm := trim(clipboard)
+
+	htmlhelp("ForumHelper", regexreplace(a_ahkpath, "(U32)?\.exe$", "chm"), searchTerm)
     Clipboard := oldclip
 return
 ;}
