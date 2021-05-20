@@ -72,7 +72,7 @@
     Exitapp
 }
 
-if ((A_PtrSize = 8 && !a_iscompiled) || !a_isunicode){
+if ((A_PtrSize = 8 || !a_isunicode) && !a_iscompiled){
 
 	ahkpath := regexreplace(a_ahkpath, "i)\\Autohotkey.exe", "\AutoHotkeyU32.exe")
 
