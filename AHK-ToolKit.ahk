@@ -3774,26 +3774,11 @@ HotkeyHandler(hk){
 
         live_script =
         (Ltrim
-            ;[Directives]{
-            #NoEnv
-            #SingleInstance Force
-            ; --
-            SetBatchLines -1
-            SendMode Input
-            SetWorkingDir %a_scriptdir%
-            ; --
-            ;}
-
-            sec         :=  1000               ; 1 second
-            min         :=  sec * 60           ; 1 minute
-            hour        :=  min * 60           ; 1 hour
-
             %_script%
-
         )
 
         if !InStr(_script, "^Esc::ExitApp")
-            live_script .= "^Esc::ExitApp"
+	    live_script .= "`n^Esc::ExitApp"
 
         FileAppend, %live_script%, %lcfPath%
 
@@ -4532,25 +4517,10 @@ lcRun(_gui=0){
 
     live_code =
     (Ltrim
-        ;[Directives]{
-        #NoEnv
-        #SingleInstance Force
-        ; --
-        SetBatchLines -1
-        SendMode Input
-        SetWorkingDir %a_scriptdir%
-        ; --
-        ;}
-
-        sec         :=  1000               ; 1 second
-        min         :=  sec * 60           ; 1 minute
-        hour        :=  min * 60           ; 1 hour
-
         %_code%
-
     )
     if !InStr(_code, "^Esc::ExitApp")
-        live_code .= "^Esc::ExitApp"
+	live_code .= "`n^Esc::ExitApp"
 
     FileAppend, %live_code%, %lcfPath%
 
