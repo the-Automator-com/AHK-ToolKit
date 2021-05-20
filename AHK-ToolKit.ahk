@@ -92,9 +92,9 @@ if ((A_PtrSize = 8 && !a_iscompiled) || !a_isunicode){
 #include <attach>
 #include <hkSwap>
 #include <uriSwap>
-#include <scriptobj>
 #include <htmlhelp>
 #include <httprequest>
+#include <ScriptObj\ScriptObj>
 ;}
 
 ;[Directives]{
@@ -121,18 +121,19 @@ GroupAdd, ScreenTools, ahk_class triuiScreen
 realexit := false
 Gosub, Exit
 realexit := true
-global script := { base        : scriptobj
-                  ,name        : "AHK-ToolKit"
-                  ,version     : "0.9.0-161030"
-                  ,author      : "RaptorX"
-                  ,email       : "graptorx@gmail.com"
-                  ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
-                  ,crtdate     : "July 11, 2010"
-                  ,moddate     : "October 20, 2012"
-                  ,conf        : "conf.xml"}
+global script := {base        : script
+                 ,name        : "AHK-ToolKit"
+                 ,version     : "0.9.0-161030"
+                 ,author      : "RaptorX"
+                 ,email       : "graptorx@gmail.com"
+                 ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
+                 ,crtdate     : "July 11, 2010"
+                 ,moddate     : "October 20, 2012"
+                 ,conf        : "conf.xml"}
+
 script.getparams(), ForumMenu(), TrayMenu()  ; These function are here so that
-                                             ; the Tray Icon is shown early
-                                             ; and forum menus are ready.
+					     ; the Tray Icon is shown early
+					     ; and forum menus are ready.
 
 ;}
 
