@@ -289,49 +289,68 @@ GuiSize:            ;{
 return
 ;}
 
-OnClipboardChange:  ;{
-    Critical
-    conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
+; OnClipboardChange:  ;{
+;     Critical
+;     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
 
-	if options.selectSingleNode("//Codet/@status").text
-    {
-        if (Clipboard = oldScript)
-            return
-        oldScript:=Clipboard, kword_cnt:=0
-        kwords := options.selectSingleNode("//Codet/Keywords").text     ; load every time because it might have
-                                                                        ; changed recently
+; 	; if options.selectSingleNode("//Codet/@status").text
+;     ; {
+;     ;     if (Clipboard = oldScript)
+;     ;         return
+;     ;     oldScript:=Clipboard, kword_cnt:=0
+;     ;     kwords := options.selectSingleNode("//Codet/Keywords").text     ; load every time because it might have
+;     ;                                                                     ; changed recently
 
-        Loop, Parse, kwords, %a_space%
-            if RegexMatch(Clipboard, "i)\b" a_loopfield "\b\(?")
-                kword_cnt++
-        if (kword_cnt >= options.selectSingleNode("//Codet/Keywords/@min").text)
-        {
-            kword_cnt:=0
-            if (options.selectSingleNode("//Codet/@mode").text = 2)
-                pasteUpload("auto")
-            else
-                pasteUpload("show")
-        }
-    }
+;     ;     Loop, Parse, kwords, %a_space%
+;     ;         if RegexMatch(Clipboard, "i)\b" a_loopfield "\b\(?")
+;     ;             kword_cnt++
+;     ;     if (kword_cnt >= options.selectSingleNode("//Codet/Keywords/@min").text)
+;     ;     {
+;     ;         kword_cnt:=0
+;     ;         if (options.selectSingleNode("//Codet/@mode").text = 2)
+;     ;             pasteUpload("auto")
+;     ;         else
+;     ;             pasteUpload("show")
+;     ;     }
+;     ; }
+;     SendMode, Event
+; 	if (instr(clipboard, "77CG") || instr(clipboard, "77CF"))
+; 	{
+; 		if WinActive("Mundo Carteras ~ Orders")
+; 			sendCapital()
+; 		return
+; 	}
 
-	if (instr(clipboard, "77CG") || instr(clipboard, "77CF"))
-		return
+; 	if (WinActive("Google Maps") || WinActive("Mundo Carteras ~ Orders"))
+; 	{
+; 		if (regexmatch(clipboard, "(\w{4}\+\w{2})")){
 
-	ifwinactive, Google Maps
-	if (regexmatch(clipboard, "(\w{4}\+\w{2})")){
+; 			if (regexmatch(clipboard, "(HV|HW|HX|GV|GW|GX|FV|FW|FX|CV|CW|CX)\w{2}\+"))
+; 				clipboard := "77CF" regexreplace(clipboard, "\s.*")
+; 			else
+; 				clipboard := "77CG" regexreplace(clipboard, "\s.*")
+; 			tooltip % clipboard, % a_screenwidth/2 - (strlen(clipboard)/2) , % a_screenheight/2
+; 			if WinActive("Google Maps")
+; 			{
+; 				setkeydelay, 300
+; 				Send !{tab}{shift down}{tab}{shift up}{enter}
+; 				sleep 500
+; 				SendInput {tab 8}
+; 				sendCapital()
+; 				SendInput ^{tab}
+; 				setkeydelay, 0
+; 			}
+; 			else
+; 				sendCapital()
+;             clipboard := ""
+; 		}
+; 	}
 
-		if regexmatch(clipboard, "(HV|HW|HX|GV|GW|GX|FV|FW|FX)\w{2}\+")
-			clipboard := "77CF" regexreplace(clipboard, "\s.*")
-		else
-			clipboard := "77CG" regexreplace(clipboard, "\s.*")
-		tooltip % clipboard
-	}
-
-	sleep 3*sec
-	tooltip
-
-
-return
+;     ; msgbox done
+;     SendMode, Input
+; 	sleep 3*1000
+; 	tooltip
+; return
 ;}
 
 ; Special Labels
