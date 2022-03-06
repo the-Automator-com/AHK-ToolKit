@@ -1,4 +1,4 @@
-/**
+﻿/**
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
@@ -61,8 +61,8 @@
  * =============================================================================================== *
  */
 
- if (a_ahkversion < 1.1)
- {
+if (a_ahkversion < 1.1)
+{
 	Msgbox, 0x10
 	      , % "Error"
 	      , % "The AutoHotkey installed in your computer is not compatible with`n"
@@ -77,7 +77,7 @@ if ((A_PtrSize = 8 || !a_isunicode) && !a_iscompiled)
 {
 
 	ahkpath := RegExReplace(a_ahkpath, "D)[^\\]*$", "AutoHotkeyU32.exe", varCount, 1)
-
+	
 	if (!FileExist(ahkpath) && !ahkpath := a_ahkpath){
 		ahkpath := a_temp "\ahkl.bak"
 		FileInstall, res\ahkl.bak, %ahkpath%, true
@@ -1675,7 +1675,7 @@ Add(type){
 
 	if (editingHS)
 	{
-	    editingHS := False
+	    editingHS := False, _expand := ""
 	    Msgbox, 0x124
 		  , % "Hotstring already present"
 		  , % "The hotstring you are trying to create already exist.`n"
@@ -2520,6 +2520,7 @@ GuiHandler(){
 	{
 	    3GuiClose:
 	    3GuiEscape:
+	    	_expandto := _expand := ""
 		GuiClose(3), GuiReset(03)
 	    return
 	}
@@ -3645,7 +3646,7 @@ ListHandler(sParam=0){
 		ControlFocus,, % "ahk_id " sci[3].hwnd
 		return
 	    }
-	    editingHS := True
+	    editingHS := True, _expand := ""
 	    LV_GetText(_expand, _selrow, 3), oldhs := _expand
 	    node := root.selectSingleNode("//Hotstrings/hs[expand='" RegexReplace(_expand, "\'", "&apos;") "']")
 
