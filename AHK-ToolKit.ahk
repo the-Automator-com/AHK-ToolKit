@@ -1,4 +1,4 @@
-﻿/**
+/**
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
@@ -73,14 +73,16 @@
 	Exitapp
 }
 
-if ((A_PtrSize = 8 || !a_isunicode) && !a_iscompiled){
+if ((A_PtrSize = 8 || !a_isunicode) && !a_iscompiled)
+{
 
-	ahkpath := regexreplace(a_ahkpath, "i)\\Autohotkey.exe", "\AutoHotkeyU32.exe")
+	ahkpath := RegExReplace(a_ahkpath, "D)[^\\]*$", "AutoHotkeyU32.exe", varCount, 1)
 
 	if (!FileExist(ahkpath) && !ahkpath := a_ahkpath){
 		ahkpath := a_temp "\ahkl.bak"
 		FileInstall, res\ahkl.bak, %ahkpath%, true
 	}
+
 	Run % ahkpath " """ A_ScriptFullPath """"
 	ExitApp
 }
