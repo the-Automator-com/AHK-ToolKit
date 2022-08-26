@@ -4794,6 +4794,7 @@ WM(var){
 
 #if options.selectSingleNode("//ScrTools/@altdrag").text && !WinActive("ahk_group ScreenTools") ;&& !WinActive("Store Manager")
 ;} Added for correct folding in C++ Lexer (To be removed when finished)
+/* 
 +!LButton::                                                              ;{ [Alt + LButton] Capture Active Window/Area
     CoordMode, Mouse, Screen
     rect := rectBox := False
@@ -4845,7 +4846,7 @@ WM(var){
 		rect := True
 
     }
-
+*/
 #if options.selectSingleNode("//ScrTools/@prtscr").text
 ;} Added for correct folding in C++ Lexer (To be removed when finished)
 /*
