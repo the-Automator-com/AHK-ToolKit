@@ -77,7 +77,7 @@ if ((A_PtrSize = 8 || !a_isunicode) && !a_iscompiled)
 {
 
 	ahkpath := RegExReplace(a_ahkpath, "D)[^\\]*$", "AutoHotkeyU32.exe", varCount, 1)
-	
+
 	if (!FileExist(ahkpath) && !ahkpath := a_ahkpath){
 		ahkpath := a_temp "\ahkl.bak"
 		FileInstall, res\ahkl.bak, %ahkpath%, true
@@ -3767,21 +3767,25 @@ HotkeyHandler(hk){
     {
 	lcfPath := a_temp . "\" . rName(5, "code")        ; Random Live Code Path
 
-	if !InStr(_script,"Gui")
-	    _script .= "`n`nExitApp"
-	else if !InStr(_script,"GuiClose")
-	{
-	    if !InStr(_script,"return")
-		_script .= "`nreturn"
-	    _script .= "`n`nGuiClose:`nExitApp"
-	}
+    if !InStr(ahkpath, "v2")
+    {
+        if !InStr(_script,"Gui")
+            _script .= "`n`nExitApp"
+        else if !InStr(_script,"GuiClose")
+        {
+            if !InStr(_script,"return")
+                _script .= "`nreturn"
+
+            _script .= "`n`nGuiClose:`nExitApp"
+        }
+    }
 
 	live_script =
 	(Ltrim
 	    %_script%
 	)
 
-	if !InStr(_script, "^Esc::ExitApp")
+	if !InStr(live_script, "^Esc::ExitApp")
 	    live_script .= "`n^Esc::ExitApp"
 
 	FileAppend, %live_script%, %lcfPath%
@@ -4501,6 +4505,7 @@ updateSB(window=""){
 lcRun(_gui=0){
 
     lcfPath := a_temp . "\" . rName(5, "code")        ; Random Live Code Path
+    ahkpath := options.selectSingleNode("//RCPaths/" options.selectSingleNode("//RCPaths/@current").text).text
 
     if _gui = 01
 	sci[1].GetText(sci[1].GetLength()+1, _code)
@@ -4510,25 +4515,29 @@ lcRun(_gui=0){
 	if (_code == 5)
 		_code := "" ; fix sci wrapper error that sets variable to 5 when calling GetText on blank buffer
 
-    if !InStr(_code,"Gui")
-	_code .= "`n`nExitApp"
-    else if !InStr(_code,"GuiClose")
+    if !InStr(ahkpath, "v2")
     {
-	if !InStr(_code,"return")
-	    _code .= "`nreturn"
-	_code .= "`n`nGuiClose:`nExitApp"
+        if !InStr(_code,"Gui")
+            _code .= "`nExitApp"
+        else if !InStr(_code,"GuiClose")
+        {
+            if !InStr(_code,"return")
+                _code .= "`nreturn"
+
+            _code .= "`n`nGuiClose:`nExitApp"
+        }
     }
 
     live_code =
     (Ltrim
-	%_code%
+        %_code%
     )
-    if !InStr(_code, "^Esc::ExitApp")
-	live_code .= "`n^Esc::ExitApp"
+
+    if !InStr(live_code, "^Esc::ExitApp")
+        live_code .= "`n^Esc::ExitApp"
 
     FileAppend, %live_code%, %lcfPath%
 
-    ahkpath := options.selectSingleNode("//RCPaths/" options.selectSingleNode("//RCPaths/@current").text).text
     if (!fileExist(ahkpath) && !ahkpath := a_ahkpath)
     {
 	ahkpath := a_temp "\ahkl.bak"
@@ -4794,7 +4803,7 @@ WM(var){
 
 #if options.selectSingleNode("//ScrTools/@altdrag").text && !WinActive("ahk_group ScreenTools") ;&& !WinActive("Store Manager")
 ;} Added for correct folding in C++ Lexer (To be removed when finished)
-/* 
+/*
 +!LButton::                                                              ;{ [Alt + LButton] Capture Active Window/Area
     CoordMode, Mouse, Screen
     rect := rectBox := False
