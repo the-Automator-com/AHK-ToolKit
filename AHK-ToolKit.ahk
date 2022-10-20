@@ -431,38 +431,57 @@ else
 FirstRun(){
     global
 
+    
+
+    SplitPath, A_AhkPath,,ahkDir
+    Ansi32v1 := ahkDir "\AutoHotkeyA32.exe"
+    Unicode32v1 := ahkDir "\AutoHotkeyU32.exe"
+    Unicode64v1 := ahkDir "\AutoHotkeyU64.exe"
+    Unicode32v2 := ahkDir "\v2\AutoHotkeyU32.exe"
+    Unicode64v2 := ahkDir "\v2\AutoHotkeyU64.exe"
+    
     Gui, +DelimiterSpace
-    Gui, add, GroupBox, y5 w345 h95, % "General Preferences"
+    Gui, add, GroupBox, y5 w385 h95, % "General Preferences"
     Gui, add, Text, xp+10 yp+20 w325, % "This is the first time you are running " script.name ".`n"
 				      . "Here you can set some general options for the program.`n`n"
 				      . "You can change them at any time later on by going to the `n""Settings >"
 				      . " Preferences"" Menu."
-    Gui, add, GroupBox, x10 y+15 w345 h70, % "Startup"
+    Gui, add, GroupBox, x10 y+15 w385 h70, % "Startup"
     Gui, add, CheckBox, xp+25 yp+20 Checked v_ssi, % "Show splash image"
     Gui, add, CheckBox, x+70 Checked v_sww, % "Start with Windows"
     Gui, add, CheckBox, x35 y+10 Checked v_smm, % "Start minimized"
     Gui, add, CheckBox, x+91 Checked v_cfu, % "Check for updates"
 
-    Gui, add, GroupBox, x10 y+20 w345 h55, % "Main GUI Hotkey"
-    Gui, add, DropDownList, xp+10 yp+20 w140 HWND$hkddl v_hkddl, % lst := "None  " klist("all^", "mods msb")
-    SetHotkeys(lst,$hkddl, "First Run")
+    Gui, add, GroupBox, x10 y+20 w385 h55, % "Main GUI Hotkey"
+    Gui, add, DropDownList, xp+10 yp+20 w170 HWND$hkddl v_hkddl, % lst := "None  " klist("all^", "mods msb")
+    ; SetHotkeys(lst,$hkddl, "First Run")
     Gui, add, CheckBox, x+10 yp+3 v_ctrl, % "Ctrl"
     Gui, add, CheckBox, x+10 v_alt, % "Alt"
     Gui, add, CheckBox, x+10 v_shift, % "Shift"
     Gui, add, CheckBox, x+10 v_win, % "Win"
 
-    Gui, add, GroupBox, x10 y+26 w345 h70, % "Other Tools"
-    Gui, add, CheckBox, xp+15 yp+20 Checked v_ecd, % "Enable Code Detection"
-    Gui, add, CheckBox, x+60 Checked v_ech, % "Enable Command Helper"
-    Gui, add, CheckBox, x25 y+10 Checked v_eft, % "Enable Forum Tag-AutoComplete"
-    Gui, add, CheckBox, x+14 Checked v_est, % "Enable Screen Tools"
+    Gui, add, GroupBox, x10 y+26 w385 h160, % "Autohotkey Paths"
+    Gui, add, Edit, xp+10 yp+20 w280 vAnsi32v1 Section, % Ansi32v1
+    Gui, add, Edit, w280 vUnicode32v1, % Unicode32v1
+    Gui, add, Edit, w280 vUnicode64v1, % Unicode64v1
+    Gui, add, Edit, w280 vUnicode32v2, % Unicode32v2
+    Gui, add, Edit, w280 vUnicode64v2, % Unicode64v2
+
+    Gui, add, Button, x+10 ys-1 w75 vbrwAnsi32v1 gGuiHandler, % "Browse..."
+    Gui, add, Button, y+4 w75 vbrwUnicode32v1 gGuiHandler, % "Browse..."
+    Gui, add, Button, y+4 w75 vbrwUnicode64v1 gGuiHandler, % "Browse..."
+    Gui, add, Button, y+4 w75 vbrwUnicode32v2 gGuiHandler, % "Browse..."
+    Gui, add, Button, y+4 w75 vbrwUnicode64v2 gGuiHandler, % "Browse..."
+
     Gui, add, Text, x20 y+30 w325
 	      , % "Note:`n"
 		. "The default hotkey is Win + ``  (Win key + Back tic)"
 
-    Gui, add, Text, x0 y+10 w370 0x10
-    Gui, add, Button, xp+280 yp+10 w75 gGuiHandler, % "&Save"
-    Gui, show, w365 h405, % "First Run"
+    Gui, add, Text, x0 y+10 w410 0x10
+    Gui, add, Button, xp+320 yp+10 w75 gGuiHandler, % "&Save"
+    Gui, show, w405, % "First Run"
+
+
 
     Pause
 }
@@ -2238,20 +2257,32 @@ GuiHandler(){
 		node.setAttribute("ctrl", _ctrl), node.setAttribute("alt", _alt)
 		node.setAttribute("shift", _shift), node.setAttribute("win", _win)
 
-	    ; Other Tools:
-	    ; ecd = enable command detection
-	    ; ech = enable command helper
-	    ; eft = enable forum tag-autocomplete
-	    ; est = enable screen tools
-	    node := options.childNodes.item[3]                      ; <-- Codet
-		node.setAttribute("status", _ecd)
+        GuiControlGet, Ansi32v1
+        GuiControlGet, Unicode32v1
+        GuiControlGet, Unicode64v1
+        GuiControlGet, Unicode32v2
+        GuiControlGet, Unicode64v2
+        
+        options.selectSingleNode("//Ansi32v1").text := Ansi32v1
+        options.selectSingleNode("//Unicode32v1").text := Unicode32v1
+        options.selectSingleNode("//Unicode64v1").text := Unicode64v1
+        options.selectSingleNode("//Unicode32v2").text := Unicode32v2
+        options.selectSingleNode("//Unicode64v2").text := Unicode64v2
 
-	    node := options.childNodes.item[4]                      ; <-- CMDHelper
-		node.setAttribute("global", _ech),node.setAttribute("sci", _ech)
-		node.setAttribute("forum", _ech),node.setAttribute("tags", _eft)
+	    ; ; Other Tools:
+	    ; ; ecd = enable command detection
+	    ; ; ech = enable command helper
+	    ; ; eft = enable forum tag-autocomplete
+	    ; ; est = enable screen tools
+	    ; node := options.childNodes.item[3]                      ; <-- Codet
+		; node.setAttribute("status", _ecd)
 
-	    node := options.childNodes.item[6]                      ; <-- ScrTools
-		node.setAttribute("altdrag", _est),node.setAttribute("prtscr", _est)
+	    ; node := options.childNodes.item[4]                      ; <-- CMDHelper
+		; node.setAttribute("global", _ech),node.setAttribute("sci", _ech)
+		; node.setAttribute("forum", _ech),node.setAttribute("tags", _eft)
+
+	    ; node := options.childNodes.item[6]                      ; <-- ScrTools
+		; node.setAttribute("altdrag", _est),node.setAttribute("prtscr", _est)
 	    node := null
 
 	    conf.transformNodeToObject(xsl, conf)
@@ -2261,6 +2292,16 @@ GuiHandler(){
 	    Pause                                                   ; UnPause
 	}
 
+    if a_guicontrol in brwAnsi32v1,brwUnicode32v1,brwUnicode64v1,brwUnicode32v2,brwUnicode64v2
+    {
+        SplitPath, A_AhkPath,,ahkDir
+        FileSelectFile, ahkPath, 3, %ahkDir%,, *.exe
+        
+        if !ahkPath
+            return
+
+        GuiControl,, % StrReplace(A_GuiControl, "brw"), % ahkPath
+    }
 	if (a_guicontrol = "slDDL")
 	{
 	    Gui, 01: ListView, slList
@@ -4108,8 +4149,18 @@ prefControl(pref=0){
 	GuiControl, 06: hide, AHKTK_UC
 }
 defConf(path){
-    s_version := script.version, hlpPath := RegexReplace(a_ahkpath, "exe$", "chm")
-    a_isunicode ? (unicode := a_ahkpath, current := "Unicode32v1") : (ansi := a_ahkpath, current := "Ansi32v1")
+    s_version := script.version
+    
+    hlpPath := RegexReplace(a_ahkpath, "exe$", "chm")
+    current := (A_IsUnicode ? "Unicode" : "Ansi") (A_PtrSize * 8) "v1"
+
+    SplitPath, A_AhkPath,,ahkDir
+    Ansi32v1 := ahkDir "\AutoHotkeyA32.exe"
+    Unicode32v1 := ahkDir "\AutoHotkeyU32.exe"
+    Unicode64v1 := ahkDir "\AutoHotkeyU64.exe"
+    Unicode32v2 := ahkDir "\v2\AutoHotkeyU32.exe"
+    Unicode64v2 := ahkDir "\v2\AutoHotkeyU64.exe"
+
     template=
     (
 <?xml version="1.0" encoding="UTF-8"?>
@@ -4140,11 +4191,11 @@ if exitapp gosub goto ifequal ifexist ifgreater ifgreaterorequal ifinstring ifle
 		</CMDHelper>
 		<LiveCode linewrap="1" highlighting="1" url="1" symbols="0" snplib="0">
 			<RCPaths current="%current%">
-				<Ansi32v1>%ansi%</Ansi32v1>
-				<Unicode32v1>%unicode%</Unicode32v1>
-				<Unicode64v1></Unicode64v1>
-				<Unicode32v2></Unicode32v2>
-				<Unicode64v2></Unicode64v2>
+				<Ansi32v1>%Ansi32v1%</Ansi32v1>
+				<Unicode32v1>%Unicode32v1%</Unicode32v1>
+				<Unicode64v1>%Unicode64v1%</Unicode64v1>
+				<Unicode32v2>%Unicode32v2%</Unicode32v2>
+				<Unicode64v2>%Unicode64v2%</Unicode64v2>
 			</RCPaths>
 	    <SnippetLib current="Example Snippets">
 				<Group name="Example Snippets" count="4">
