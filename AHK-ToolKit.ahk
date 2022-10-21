@@ -432,7 +432,6 @@ FirstRun(){
     global
 
     SplitPath, A_AhkPath,,ahkDir
-    Ansi32v1 := ahkDir "\AutoHotkeyA32.exe"
     Unicode32v1 := ahkDir "\AutoHotkeyU32.exe"
     Unicode64v1 := ahkDir "\AutoHotkeyU64.exe"
     Unicode32v2 := ahkDir "\v2\AutoHotkeyU32.exe"
@@ -459,14 +458,12 @@ FirstRun(){
     Gui, add, CheckBox, x+10 v_win, % "Win"
 
     Gui, add, GroupBox, x10 y+26 w385 h160, % "Autohotkey Paths"
-    Gui, add, Edit, xp+10 yp+20 w280 vAnsi32v1 Section, % Ansi32v1
-    Gui, add, Edit, w280 vUnicode32v1, % Unicode32v1
+    Gui, add, Edit, xp+10 yp+20 w280 vUnicode32v1, % Unicode32v1
     Gui, add, Edit, w280 vUnicode64v1, % Unicode64v1
     Gui, add, Edit, w280 vUnicode32v2, % Unicode32v2
     Gui, add, Edit, w280 vUnicode64v2, % Unicode64v2
 
-    Gui, add, Button, x+10 ys-1 w75 vbrwAnsi32v1 gGuiHandler, % "Browse..."
-    Gui, add, Button, y+4 w75 vbrwUnicode32v1 gGuiHandler, % "Browse..."
+    Gui, add, Button, x+10 ys-1 w75 vbrwUnicode32v1 gGuiHandler, % "Browse..."
     Gui, add, Button, y+4 w75 vbrwUnicode64v1 gGuiHandler, % "Browse..."
     Gui, add, Button, y+4 w75 vbrwUnicode32v2 gGuiHandler, % "Browse..."
     Gui, add, Button, y+4 w75 vbrwUnicode64v2 gGuiHandler, % "Browse..."
@@ -566,7 +563,6 @@ MainMenu(){
     Menu, View, add, Line Wrap, MenuHandler
     Menu, View, disable, Line Wrap
 
-    Menu, RCW, add, Ansi32v1, MenuHandler
     Menu, RCW, add, Unicode32v1, MenuHandler
     Menu, RCW, add, Unicode64v1, MenuHandler
     Menu, RCW, add
@@ -744,7 +740,7 @@ MainGui(){
     Gui, font, s8 cGray italic, Verdana
     Gui, add, Edit, x10 yp+10 w250 Disabled HWND$QSlc gGuiHandler vQSlc, % "Quick Search"
     Gui, font
-    Gui, add, DropDownList, x+245 HWND$RCbin, Ansi32v1|Unicode32v1|Unicode64v1|Unicode32v2|Unicode64v2
+    Gui, add, DropDownList, x+245 HWND$RCbin, Unicode32v1|Unicode64v1|———————————|Unicode32v2|Unicode64v2
     GuiControl, ChooseString, %$RCbin%, % v:=options.selectSingleNode("//RCPaths/@current").text
 
     Gui, add, Button, x+10 yp-1 w75 HWND$lcRun gGuiHandler, % "&Run"
@@ -2260,13 +2256,11 @@ GuiHandler(){
 		node.setAttribute("ctrl", _ctrl), node.setAttribute("alt", _alt)
 		node.setAttribute("shift", _shift), node.setAttribute("win", _win)
 
-        GuiControlGet, Ansi32v1
         GuiControlGet, Unicode32v1
         GuiControlGet, Unicode64v1
         GuiControlGet, Unicode32v2
         GuiControlGet, Unicode64v2
 
-        options.selectSingleNode("//Ansi32v1").text := Ansi32v1
         options.selectSingleNode("//Unicode32v1").text := Unicode32v1
         options.selectSingleNode("//Unicode64v1").text := Unicode64v1
         options.selectSingleNode("//Unicode32v2").text := Unicode32v2
@@ -2295,7 +2289,7 @@ GuiHandler(){
 	    Pause                                                   ; UnPause
 	}
 
-    if a_guicontrol in brwAnsi32v1,brwUnicode32v1,brwUnicode64v1,brwUnicode32v2,brwUnicode64v2
+    if a_guicontrol in brwUnicode32v1,brwUnicode64v1,brwUnicode32v2,brwUnicode64v2
     {
         SplitPath, A_AhkPath,,ahkDir
         FileSelectFile, ahkPath, 3, %ahkDir%,, *.exe
@@ -4073,7 +4067,7 @@ hotExtract(file, path){
 }
 rcwSet(menu=0){
     global $RCbin
-    static names:="Ansi32v1|Unicode32v1|Unicode64v1|Unicode32v2|Unicode64v2"
+    static names:="Unicode32v1|Unicode64v1|Unicode32v2|Unicode64v2"
 
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
     node := options.selectSingleNode("//RCPaths").childNodes
@@ -4163,7 +4157,6 @@ defConf(path){
     current := (A_IsUnicode ? "Unicode" : "Ansi") (A_PtrSize * 8) "v1"
 
     SplitPath, A_AhkPath,,ahkDir
-    Ansi32v1 := ahkDir "\AutoHotkeyA32.exe"
     Unicode32v1 := ahkDir "\AutoHotkeyU32.exe"
     Unicode64v1 := ahkDir "\AutoHotkeyU64.exe"
     Unicode32v2 := ahkDir "\v2\AutoHotkeyU32.exe"
@@ -4199,7 +4192,6 @@ if exitapp gosub goto ifequal ifexist ifgreater ifgreaterorequal ifinstring ifle
 		</CMDHelper>
 		<LiveCode linewrap="1" highlighting="1" url="1" symbols="0" snplib="0">
 			<RCPaths current="%current%">
-				<Ansi32v1>%Ansi32v1%</Ansi32v1>
 				<Unicode32v1>%Unicode32v1%</Unicode32v1>
 				<Unicode64v1>%Unicode64v1%</Unicode64v1>
 				<Unicode32v2>%Unicode32v2%</Unicode32v2>
