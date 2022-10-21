@@ -431,15 +431,13 @@ else
 FirstRun(){
     global
 
-    
-
     SplitPath, A_AhkPath,,ahkDir
     Ansi32v1 := ahkDir "\AutoHotkeyA32.exe"
     Unicode32v1 := ahkDir "\AutoHotkeyU32.exe"
     Unicode64v1 := ahkDir "\AutoHotkeyU64.exe"
     Unicode32v2 := ahkDir "\v2\AutoHotkeyU32.exe"
     Unicode64v2 := ahkDir "\v2\AutoHotkeyU64.exe"
-    
+
     Gui, +DelimiterSpace
     Gui, add, GroupBox, y5 w385 h95, % "General Preferences"
     Gui, add, Text, xp+10 yp+20 w325, % "This is the first time you are running " script.name ".`n"
@@ -666,87 +664,91 @@ MainGui(){
     OnMessage(WM("COMMAND"),"MsgHandler")
 
     _aot := (root.attributes.item[1].text ? "+" : "-") "AlwaysOnTop"
-    Gui, 01: +LastFound +Resize +MinSize650x300 %_aot%
+    Gui, 01:Default
+    Gui, +LastFound +Resize +MinSize650x300 %_aot%
     $hwnd1 := WinExist(), MainMenu(), _aot:=null
     tabLast := "Hotkeys"    ; Helps when deleting an item on the Hotkeys tab, before actually clicking the tabs.
 
-    Gui, 01: menu, MainMenu
-    Gui, 01: add, Tab2, x0 y0 w800 h400 HWND$tabcont gGuiHandler vtabLast, % "Hotkeys|Hotstrings|Live Code"
-    Gui, 01: add, StatusBar, HWND$StatBar
+    Gui, menu, MainMenu
+    Gui, add, Tab2, x0 y0 w800 h400 HWND$tabcont gGuiHandler vtabLast, % "Hotkeys|Hotstrings|Live Code"
+    Gui, add, StatusBar, HWND$StatBar
 
     updateSB()
 
     _cnt := root.selectSingleNode("//Hotkeys/@count").text
-    Gui, 01: tab, Hotkeys
-    Gui, 01: add, ListView, w780 h315 HWND$hkList Count%_cnt% Sort Grid AltSubmit gListHandler vhkList
+    Gui, tab, Hotkeys
+    Gui, add, ListView, w780 h315 HWND$hkList Count%_cnt% Sort Grid AltSubmit gListHandler vhkList
 			  , % "Type|Program Name|Hotkey|Program Path / Script Preview"
-    Gui, 01: add, ListView, w780 h315 xp yp HWND$shkList Count%_cnt% Sort Grid AltSubmit gListHandler vshkList
+    Gui, add, ListView, w780 h315 xp yp HWND$shkList Count%_cnt% Sort Grid AltSubmit gListHandler vshkList
 			  , % "Type|Program Name|Hotkey|Program Path"
 
     GuiControl, hide, shkList
 
     Load("Hotkeys")
 
-    Gui, 01: add, Text, x0 y350 w820 0x10 HWND$hkDelim
-    Gui, 01: font, s8 cGray italic, Verdana
-    Gui, 01: add, Edit, x10 yp+10 w250 HWND$QShk gGuiHandler vQShk, % "Quick Search"
-    Gui, 01: font
-    Gui, 01: add, Button, x+370 yp w75 HWND$hkAdd Default gGuiHandler, % "&Add"
-    Gui, 01: add, Button, x+10 yp w75 HWND$hkClose gGuiHandler, % "&Close"
+    Gui, add, Text, x0 y350 w820 0x10 HWND$hkDelim
+    Gui, font, s8 cGray italic, Verdana
+    Gui, add, Edit, x10 yp+10 w250 HWND$QShk gGuiHandler vQShk, % "Quick Search"
+    Gui, font
+    Gui, add, Button, x+370 yp w75 HWND$hkAdd Default gGuiHandler, % "&Add"
+    Gui, add, Button, x+10 yp w75 HWND$hkClose gGuiHandler, % "&Close"
 
     _cnt := root.selectSingleNode("//Hotstrings/@count").text
-    Gui, 01: Tab, Hotstrings
-    Gui, 01: add, ListView, w780 h205 HWND$hsList Count%_cnt% Grid AltSubmit gListHandler vhsList
+    Gui, Tab, Hotstrings
+    Gui, add, ListView, w780 h205 HWND$hsList Count%_cnt% Grid AltSubmit gListHandler vhsList
 			  , % "Type|Options|Abbreviation|Expand To"
-    Gui, 01: add, ListView, w780 h205 xp yp HWND$shsList Count%_cnt% Grid AltSubmit gListHandler vshsList
+    Gui, add, ListView, w780 h205 xp yp HWND$shsList Count%_cnt% Grid AltSubmit gListHandler vshsList
 			  , % "Type|Options|Abbreviation|Expand To"
 
     GuiControl, hide, shsList
 
-    Gui, 01: add, Groupbox, w780 h105 HWND$hsGbox, % "Quick Add"
-    Gui, 01: add, Text, xp+100 yp+20 HWND$hsText1, % "Expand:"
-    Gui, 01: font, s8 cGray italic, Verdana
-    Gui, 01: add, Edit, x+10 yp-3 w150 HWND$hsExpand vhsExpand, % "e.g. btw"
-    Gui, 01: font
-    Gui, 01: add, Text, x+10 yp+3 HWND$hsText2, % "To:"
-    Gui, 01: font, s8 cGray italic, Verdana
-    Gui, 01: add, Edit, x+10 yp-3 w250 HWND$hsExpandto vhsExpandto, % "e.g. by the way"
-    Gui, 01: font
-    Gui, 01: add, Checkbox, x+10 yp+5 HWND$hsCbox1 vhsIsCode, % "Run as Script"
-    Gui, 01: add, CheckBox, x112 y+15 HWND$hsCbox2 Checked vhsAE, % "AutoExpand"
-    Gui, 01: add, CheckBox, xp+235 yp HWND$hsCbox3 vhsDND, % "Do not delete typed abbreviation"
-    Gui, 01: add, CheckBox, x112 y+10 HWND$hsCbox4 vhsTIOW, % "Trigger inside other words"
-    Gui, 01: add, CheckBox, xp+235 yp HWND$hsCbox5 vhsSR, % "Send Raw (do not translate {Enter} or {key})"
+    Gui, add, Groupbox, w780 h105 HWND$hsGbox, % "Quick Add"
+    Gui, add, Text, xp+100 yp+20 HWND$hsText1, % "Expand:"
+    Gui, font, s8 cGray italic, Verdana
+    Gui, add, Edit, x+10 yp-3 w150 HWND$hsExpand vhsExpand, % "e.g. btw"
+    Gui, font
+    Gui, add, Text, x+10 yp+3 HWND$hsText2, % "To:"
+    Gui, font, s8 cGray italic, Verdana
+    Gui, add, Edit, x+10 yp-3 w250 HWND$hsExpandto vhsExpandto, % "e.g. by the way"
+    Gui, font
+    Gui, add, Checkbox, x+10 yp+5 HWND$hsCbox1 vhsIsCode, % "Run as Script"
+    Gui, add, CheckBox, x112 y+15 HWND$hsCbox2 Checked vhsAE, % "AutoExpand"
+    Gui, add, CheckBox, xp+235 yp HWND$hsCbox3 vhsDND, % "Do not delete typed abbreviation"
+    Gui, add, CheckBox, x112 y+10 HWND$hsCbox4 vhsTIOW, % "Trigger inside other words"
+    Gui, add, CheckBox, xp+235 yp HWND$hsCbox5 vhsSR, % "Send Raw (do not translate {Enter} or {key})"
 
     Load("HotStrings")
 
-    Gui, 01: add, Text, x0 y350 w820 0x10 HWND$hsDelim
-    Gui, 01: font, s8 cGray italic, Verdana
-    Gui, 01: add, Edit, x10 yp+10 w250 HWND$QShs gGuiHandler vQShs, % "Quick Search"
-    Gui, 01: font
-    Gui, 01: add, Button, x+370 yp w75 HWND$hsAdd Default gGuiHandler, % "&Add"
-    Gui, 01: add, Button, x+10 yp w75 HWND$hsClose gGuiHandler, % "&Close"
+    Gui, add, Text, x0 y350 w820 0x10 HWND$hsDelim
+    Gui, font, s8 cGray italic, Verdana
+    Gui, add, Edit, x10 yp+10 w250 HWND$QShs gGuiHandler vQShs, % "Quick Search"
+    Gui, font
+    Gui, add, Button, x+370 yp w75 HWND$hsAdd Default gGuiHandler, % "&Add"
+    Gui, add, Button, x+10 yp w75 HWND$hsClose gGuiHandler, % "&Close"
 
-    Gui, 01: Tab, Live Code
+    Gui, Tab, Live Code
     options.selectSingleNode("//@snplib").text ? w:=640 : w:=790
     sci[1] := new scintilla($hwnd1,5,25,w,320, "lib\LexAHKL.dll", "hidden")
 
-    Gui, 01: add, Text, x650 y25 w145 h17 HWND$slTitle Center Border Hidden, % "Snippet Library"
-    Gui, 01: add, DropDownList, xp y+5 w145 HWND$slDDL Hidden gGuiHandler Sort vslDDL
+    Gui, add, Text, x650 y25 w145 h17 HWND$slTitle Center Border Hidden, % "Snippet Library"
+    Gui, add, DropDownList, xp y+5 w145 HWND$slDDL Hidden gGuiHandler Sort vslDDL
     _current := options.selectSingleNode("//SnippetLib/@current").text
     _cnt := options.selectSingleNode("//Group[@name='" _current "']/@count").text
-    Gui, 01: add, ListView
+    Gui, add, ListView
 		, w145 h270 HWND$slList -Hdr -ReadOnly Count%_cnt% AltSubmit Sort Grid Hidden gListHandler vslList
 		, % "Title"
 
     Load("SnpLib")
 
-    Gui, 01: add, Text, x0 y350 w820 0x10 HWND$lcDelim
-    Gui, 01: font, s8 cGray italic, Verdana
-    Gui, 01: add, Edit, x10 yp+10 w250 Disabled HWND$QSlc gGuiHandler vQSlc, % "Quick Search"
-    Gui, 01: font
-    Gui, 01: add, Button, x+370 yp w75 HWND$lcRun gGuiHandler, % "&Run"
-    Gui, 01: add, Button, x+10 yp w75 HWND$lcClear gGuiHandler, % "&Clear"
+    Gui, add, Text, x0 y350 w820 0x10 HWND$lcDelim
+    Gui, font, s8 cGray italic, Verdana
+    Gui, add, Edit, x10 yp+10 w250 Disabled HWND$QSlc gGuiHandler vQSlc, % "Quick Search"
+    Gui, font
+    Gui, add, DropDownList, x+245 HWND$RCbin, Ansi32v1|Unicode32v1|Unicode64v1|Unicode32v2|Unicode64v2
+    GuiControl, ChooseString, %$RCbin%, % v:=options.selectSingleNode("//RCPaths/@current").text
+
+    Gui, add, Button, x+10 yp-1 w75 HWND$lcRun gGuiHandler, % "&Run"
+    Gui, add, Button, x+10 w75 HWND$lcClear gGuiHandler, % "&Clear"
     GuiAttach(1),SetSciMargin(sci[1])
 
     ; The following is used in the message handler to get the ID
@@ -763,7 +765,7 @@ MainGui(){
     ; The attach function redraws the tab on top of the Status bar.
     ; I made it so that the window is a little bit below the tab to avoid overlapping
     ; hence the h422.
-    Gui, 01: show, w799 h422 %hide%, % "AutoHotkey Toolkit [" (a_isunicode ? "W" : "A") "]"
+    Gui, show, w799 h422 %hide%, % "AutoHotkey Toolkit [" (a_isunicode ? "W" : "A") "]"
     return
 }
 AddHKGui(){
@@ -1377,7 +1379,7 @@ AreaSlectionGui(){
 GuiAttach(guiNum){
     global $tabcont,$hkList,$hkDelim,$QShk,$hkAdd,$hkClose,$StatBar,$slTitle,$slDDL,$slList
 	 , $hsList,$hsGbox,$hsText1,$hsExpand,$hsText2,$hsExpandto,$hsCbox1,$hsCbox2,$hsCbox3,$hsCbox4,$hsCbox5
-	 , $hsDelim,$QShs,$hsAdd,$hsClose,$lcDelim,$QSlc,$lcRun,$lcClear,$hk2Delim
+	 , $hsDelim,$QShs,$hsAdd,$hsClose,$lcDelim,$QSlc,$RCbin,$lcRun,$lcClear,$hk2Delim
 	 , $hk2Add,$hk2Cancel,$hs2GBox,$hs2Delim,$hs2Add,$hsCancel
 	 , $imList,$imDelim,$imAccept,$imClear,$imCancel,$slGBox,$slDelim,$slAdd,$slCancel
 	 , $shsList,$shkList
@@ -1416,6 +1418,7 @@ GuiAttach(guiNum){
 	attach($slList, "x h r2")
 	attach($lcDelim, "y w")
 	attach($QSlc, "y")
+	attach($RCbin, "x y r2")
 	attach($lcRun, "x y r2"),attach($lcClear, "x y r2")
     }
 
@@ -2262,7 +2265,7 @@ GuiHandler(){
         GuiControlGet, Unicode64v1
         GuiControlGet, Unicode32v2
         GuiControlGet, Unicode64v2
-        
+
         options.selectSingleNode("//Ansi32v1").text := Ansi32v1
         options.selectSingleNode("//Unicode32v1").text := Unicode32v1
         options.selectSingleNode("//Unicode64v1").text := Unicode64v1
@@ -2296,7 +2299,7 @@ GuiHandler(){
     {
         SplitPath, A_AhkPath,,ahkDir
         FileSelectFile, ahkPath, 3, %ahkDir%,, *.exe
-        
+
         if !ahkPath
             return
 
@@ -4069,6 +4072,7 @@ hotExtract(file, path){
     return 1
 }
 rcwSet(menu=0){
+    global $RCbin
     static names:="Ansi32v1|Unicode32v1|Unicode64v1|Unicode32v2|Unicode64v2"
 
     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
@@ -4082,9 +4086,13 @@ rcwSet(menu=0){
 	else if (menu = a_loopfield)
 	{
 	    Loop, Parse, names, |
-		Menu, RCW, uncheck, %a_loopfield%       ; Make sure all others are unchecked
+		    Menu, RCW, uncheck, %a_loopfield%       ; Make sure all others are unchecked
 	    Menu, RCW, check, %a_loopfield%
 	    options.selectSingleNode("//RCPaths/@current").text := a_loopfield
+
+        Gui, 01:Default
+        GuiControl, ChooseString, %$RCbin%, % a_loopfield
+
 	    conf.transformNodeToObject(xsl, conf)
 	    conf.save(script.conf), conf.load(script.conf)          ; Save and Load
 	}
@@ -4150,7 +4158,7 @@ prefControl(pref=0){
 }
 defConf(path){
     s_version := script.version
-    
+
     hlpPath := RegexReplace(a_ahkpath, "exe$", "chm")
     current := (A_IsUnicode ? "Unicode" : "Ansi") (A_PtrSize * 8) "v1"
 
@@ -4554,9 +4562,11 @@ updateSB(window=""){
     return
 }
 lcRun(_gui=0){
+    global $RCbin
 
     lcfPath := a_temp . "\" . rName(5, "code")        ; Random Live Code Path
-    ahkpath := options.selectSingleNode("//RCPaths/" options.selectSingleNode("//RCPaths/@current").text).text
+    GuiControlGet, RCBin,, %$RCbin%
+    ahkpath := options.selectSingleNode("//RCPaths/" RCBin).text
 
     if _gui = 01
 	sci[1].GetText(sci[1].GetLength()+1, _code)
