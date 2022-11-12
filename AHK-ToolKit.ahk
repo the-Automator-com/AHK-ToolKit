@@ -1,4 +1,4 @@
-﻿/**
+/**
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
@@ -457,18 +457,18 @@ FirstRun(){
     Gui, add, CheckBox, x+10 v_shift, % "Shift"
     Gui, add, CheckBox, x+10 v_win, % "Win"
 
-    Gui, add, GroupBox, x10 y+26 w385 h160, % "Autohotkey Paths"
-    Gui, add, Edit, xp+10 yp+20 w280 vUnicode32v1, % Unicode32v1
-    Gui, add, Edit, w280 vUnicode64v1, % Unicode64v1
-    Gui, add, Edit, w280 vUnicode32v2, % Unicode32v2
-    Gui, add, Edit, w280 vUnicode64v2, % Unicode64v2
+    Gui, add, GroupBox, x10 y+26 w385 h135, % "Autohotkey Paths"
+    Gui, add, Edit, xp+10 yp+20 w280 r1 vUnicode32v1 Section, % Unicode32v1
+    Gui, add, Edit, w280 r1 vUnicode64v1, % Unicode64v1
+    Gui, add, Edit, w280 r1 vUnicode32v2, % Unicode32v2
+    Gui, add, Edit, w280 r1 vUnicode64v2, % Unicode64v2
 
     Gui, add, Button, x+10 ys-1 w75 vbrwUnicode32v1 gGuiHandler, % "Browse..."
     Gui, add, Button, y+4 w75 vbrwUnicode64v1 gGuiHandler, % "Browse..."
     Gui, add, Button, y+4 w75 vbrwUnicode32v2 gGuiHandler, % "Browse..."
     Gui, add, Button, y+4 w75 vbrwUnicode64v2 gGuiHandler, % "Browse..."
 
-    Gui, add, Text, x20 y+30 w325
+    Gui, add, Text, x20 y+20 w325
 	      , % "Note:`n"
 		. "The default hotkey is Win + ``  (Win key + Back tic)"
 
