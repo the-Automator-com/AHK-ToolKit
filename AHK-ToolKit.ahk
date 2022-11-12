@@ -1,12 +1,12 @@
-/**
+﻿/**
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * @Script Version   : 0.9.0-161030
+ * @Script Version   : 0.11.0
  * @Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * @Creation Date    : July 11, 2010
- * @Modification Date: October 20, 2012
+ * @Modification Date: November 11, 2022
  *
  * @Description      :
  * -------------------
@@ -126,12 +126,12 @@ Gosub, Exit
 realexit := true
 global script := {base        : script
                  ,name        : "AHK-ToolKit"
-                 ,version     : "0.9.0-161030"
+                 ,version     : "0.11.0"
                  ,author      : "RaptorX"
                  ,email       : "graptorx@gmail.com"
                  ,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
                  ,crtdate     : "July 11, 2010"
-                 ,moddate     : "October 20, 2012"
+                 ,moddate     : "November 11, 2022"
                  ,conf        : "conf.xml"}
 
 script.getparams(), ForumMenu(), TrayMenu()  ; These function are here so that
@@ -4983,13 +4983,13 @@ Exe_File=%In_Dir%\lib\AHK-ToolKit.exe
 Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
 [VERSION]
 Set_Version_Info=1
-File_Version=0.9.0-161030
+File_Version=0.11.0
 Inc_File_Version=0
 Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=0.9.0-161030
+Product_Version=0.11.0
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico
