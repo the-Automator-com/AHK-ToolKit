@@ -2,7 +2,7 @@
     function: normalizePhone
 
     description:
-    
+
     returns:
     Properly formatted phone
 
@@ -23,6 +23,6 @@ normalizePhone(phone){
 		msgbox % "The provided phone number is probably missing some digits.\n Only basic formatting performed."
 		res := regexreplace(phone, "\D", "")
 	}
-	
+
 	return res
 }
