@@ -25,27 +25,27 @@ msgbox % key := hkSwap(hkey, 1)       ; Returns #w
 */
 
 hkSwap(byref key, type = 0){
-   
-    if (type = "long" || type = 0)
-    {
-        long_hk := RegexReplace(key, "\+", "Shift + ")
-        long_hk := RegexReplace(long_hk, "\^", "Ctrl + ")
-        long_hk := RegexReplace(long_hk, "!", "Alt + ")
-        long_hk := RegexReplace(long_hk, "#", "Win + ")
-        return long_hk ; long hotkey, ex. Ctrl + Alt + Shift + Win + s
-    }
-    else if (type = "short" || type = 1)
-    {
-        ; This matches regardless of the spacing, ex. "Shift + " or "Shift+"
-        short_hk := RegexReplace(key, "Shift\s?\+\s?", "+")
-        short_hk := RegexReplace(short_hk, "Ctrl\s?\+\s?", "^")
-        short_hk := RegexReplace(short_hk, "Alt\s?\+\s?", "!")
-        short_hk := RegexReplace(short_hk, "Win\s?\+\s?", "#")
-        return short_hk ; short hotkey, ex. ^!+#s
-    }
-    else if type =
-    {
-        ; invalid type
-        return false
-    }
+
+	if (type = "long" || type = 0)
+	{
+		long_hk := RegexReplace(key, "\+", "Shift + ")
+		long_hk := RegexReplace(long_hk, "\^", "Ctrl + ")
+		long_hk := RegexReplace(long_hk, "!", "Alt + ")
+		long_hk := RegexReplace(long_hk, "#", "Win + ")
+		return long_hk ; long hotkey, ex. Ctrl + Alt + Shift + Win + s
+	}
+	else if (type = "short" || type = 1)
+	{
+		; This matches regardless of the spacing, ex. "Shift + " or "Shift+"
+		short_hk := RegexReplace(key, "Shift\s?\+\s?", "+")
+		short_hk := RegexReplace(short_hk, "Ctrl\s?\+\s?", "^")
+		short_hk := RegexReplace(short_hk, "Alt\s?\+\s?", "!")
+		short_hk := RegexReplace(short_hk, "Win\s?\+\s?", "#")
+		return short_hk ; short hotkey, ex. ^!+#s
+	}
+	else if type =
+	{
+		; invalid type
+		return false
+	}
 } ; Function End

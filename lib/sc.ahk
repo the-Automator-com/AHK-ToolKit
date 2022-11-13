@@ -2,12 +2,12 @@
 CaptureScreen(aRect, sFileTo, bCursor, nQuality)
 1) If the optional parameter bCursor is True, captures the cursor too.
 2) If the optional parameter sFileTo is 0, set the image to Clipboard.
-   If it is omitted or "", saves to screen.bmp in the script folder,
-   otherwise to sFileTo which can be BMP/JPG/PNG/GIF/TIF.
+If it is omitted or "", saves to screen.bmp in the script folder,
+otherwise to sFileTo which can be BMP/JPG/PNG/GIF/TIF.
 3) The optional parameter nQuality is applicable only when sFileTo is JPG. Set it to the desired quality level of the resulting JPG, an integer between 0 - 100.
 4) If aRect is 0/1/2/3, captures the entire desktop/active window/active client area/active monitor.
 5) aRect can be comma delimited sequence of coordinates, e.g., "Left, Top, Right, Bottom" or "Left, Top, Right, Bottom, Width_Zoomed, Height_Zoomed".
-   In this case, only that portion of the rectangle will be captured. Additionally, in the latter case, zoomed to the new width/height, Width_Zoomed/Height_Zoomed.
+In this case, only that portion of the rectangle will be captured. Additionally, in the latter case, zoomed to the new width/height, Width_Zoomed/Height_Zoomed.
 
 Example:
 CaptureScreen(0)
@@ -84,7 +84,7 @@ CaptureScreen(aRect = 0,  sFile = "", bCursor = false, nQuality = "")
 	If	sFile = 0
 		SetClipboardData(hBM)
 	Else	Convert(hBM, sFile, nQuality), DllCall("DeleteObject", "Uint", hBM)
-}
+	}
 
 CaptureCursor(hDC, nL, nT)
 {
@@ -143,7 +143,7 @@ Convert(sFileFr = "", sFileTo = "", nQuality = "")
 	{
 		DllCall("OpenClipboard", "Uint", 0)
 		If	 DllCall("IsClipboardFormatAvailable", "Uint", 2) && (hBM:=DllCall("GetClipboardData", "Uint", 2))
-		DllCall("gdiplus\GdipCreateBitmapFromHBITMAP", "Uint", hBM, "Uint", 0, "UintP", pImage)
+			DllCall("gdiplus\GdipCreateBitmapFromHBITMAP", "Uint", hBM, "Uint", 0, "UintP", pImage)
 		DllCall("CloseClipboard")
 	}
 	Else If	sFileFr Is Integer
@@ -156,17 +156,17 @@ Convert(sFileFr = "", sFileTo = "", nQuality = "")
 	Loop, %	nCount
 		If	InStr(a_isunicode ? StrGet(NumGet(ci,76*(A_Index-1)+44), "UTF-16") : Ansi4Unicode(NumGet(ci,76*(A_Index-1)+44)), "." . sExtTo)
 		{
-			pCodec := &ci+76*(A_Index-1)
-			Break
-		}
+		pCodec := &ci+76*(A_Index-1)
+		Break
+	}
 	If	InStr(".JPG.JPEG.JPE.JFIF", "." . sExtTo) && nQuality<>"" && pImage && pCodec
 	{
-	DllCall("gdiplus\GdipGetEncoderParameterListSize", "Uint", pImage, "Uint", pCodec, "UintP", nSize)
-	VarSetCapacity(pi,nSize,0)
-	DllCall("gdiplus\GdipGetEncoderParameterList", "Uint", pImage, "Uint", pCodec, "Uint", nSize, "Uint", &pi)
-	Loop, %	NumGet(pi)
-		If	NumGet(pi,28*(A_Index-1)+20)=1 && NumGet(pi,28*(A_Index-1)+24)=6
-		{
+		DllCall("gdiplus\GdipGetEncoderParameterListSize", "Uint", pImage, "Uint", pCodec, "UintP", nSize)
+		VarSetCapacity(pi,nSize,0)
+		DllCall("gdiplus\GdipGetEncoderParameterList", "Uint", pImage, "Uint", pCodec, "Uint", nSize, "Uint", &pi)
+		Loop, %	NumGet(pi)
+			If	NumGet(pi,28*(A_Index-1)+20)=1 && NumGet(pi,28*(A_Index-1)+24)=6
+			{
 			pParam := &pi+28*(A_Index-1)
 			NumPut(nQuality,NumGet(NumPut(4,NumPut(1,pParam+0)+20)))
 			Break

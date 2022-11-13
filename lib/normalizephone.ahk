@@ -1,12 +1,12 @@
 ﻿/*
-    function: normalizePhone
+function: normalizePhone
 
-    description:
+description:
 
-    returns:
-    Properly formatted phone
+returns:
+Properly formatted phone
 
-	@Modification Date: July 29, 2019
+@Modification Date: July 29, 2019
 */
 
 normalizePhone(phone){
