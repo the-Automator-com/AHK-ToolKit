@@ -1,4 +1,4 @@
-#SingleInstance Force
+﻿#SingleInstance Force
 #Requires Autohotkey v1.1.33+
 
 /**
@@ -1643,7 +1643,6 @@ Add(type){
 		else
 		{
 			; _code comes from import
-			Hotkey, % RegexReplace(hkey, "&apos;", "'"), HotkeyHandler, On
 			node.attributes.item[0].text() += 1
 			_c := conf.createElement("hk")
 			_c.setAttribute("type", hkType), _c.setAttribute("key", opts hkey) ; opts comes from import
@@ -1668,6 +1667,24 @@ Add(type){
 				: strLen(_hkscript _code)>40 ? subStr(_hkscript _code,1,40) "..." : _hkscript _code)
 			Loop, 4
 				LV_ModifyCol(a_index,"AutoHdr")
+
+			if (hkIfWin)
+			{
+				for each, winTitle in StrSplit(hkIfWin, ",")
+					GroupAdd, ActiveGroup, i)%winTitle%
+				
+				Hotkey, IfWinActive, ahk_group ActiveGroup
+			}
+			else if (hkIfWinN)
+			{
+				for each, winTitle in StrSplit(hkIfWinN, ",")
+					GroupAdd, NotActiveGroup, i)%winTitle%
+				
+				Hotkey, IfWinNotActive, ahk_group NotActiveGroup
+			}
+
+			Hotkey, % RegexReplace(hkey, "&apos;", "'"), HotkeyHandler, On
+			Hotkey, IfWinActive
 		}
 		conf.transformNodeToObject(xsl, conf), updateSB()
 		conf.save(script.conf), conf.load(script.conf) root:=options:=_c:=_cc1:=_cc2:=_cc3:=_cc4:=_cc5:=null
@@ -1824,6 +1841,8 @@ Add(type){
 Load(type){
 	global
 
+	local currentNode
+
 	if (type = "Hotkeys")
 	{
 		Gui, 01: ListView, hkList
@@ -1835,17 +1854,33 @@ Load(type){
 		node := options.selectSingleNode("//Hotkeys").childNodes
 		Loop, % node.length
 		{
-			_path := node.item[a_index-1].selectSingleNode("path").text
-			_script := RegexReplace(node.item[a_index-1].selectSingleNode("script").text, "(\n|\r)", "[``n]")
-			_hk := RegexReplace(node.item[a_index-1].selectSingleNode("@key").text, "&apos;", "'")
+			currentNode := node.item[a_index-1]
+			_path := currentNode.selectSingleNode("path").text
+			_script := RegexReplace(currentNode.selectSingleNode("script").text, "(\n|\r)", "[``n]")
+			_hk := RegexReplace(currentNode.selectSingleNode("@key").text, "&apos;", "'")
 
-			LV_Add("", node.item[a_index-1].selectSingleNode("@type").text
-				, node.item[a_index-1].selectSingleNode("name").text
-				, hkSwap(_hk, "long")
-				, _path ? _path : (strLen(_script) > 40 ? subStr(_script, 1, 40) "..." : _script))
+			LV_Add("", currentNode.selectSingleNode("@type").text
+			         , currentNode.selectSingleNode("name").text
+			         , hkSwap(_hk, "long")
+			         , _path ? _path : (strLen(_script) > 40 ? subStr(_script, 1, 40) "..." : _script))
 
+			if (ifWin := currentNode.selectSingleNode("ifwinactive").text)
+			{
+				for each, winTitle in StrSplit(ifWin, ",")
+					GroupAdd, ActiveGroup, i)%winTitle%
+				
+				Hotkey, IfWinActive, ahk_group ActiveGroup
+			}
+			else if (ifNotWin := currentNode.selectSingleNode("ifwinnotactive").text)
+			{
+				for each, winTitle in StrSplit(ifNotWin, ",")
+					GroupAdd, NotActiveGroup, i)%winTitle%
+				
+				Hotkey, IfWinNotActive, ahk_group NotActiveGroup
+			}
 
 			Hotkey,  % _hk, HotkeyHandler, On
+			Hotkey, IfWinActive
 		}
 		LV_ModifyCol(2, "Center"), LV_ModifyCol(3, "Center")
 		GuiControl, +Redraw, hkList
@@ -3460,6 +3495,8 @@ MenuHandler(stat=0){
 ListHandler(sParam=0){
 	global
 
+	local currentNode
+
 	Gui, 01: ListView, %a_guicontrol%
 	_selrow := LV_GetNext(), LV_GetText(_seltxt, _selrow)
 	conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
@@ -3650,9 +3687,27 @@ ListHandler(sParam=0){
 					node.attributes.item[0].text() := 0
 				else
 					node.attributes.item[0].text() -= 1
-				node.removeChild(node.selectSingleNode("//hk[@key='" hkSwap(RegexReplace(_hkey, "\'", "&apos;")
+				node.removeChild(currentNode:=node.selectSingleNode("//hk[@key='" hkSwap(RegexReplace(_hkey, "\'", "&apos;")
 					, "short") "']"))
+
+				if (ifWin := currentNode.selectSingleNode("ifwinactive").text)
+				{
+					for each, winTitle in StrSplit(ifWin, ",")
+						GroupAdd, ActiveGroup, i)%winTitle%
+					
+					Hotkey, IfWinActive, ahk_group ActiveGroup
+
+				}
+				else if (ifNotWin := currentNode.selectSingleNode("ifwinnotactive").text)
+				{
+					for each, winTitle in StrSplit(ifNotWin, ",")
+						GroupAdd, NotActiveGroup, i)%winTitle%
+						
+					Hotkey, IfWinNotActive, ahk_group NotActiveGroup
+				}
+
 				Hotkey, % hkSwap(_hkey, "short"), OFF
+				Hotkey, IfWinActive
 			}
 			conf.transformNodeToObject(xsl, conf), updateSB()
 			conf.save(script.conf), conf.load(script.conf) root:=options:=node:=null         ; Save & Clean
