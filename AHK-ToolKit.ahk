@@ -5,7 +5,7 @@
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * @Script Version   : release-0.15.0
+ * @Script Version   : 0.15.1
  * @Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * @Creation Date    : July 11, 2010
@@ -114,7 +114,7 @@ Gosub, Exit
 realexit := true
 global script := {base        : script
 	,name        : "AHK-ToolKit"
-	,version     : "release-0.15.0"
+	,version     : "0.15.1"
 	,author      : "RaptorX"
 	,email       : "graptorx@gmail.com"
 	,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
@@ -5027,13 +5027,13 @@ Exe_File=%In_Dir%\lib\AHK-ToolKit.exe
 Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
 [VERSION]
 Set_Version_Info=1
-File_Version=release-0.15.0
+File_Version=0.15.1
 Inc_File_Version=0
 Internal_Name=AHK-TK
 Legal_Copyright=GNU General Public License 3.0
 Original_Filename=AutoHotkey Toolkit.exe
 Product_Name=AutoHotkey Toolkit
-Product_Version=release-0.15.0
+Product_Version=0.15.1
 [ICONS]
 Icon_1=%In_Dir%\res\AHK-TK.ico
 Icon_2=%In_Dir%\res\AHK-TK.ico
