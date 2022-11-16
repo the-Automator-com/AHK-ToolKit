@@ -1,4 +1,7 @@
-﻿/**
+#SingleInstance Force
+#Requires Autohotkey v1.1.33+
+
+/**
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
@@ -61,18 +64,6 @@
  * =============================================================================================== *
  */
 
-if (a_ahkversion < 1.1)
-{
-	Msgbox, 0x10
-		, % "Error"
-		, % "The AutoHotkey installed in your computer is not compatible with`n"
-		.   "this version of AutoHotkey Toolkit.`n`n"
-		.   "Please use the compiled version of my script or upgrade to AutoHotkey L.`n"
-		.   "The application will exit now."
-
-	Exitapp
-}
-
 if ((A_PtrSize = 8 || !a_isunicode) && !a_iscompiled)
 {
 	SplitPath, A_AhkPath,, ahkDir
@@ -112,12 +103,9 @@ CoordMode, Tooltip, Screen
 OnExit, Exit
 SetWorkingDir, %a_scriptdir%
 ; --
-GroupAdd, ScreenTools, ahk_class SWarClass
-GroupAdd, ScreenTools, ahk_class Photoshop
-GroupAdd, ScreenTools, ahk_class illustrator
-GroupAdd, ScreenTools, ahk_class 3DSMAX
-GroupAdd, ScreenTools, ahk_class AE_CApplication_9.0
-GroupAdd, ScreenTools, ahk_class triuiScreen
+
+for each,winClass in ["SWarClass","Photoshop","illustrator","3DSMAX","AE_CApplication_9.0","triuiScreen"]
+	GroupAdd, ScreenTools, ahk_class %winClass%
 ;}
 
 ;[Basic Script Info]{
@@ -1520,8 +1508,9 @@ SetHotkeys(list=0, $hwnd=0, title=0){
 	return
 }
 SetSciMargin(lSci, n0=40, n1=10){
-
-	lSci.SetMarginWidthN(0, n0), lSci.SetMarginMaskN(1, SC_MASK_FOLDERS), lSci.SetMarginSensitiveN(1, true)
+	lSci.SetMarginWidthN(0, n0)
+	lSci.SetMarginMaskN(1, SC_MASK_FOLDERS)
+	lSci.SetMarginSensitiveN(1, true)
 }
 SetSciStyles(){
 	conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
@@ -4516,7 +4505,7 @@ defConf(path){
 		<Hotstrings count="0"/>
 		</AHK-Toolkit>
 	)
-	
+
 	FileDelete, %path%
 	Sleep, 500
 
