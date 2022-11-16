@@ -1547,7 +1547,7 @@ SetSciStyles(){
 		sci[cObj].MarkerSetBack(SC_MARKNUM_FOLDERMIDTAIL, 0x5A5A5A)
 
 		; Set Autohotkey Lexer and default options
-		sci[cObj].SetWrapMode(SC_WRAP_WORD), sci[cObj].SetLexer(SCLEX_AHKL)
+		sci[cObj].SetWrapMode(SC_WRAP_WORD), sci[cObj].SetLexer(SCLEX_AHKL), sci[cObj].SetCodePage(SC_CP_UTF8)
 		sci[cObj].StyleSetFont(STYLE_DEFAULT, "Courier New"), sci[cObj].StyleSetSize(STYLE_DEFAULT, 10), sci[cObj].StyleClearAll()
 
 		; Set Style Colors
