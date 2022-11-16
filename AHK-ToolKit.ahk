@@ -75,15 +75,15 @@ if (a_ahkversion < 1.1)
 
 if ((A_PtrSize = 8 || !a_isunicode) && !a_iscompiled)
 {
-
-	ahkpath := RegExReplace(a_ahkpath, "D)[^\\]*$", "AutoHotkeyU32.exe", varCount, 1)
+	SplitPath, A_AhkPath,, ahkDir
+	ahkpath := ahkDir "\AutoHotkeyU32.exe"
 
 	if (!FileExist(ahkpath) && !ahkpath := a_ahkpath){
 		ahkpath := a_temp "\ahkl.bak"
 		FileInstall, res\ahkl.bak, %ahkpath%, true
 	}
 
-	Run % ahkpath " """ A_ScriptFullPath """"
+	Run %ahkpath% "%A_ScriptFullPath%"
 	ExitApp
 }
 
