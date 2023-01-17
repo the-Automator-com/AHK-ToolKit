@@ -1,5 +1,5 @@
 ﻿#SingleInstance Force
-#Requires Autohotkey v1.1.33+
+#Requires Autohotkey v1.1.33+ 32-Bit
 ;--
 ;@Ahk2Exe-SetVersion     0.15.1
 ;@Ahk2Exe-SetMainIcon    res\AHK-TK.ico
