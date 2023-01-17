@@ -1,7 +1,7 @@
 ﻿#SingleInstance Force
 #Requires Autohotkey v1.1.33+ 32-Bit
 ;--
-;@Ahk2Exe-SetVersion     0.15.1
+;@Ahk2Exe-SetVersion     0.17.2
 ;@Ahk2Exe-SetMainIcon    res\AHK-TK.ico
 ;@Ahk2Exe-SetProductName AutoHotkey ToolKit
 ;@Ahk2Exe-SetDescription Set of Autohotkey "tools" that i use regularly.
@@ -9,7 +9,7 @@
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * @Script Version   : 0.15.1
+ * @Script Version   : 0.17.2
  * @Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * @Creation Date    : July 11, 2010
@@ -118,7 +118,7 @@ Gosub, Exit
 realexit := true
 global script := {base        : script
 	,name        : "AHK-ToolKit"
-	,version     : "0.15.1"
+	,version     : "0.17.2"
 	,author      : "RaptorX"
 	,email       : "graptorx@gmail.com"
 	,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
@@ -5064,28 +5064,3 @@ return
 ;}
 ;}
 
-/*
-* * * Compile_AHK SETTINGS BEGIN * * *
-[AHK2EXE]
-Exe_File=%In_Dir%\lib\AHK-ToolKit.exe
-Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
-[VERSION]
-Set_Version_Info=1
-File_Version=0.15.1
-Inc_File_Version=0
-Internal_Name=AHK-TK
-Legal_Copyright=GNU General Public License 3.0
-Original_Filename=AutoHotkey Toolkit.exe
-Product_Name=AutoHotkey Toolkit
-Product_Version=0.15.1
-[ICONS]
-Icon_1=%In_Dir%\res\AHK-TK.ico
-Icon_2=%In_Dir%\res\AHK-TK.ico
-Icon_3=%In_Dir%\res\AHK-TK.ico
-Icon_4=%In_Dir%\res\AHK-TK.ico
-Icon_5=%In_Dir%\res\AHK-TK.ico
-Icon_6=%In_Dir%\res\AHK-TK.ico
-Icon_7=%In_Dir%\res\AHK-TK.ico
-
-* * * Compile_AHK SETTINGS END * * *
-*/
