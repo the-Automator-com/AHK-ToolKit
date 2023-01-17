@@ -1,4 +1,4 @@
-﻿#SingleInstance Force
+#SingleInstance Force
 #Requires Autohotkey v1.1.33+
 
 /**
@@ -902,16 +902,16 @@ PreferencesGui(){
 
 	;{ TreeView Item List
 	$P1 := TV_Add("General Preferences", 0, "Expand")
-	$P1C1 := TV_Add("Code Detection", $P1, "Expand")
-	$C1C1 := TV_Add("Keywords", $P1C1, "Expand")
-	$C1C2 := TV_Add("Pastebin Options", $P1C1, "Expand")
+	; $P1C1 := TV_Add("Code Detection", $P1, "Expand")
+	; $C1C1 := TV_Add("Keywords", $P1C1, "Expand")
+	; $C1C2 := TV_Add("Pastebin Options", $P1C1, "Expand")
 	$P1C2 := TV_Add("Command Helper", $P1, "Expand")
 	$C2C1 := TV_Add("Options", $P1C2, "Expand")
 	$P1C3 := TV_Add("Live Code", $P1, "Expand")
-	$C3C1 := TV_Add("Run Code With", $P1C3, "Expand")
-	$C3C2 := TV_Add("Keywords", $P1C3, "Expand")
-	$C3C3 := TV_Add("Syntax Styles", $P1C3, "Expand")
-	$P1C4 := TV_Add("Screen Tools", $P1, "Expand")
+	; $C3C1 := TV_Add("Run Code With", $P1C3, "Expand")
+	; $C3C2 := TV_Add("Keywords", $P1C3, "Expand")
+	; $C3C3 := TV_Add("Syntax Styles", $P1C3, "Expand")
+	; $P1C4 := TV_Add("Screen Tools", $P1, "Expand")
 	; $P1C4 := TV_Add("Script Manager", $P1, "Expand")
 	;}
 
@@ -1139,9 +1139,27 @@ PreferencesGui(){
 	;}
 
 	;{ Live Code
-	; Gui, 91: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
-	; $hwnd91 := WinExist()
-	; Gui, 91: show, x165 y36 w350 h245 NoActivate
+	Gui, 91: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
+	$hwnd91 := WinExist()
+	
+	Gui, 91: add, GroupBox, x3 y0 w345 r4.5 Section , % "Info"
+	Gui, 91: add, Text, xp+10 yp+20 w330
+		, % "The live code tab allows you to quickly test code without worrying about "
+		.   "having to save the script. It also allows you to quickly switch between "
+		.   "autohotkey versions.`n`nHere you can select where different versions of "
+		.   "autohotkey are located."
+	
+	Gui, 91: add, GroupBox, xs w345 r5.8, % "Autohotkey Paths"
+	Gui, 91: add, Edit, xp+10 yp+20 w245 r1 vUnicode32v1 Section, % options.selectSingleNode("//Unicode32v1").text
+	Gui, 91: add, Edit, w245 r1 vUnicode64v1, % options.selectSingleNode("//Unicode64v1").text
+	Gui, 91: add, Edit, w245 r1 vUnicode32v2, % options.selectSingleNode("//Unicode32v2").text
+	Gui, 91: add, Edit, w245 r1 vUnicode64v2, % options.selectSingleNode("//Unicode64v2").text
+
+	Gui, 91: add, Button, x+10 ys-1 w75 vbrwUnicode32v1 gGuiHandler, % "&Browse..."
+	Gui, 91: add, Button, y+4 w75 vbrwUnicode64v1 gGuiHandler, % "&Browse..."
+	Gui, 91: add, Button, y+4 w75 vbrwUnicode32v2 gGuiHandler, % "&Browse..."
+	Gui, 91: add, Button, y+4 w75 vbrwUnicode64v2 gGuiHandler, % "&Browse..."
+	Gui, 91: show, x165 y36 w350 h245 NoActivate
 	;}
 
 	;{ Live Code > Run Code With
@@ -2197,6 +2215,12 @@ ApplyPref(){
 	options.selectSingleNode("//ScrTools/@prtscr").text := scrPrnt
 	;}
 
+	; Run With
+	options.selectSingleNode("//Unicode32v1").text := Unicode32v1
+	options.selectSingleNode("//Unicode64v1").text := Unicode64v1
+	options.selectSingleNode("//Unicode32v2").text := Unicode32v2
+	options.selectSingleNode("//Unicode64v2").text := Unicode64v2
+
 	conf.transformNodeToObject(xsl, conf)
 	conf.save(script.conf), conf.load(script.conf)          ; Save and Load
 	if !conf.xml
@@ -2980,9 +3004,20 @@ GuiHandler(){
 		}
 
 		if (a_guicontrol = "&Browse...")
+		|| (a_guicontrol ~= "i)brw")
 		{
-			if (a_gui = 92)
+			switch a_gui
 			{
+			case 91:
+				Gui, 91: +OwnDialogs
+				SplitPath, A_AhkPath,,ahkDir
+				FileSelectFile, ahkPath, 3, %ahkDir%,, *.exe
+
+				if !ahkPath
+					return
+
+				GuiControl, 91:, % StrReplace(A_GuiControl, "brw"), % ahkPath
+			case 92:
 				Gui, 92: +OwnDialogs
 				FileSelectFile, hf, 3, %a_ahkpath%, % "Select the help file", Help Files (*.chm)
 
@@ -4181,13 +4216,19 @@ prefControl(pref=0){
 	else
 		Gui, 92: hide
 
-	if (pref = $P1C4)
-		Gui, 87: show, x165 y36 w350 NoActivate
+	if (pref = $P1C3)
+		Gui, 91: show, x165 y36 w350 NoActivate
 	else
-		Gui, 87: hide
+		Gui, 91: hide
 
 	; Temporal Code
-	w := $P1 "," $P1C1 "," $C1C1 "," $C1C2 "," $P1C2 "," $C2C1 "," $P1C4
+	w = 
+	(Ltrim Join,
+	%$P1%
+	%$P1C2%
+	%$C2C1%
+	%$P1C3%
+	)
 
 	if pref not in %w%
 		GuiControl, 06: show, AHKTK_UC
@@ -4602,7 +4643,6 @@ lcRun(_gui=0){
 
 	lcfPath := a_temp . "\" . rName(5, "code")        ; Random Live Code Path
 	GuiControlGet, RCBin,, %$RCbin%
-	ahkpath := options.selectSingleNode("//RCPaths/" RCBin).text
 
 	if _gui = 01
 		sci[1].GetText(sci[1].GetLength()+1, _code)
