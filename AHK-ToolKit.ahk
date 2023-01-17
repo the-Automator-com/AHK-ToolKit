@@ -733,7 +733,7 @@ MainGui(){
 
 	Gui, add, Button, x+10 yp-1 w75 HWND$lcRun gGuiHandler, % "&Run"
 	Gui, add, Button, x+10 w75 HWND$lcClear gGuiHandler, % "&Clear"
-	GuiAttach(1),SetSciMargin(sci[1])
+	GuiAttach(1), SetSciMargin(sci[1])
 
 	; The following is used in the message handler to get the ID
 	; of the edit controls so we can change their font (quick search controls)
@@ -946,7 +946,7 @@ PreferencesGui(){
 	Gui, 98: add, CheckBox, x+10 Checked%_alt% HWND$_alt v_alt gGuiHandler, % "Alt"
 	Gui, 98: add, CheckBox, x+10 Checked%_shift% HWND$_shift v_shift gGuiHandler, % "Shift"
 	Gui, 98: add, CheckBox, x+10 Checked%_win% HWND$_win v_win gGuiHandler, % "Win"
-	Gui, 98: add, DropDownList, x+10 yp-3 w140 HWND$GP_DDL v_hkddl gGuiHandler
+	Gui, 98: add, DropDownList, x+10 yp-3 w130 HWND$GP_DDL v_hkddl gGuiHandler
 		, % lst := "Default  " klist("all^", "mods msb")
 
 	Control,ChooseString,%_mhk%,, ahk_id %$GP_DDL%
@@ -1525,7 +1525,7 @@ SetHotkeys(list=0, $hwnd=0, title=0){
 	Control,ChooseString,%a_thishotkey%,, ahk_id %$lhwnd%
 	return
 }
-SetSciMargin(lSci, n0=40, n1=10){
+SetSciMargin(lSci, n0=50, n1=10){
 	lSci.SetMarginWidthN(0, n0)
 	lSci.SetMarginMaskN(1, SC_MASK_FOLDERS)
 	lSci.SetMarginSensitiveN(1, true)
