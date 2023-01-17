@@ -1,6 +1,10 @@
-#SingleInstance Force
+﻿#SingleInstance Force
 #Requires Autohotkey v1.1.33+
-
+;--
+;@Ahk2Exe-SetVersion     0.15.1
+;@Ahk2Exe-SetMainIcon    res\AHK-TK.ico
+;@Ahk2Exe-SetProductName AutoHotkey ToolKit
+;@Ahk2Exe-SetDescription Set of Autohotkey "tools" that i use regularly.
 /**
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
