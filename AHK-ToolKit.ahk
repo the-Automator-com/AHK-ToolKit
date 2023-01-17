@@ -1,11 +1,15 @@
 ﻿#SingleInstance Force
-#Requires Autohotkey v1.1.33+
-
+#Requires Autohotkey v1.1.33+ 32-Bit
+;--
+;@Ahk2Exe-SetVersion     0.17.2
+;@Ahk2Exe-SetMainIcon    res\AHK-TK.ico
+;@Ahk2Exe-SetProductName AutoHotkey ToolKit
+;@Ahk2Exe-SetDescription Set of Autohotkey "tools" that i use regularly.
 /**
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * @Script Version   : 0.15.1
+ * @Script Version   : 0.17.2
  * @Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * @Creation Date    : July 11, 2010
@@ -114,7 +118,7 @@ Gosub, Exit
 realexit := true
 global script := {base        : script
 	,name        : "AHK-ToolKit"
-	,version     : "0.15.1"
+	,version     : "0.17.2"
 	,author      : "RaptorX"
 	,email       : "graptorx@gmail.com"
 	,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
@@ -733,7 +737,7 @@ MainGui(){
 
 	Gui, add, Button, x+10 yp-1 w75 HWND$lcRun gGuiHandler, % "&Run"
 	Gui, add, Button, x+10 w75 HWND$lcClear gGuiHandler, % "&Clear"
-	GuiAttach(1),SetSciMargin(sci[1])
+	GuiAttach(1), SetSciMargin(sci[1])
 
 	; The following is used in the message handler to get the ID
 	; of the edit controls so we can change their font (quick search controls)
@@ -902,16 +906,16 @@ PreferencesGui(){
 
 	;{ TreeView Item List
 	$P1 := TV_Add("General Preferences", 0, "Expand")
-	$P1C1 := TV_Add("Code Detection", $P1, "Expand")
-	$C1C1 := TV_Add("Keywords", $P1C1, "Expand")
-	$C1C2 := TV_Add("Pastebin Options", $P1C1, "Expand")
+	; $P1C1 := TV_Add("Code Detection", $P1, "Expand")
+	; $C1C1 := TV_Add("Keywords", $P1C1, "Expand")
+	; $C1C2 := TV_Add("Pastebin Options", $P1C1, "Expand")
 	$P1C2 := TV_Add("Command Helper", $P1, "Expand")
 	$C2C1 := TV_Add("Options", $P1C2, "Expand")
 	$P1C3 := TV_Add("Live Code", $P1, "Expand")
-	$C3C1 := TV_Add("Run Code With", $P1C3, "Expand")
-	$C3C2 := TV_Add("Keywords", $P1C3, "Expand")
-	$C3C3 := TV_Add("Syntax Styles", $P1C3, "Expand")
-	$P1C4 := TV_Add("Screen Tools", $P1, "Expand")
+	; $C3C1 := TV_Add("Run Code With", $P1C3, "Expand")
+	; $C3C2 := TV_Add("Keywords", $P1C3, "Expand")
+	; $C3C3 := TV_Add("Syntax Styles", $P1C3, "Expand")
+	; $P1C4 := TV_Add("Screen Tools", $P1, "Expand")
 	; $P1C4 := TV_Add("Script Manager", $P1, "Expand")
 	;}
 
@@ -946,7 +950,7 @@ PreferencesGui(){
 	Gui, 98: add, CheckBox, x+10 Checked%_alt% HWND$_alt v_alt gGuiHandler, % "Alt"
 	Gui, 98: add, CheckBox, x+10 Checked%_shift% HWND$_shift v_shift gGuiHandler, % "Shift"
 	Gui, 98: add, CheckBox, x+10 Checked%_win% HWND$_win v_win gGuiHandler, % "Win"
-	Gui, 98: add, DropDownList, x+10 yp-3 w140 HWND$GP_DDL v_hkddl gGuiHandler
+	Gui, 98: add, DropDownList, x+10 yp-3 w130 HWND$GP_DDL v_hkddl gGuiHandler
 		, % lst := "Default  " klist("all^", "mods msb")
 
 	Control,ChooseString,%_mhk%,, ahk_id %$GP_DDL%
@@ -1139,9 +1143,27 @@ PreferencesGui(){
 	;}
 
 	;{ Live Code
-	; Gui, 91: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
-	; $hwnd91 := WinExist()
-	; Gui, 91: show, x165 y36 w350 h245 NoActivate
+	Gui, 91: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
+	$hwnd91 := WinExist()
+	
+	Gui, 91: add, GroupBox, x3 y0 w345 r4.5 Section , % "Info"
+	Gui, 91: add, Text, xp+10 yp+20 w330
+		, % "The live code tab allows you to quickly test code without worrying about "
+		.   "having to save the script. It also allows you to quickly switch between "
+		.   "autohotkey versions.`n`nHere you can select where different versions of "
+		.   "autohotkey are located."
+	
+	Gui, 91: add, GroupBox, xs w345 r5.8, % "Autohotkey Paths"
+	Gui, 91: add, Edit, xp+10 yp+20 w245 r1 vUnicode32v1 Section, % options.selectSingleNode("//Unicode32v1").text
+	Gui, 91: add, Edit, w245 r1 vUnicode64v1, % options.selectSingleNode("//Unicode64v1").text
+	Gui, 91: add, Edit, w245 r1 vUnicode32v2, % options.selectSingleNode("//Unicode32v2").text
+	Gui, 91: add, Edit, w245 r1 vUnicode64v2, % options.selectSingleNode("//Unicode64v2").text
+
+	Gui, 91: add, Button, x+10 ys-1 w75 vbrwUnicode32v1 gGuiHandler, % "&Browse..."
+	Gui, 91: add, Button, y+4 w75 vbrwUnicode64v1 gGuiHandler, % "&Browse..."
+	Gui, 91: add, Button, y+4 w75 vbrwUnicode32v2 gGuiHandler, % "&Browse..."
+	Gui, 91: add, Button, y+4 w75 vbrwUnicode64v2 gGuiHandler, % "&Browse..."
+	Gui, 91: show, x165 y36 w350 h245 NoActivate
 	;}
 
 	;{ Live Code > Run Code With
@@ -1507,7 +1529,7 @@ SetHotkeys(list=0, $hwnd=0, title=0){
 	Control,ChooseString,%a_thishotkey%,, ahk_id %$lhwnd%
 	return
 }
-SetSciMargin(lSci, n0=40, n1=10){
+SetSciMargin(lSci, n0=50, n1=10){
 	lSci.SetMarginWidthN(0, n0)
 	lSci.SetMarginMaskN(1, SC_MASK_FOLDERS)
 	lSci.SetMarginSensitiveN(1, true)
@@ -2196,6 +2218,12 @@ ApplyPref(){
 	options.selectSingleNode("//ScrTools/@altdrag").text := scrStat
 	options.selectSingleNode("//ScrTools/@prtscr").text := scrPrnt
 	;}
+
+	; Run With
+	options.selectSingleNode("//Unicode32v1").text := Unicode32v1
+	options.selectSingleNode("//Unicode64v1").text := Unicode64v1
+	options.selectSingleNode("//Unicode32v2").text := Unicode32v2
+	options.selectSingleNode("//Unicode64v2").text := Unicode64v2
 
 	conf.transformNodeToObject(xsl, conf)
 	conf.save(script.conf), conf.load(script.conf)          ; Save and Load
@@ -2980,9 +3008,20 @@ GuiHandler(){
 		}
 
 		if (a_guicontrol = "&Browse...")
+		|| (a_guicontrol ~= "i)brw")
 		{
-			if (a_gui = 92)
+			switch a_gui
 			{
+			case 91:
+				Gui, 91: +OwnDialogs
+				SplitPath, A_AhkPath,,ahkDir
+				FileSelectFile, ahkPath, 3, %ahkDir%,, *.exe
+
+				if !ahkPath
+					return
+
+				GuiControl, 91:, % StrReplace(A_GuiControl, "brw"), % ahkPath
+			case 92:
 				Gui, 92: +OwnDialogs
 				FileSelectFile, hf, 3, %a_ahkpath%, % "Select the help file", Help Files (*.chm)
 
@@ -4181,13 +4220,19 @@ prefControl(pref=0){
 	else
 		Gui, 92: hide
 
-	if (pref = $P1C4)
-		Gui, 87: show, x165 y36 w350 NoActivate
+	if (pref = $P1C3)
+		Gui, 91: show, x165 y36 w350 NoActivate
 	else
-		Gui, 87: hide
+		Gui, 91: hide
 
 	; Temporal Code
-	w := $P1 "," $P1C1 "," $C1C1 "," $C1C2 "," $P1C2 "," $C2C1 "," $P1C4
+	w = 
+	(Ltrim Join,
+	%$P1%
+	%$P1C2%
+	%$C2C1%
+	%$P1C3%
+	)
 
 	if pref not in %w%
 		GuiControl, 06: show, AHKTK_UC
@@ -4602,7 +4647,6 @@ lcRun(_gui=0){
 
 	lcfPath := a_temp . "\" . rName(5, "code")        ; Random Live Code Path
 	GuiControlGet, RCBin,, %$RCbin%
-	ahkpath := options.selectSingleNode("//RCPaths/" RCBin).text
 
 	if _gui = 01
 		sci[1].GetText(sci[1].GetLength()+1, _code)
@@ -5020,28 +5064,3 @@ return
 ;}
 ;}
 
-/*
-* * * Compile_AHK SETTINGS BEGIN * * *
-[AHK2EXE]
-Exe_File=%In_Dir%\lib\AHK-ToolKit.exe
-Alt_Bin=C:\Program Files\AutoHotkeyW\Compiler\AutoHotkeySC.bin
-[VERSION]
-Set_Version_Info=1
-File_Version=0.15.1
-Inc_File_Version=0
-Internal_Name=AHK-TK
-Legal_Copyright=GNU General Public License 3.0
-Original_Filename=AutoHotkey Toolkit.exe
-Product_Name=AutoHotkey Toolkit
-Product_Version=0.15.1
-[ICONS]
-Icon_1=%In_Dir%\res\AHK-TK.ico
-Icon_2=%In_Dir%\res\AHK-TK.ico
-Icon_3=%In_Dir%\res\AHK-TK.ico
-Icon_4=%In_Dir%\res\AHK-TK.ico
-Icon_5=%In_Dir%\res\AHK-TK.ico
-Icon_6=%In_Dir%\res\AHK-TK.ico
-Icon_7=%In_Dir%\res\AHK-TK.ico
-
-* * * Compile_AHK SETTINGS END * * *
-*/
