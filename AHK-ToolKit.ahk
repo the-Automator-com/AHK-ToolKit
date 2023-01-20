@@ -4647,6 +4647,7 @@ lcRun(_gui=0){
 
 	lcfPath := a_temp . "\" . rName(5, "code")        ; Random Live Code Path
 	GuiControlGet, RCBin,, %$RCbin%
+	ahkpath := options.selectSingleNode("//" RCBin).text
 
 	if _gui = 01
 		sci[1].GetText(sci[1].GetLength()+1, _code)
