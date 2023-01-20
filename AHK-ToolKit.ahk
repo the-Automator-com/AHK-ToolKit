@@ -1,7 +1,7 @@
 ﻿#SingleInstance Force
 #Requires Autohotkey v1.1.33+ 32-Bit
 ;--
-;@Ahk2Exe-SetVersion     0.17.2
+;@Ahk2Exe-SetVersion     0.17.3
 ;@Ahk2Exe-SetMainIcon    res\AHK-TK.ico
 ;@Ahk2Exe-SetProductName AutoHotkey ToolKit
 ;@Ahk2Exe-SetDescription Set of Autohotkey "tools" that i use regularly.
@@ -9,7 +9,7 @@
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * @Script Version   : 0.17.2
+ * @Script Version   : 0.17.3
  * @Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * @Creation Date    : July 11, 2010
@@ -118,7 +118,7 @@ Gosub, Exit
 realexit := true
 global script := {base        : script
 	,name        : "AHK-ToolKit"
-	,version     : "0.17.2"
+	,version     : "0.17.3"
 	,author      : "RaptorX"
 	,email       : "graptorx@gmail.com"
 	,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
@@ -4647,6 +4647,7 @@ lcRun(_gui=0){
 
 	lcfPath := a_temp . "\" . rName(5, "code")        ; Random Live Code Path
 	GuiControlGet, RCBin,, %$RCbin%
+	ahkpath := options.selectSingleNode("//" RCBin).text
 
 	if _gui = 01
 		sci[1].GetText(sci[1].GetLength()+1, _code)
