@@ -937,7 +937,7 @@ ExportGui(){
 PreferencesGui(){
 	global
 
-	Gui, 06: -MinimizeBox -MaximizeBox +LastFound +Owner1
+	Gui, 06: -MinimizeBox -MaximizeBox +LastFound +Owner1 +alwaysontop
 	Gui, 06: Default
 	$hwnd6 := WinExist()
 
@@ -961,8 +961,12 @@ PreferencesGui(){
 	Gui, 06: font, s16
 	Gui, 06: add, Text, x+5 y0 HWND$Title vTitle, % "General Preferences"
 	Gui, 06: font
-	Gui, 06: add, Text, x165 y+5 w370 0x10
-	Gui, 06: add, Picture, x165 y36 vAHKTK_UC Hidden, % "res\img\AHK-TK_UnderConstruction.png"
+	Gui, 06: add, Text, HWND$TopDivider y+5 w370 0x10 Section
+	
+	ControlGetPos, tdoX, tdoY, tdoW, tdoH,, ahk_id %$TopDivider%
+	tdX := tdoX -3, tdY := tdoY -20
+	
+	Gui, 06: add, Picture, xs ys+5 w-1 h245 Hidden vAHKTK_UC, % "res\img\AHK-TK_UnderConstruction.png"
 
 	;{ General Preferences GUI
 	Gui, 98: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
@@ -971,12 +975,13 @@ PreferencesGui(){
 	vars := "ssi|smm|sww|cfu"
 	Loop, Parse, vars, |
 		_%a_loopfield% := options.selectSingleNode("//@" a_loopfield).text
-
-	Gui, 98: add, GroupBox, x3 y0 w345 h70, % "Startup"
-	Gui, 98: add, CheckBox, xp+25 yp+20 Checked%_ssi% v_ssi gGuiHandler, % "Show splash image"
-	Gui, 98: add, CheckBox, x+70 Checked%_sww% v_sww gGuiHandler, % "Start with Windows"
-	Gui, 98: add, CheckBox, x28 y+10 Checked%_smm% v_smm gGuiHandler, % "Start minimized"
-	Gui, 98: add, CheckBox, x+91 Checked%_cfu% v_cfu gGuiHandler, % "Check for updates"
+	
+	Gui, 98: Margin, 3
+	Gui, 98: add, GroupBox, xm y0 w345 h70, % "Startup"
+	Gui, 98: add, CheckBox, xp+25 yp+20 Section Checked%_ssi% v_ssi gGuiHandler, % "Show splash image"
+	Gui, 98: add, CheckBox, xs Checked%_smm% v_smm gGuiHandler, % "Start minimized"
+	Gui, 98: add, CheckBox, x+65 ys Checked%_sww% v_sww gGuiHandler, % "Start with Windows"
+	Gui, 98: add, CheckBox, Checked%_cfu% v_cfu gGuiHandler, % "Check for updates"
 
 	_mhk := options.selectSingleNode("MainKey").text
 	vars := "ctrl|alt|shift|win"
@@ -984,7 +989,7 @@ PreferencesGui(){
 		_%a_loopfield% := options.selectSingleNode("MainKey/@" a_loopfield).text
 	_mods:=(_ctrl ? "^" : null)(_alt ? "!" : null)(_shift ? "+" : null)(_win ? "#" : null)
 
-	Gui, 98: add, GroupBox, x3 y+20 w345 h55, % "Main GUI Hotkey"
+	Gui, 98: add, GroupBox, xm y+25 w345 h55, % "Main GUI Hotkey"
 	Gui, 98: add, CheckBox, xp+10 yp+23 Checked%_ctrl% HWND$_ctrl v_ctrl gGuiHandler, % "Ctrl"
 	Gui, 98: add, CheckBox, x+10 Checked%_alt% HWND$_alt v_alt gGuiHandler, % "Alt"
 	Gui, 98: add, CheckBox, x+10 Checked%_shift% HWND$_shift v_shift gGuiHandler, % "Shift"
@@ -995,13 +1000,13 @@ PreferencesGui(){
 	Control,ChooseString,%_mhk%,, ahk_id %$GP_DDL%
 	; SetHotkeys(lst,$GP_DDL, "Preferences")
 
-	Gui, 98: add, GroupBox, x3 y+26 w345 h100 Disabled, % "Suspend hotkeys on these windows"
+	Gui, 98: add, GroupBox, xm y+26 w345 h100 Disabled, % "Suspend hotkeys on these windows"
 	Gui, 98: add, Edit, xp+10 yp+20 w325 h70 HWND$GP_E1 v_swl gGuiHandler Disabled
 		, % options.selectSingleNode("SuspWndList").text
 
 	Hotkey, % _mods _mhk, GuiClose
 
-	Gui, 98: show, x165 y36 w350 h245 NoActivate
+	Gui, 98: show, x%tdX% y%tdY% w350 h245 NoActivate
 	;}
 
 	;{ Code Detection Preferences
@@ -1031,7 +1036,7 @@ PreferencesGui(){
 		: ("Automatic Upload", options.selectSingleNode("//Codet/@mode").text := 2)
 	GuiControl, 97: , %selRadio%, 1
 
-	Gui, 97: show, x165 y36 w350 h245 NoActivate
+	Gui, 97: show, x%tdX% y%tdY% w350 h245 NoActivate
 	;}
 
 	;{ Code Detection > Keywords Preferences
@@ -1056,7 +1061,7 @@ PreferencesGui(){
 	Gui, 96: add, Edit, x+11 w201 HWND$QScod Center gGuiHandler vQScod, % "Quick Search"
 	Gui, 96: font
 
-	Gui, 96: show, x165 y36 w350 h245 NoActivate
+	Gui, 96: show, x%tdX% y%tdY% w350 h245 NoActivate
 	;}
 
 	;{ Code Detection > Pastebin Preferences
@@ -1103,7 +1108,7 @@ PreferencesGui(){
 
 	Control,ChooseString,%curr%,, ahk_id %$CP_DDL%
 
-	Gui, 95: show, x165 y36 w350 h245 NoActivate
+	Gui, 95: show, x%tdX% y%tdY% w350 h245 NoActivate
 	;}
 
 	;{ Command Helper
@@ -1128,7 +1133,7 @@ PreferencesGui(){
 		, % "Enable in Internal Editors"
 	Gui, 93: add, CheckBox, xp+180 HWND$_eft Checked%_eft% gGuiHandler v_eft, % "AHK Forum Tags"
 
-	Gui, 93: show, x165 y36 w350 h245 NoActivate
+	Gui, 93: show, x%tdX% y%tdY% w350 h245 NoActivate
 	;}
 
 	;{ Command Helper > Options
@@ -1151,7 +1156,7 @@ PreferencesGui(){
 	Gui, 92: add, CheckBox, x+10 HWND$_hfalt Checked%_hfalt% v_hfalt gGuiHandler, % "Alt"
 	Gui, 92: add, CheckBox, x+10 HWND$_hfshift Checked%_hfshift% v_hfshift gGuiHandler, % "Shift"
 	Gui, 92: add, CheckBox, x+10 HWND$_hfwin Checked%_hfwin% v_hfwin gGuiHandler, % "Win"
-	Gui, 92: add, DropDownList, x+10 yp-3 w140 HWND$HF_DDL v_hfddl gGuiHandler
+	Gui, 92: add, DropDownList, x+10 yp-3 w130 HWND$HF_DDL v_hfddl gGuiHandler
 		, % lst := "Default  " klist("all^", "mods msb")
 
 	Control,ChooseString,%_hfhk%,, ahk_id %$HF_DDL%
@@ -1168,7 +1173,7 @@ PreferencesGui(){
 	Gui, 92: add, CheckBox, x+10 HWND$_ftalt Checked%_ftalt% v_ftalt gGuiHandler, % "Alt"
 	Gui, 92: add, CheckBox, x+10 HWND$_ftshift Checked%_ftshift% v_ftshift gGuiHandler, % "Shift"
 	Gui, 92: add, CheckBox, x+10 HWND$_ftwin Checked%_ftwin% v_ftwin gGuiHandler, % "Win"
-	Gui, 92: add, DropDownList, x+10 yp-3 w140 HWND$FT_DDL v_ftddl gGuiHandler
+	Gui, 92: add, DropDownList, x+10 yp-3 w130 HWND$FT_DDL v_ftddl gGuiHandler
 		, % lst := "Default  " klist("all^", "mods msb")
 
 	Control,ChooseString,%_fthk%,, ahk_id %$FT_DDL%
@@ -1178,7 +1183,7 @@ PreferencesGui(){
 	Gui, 92: add, Edit, xp+10 yp+23 w240 r1 vhfPath, % options.selectSingleNode("CMDHelper/HelpPath").text
 	Gui, 92: add, Button, x+10 w75 gGuiHandler, % "&Browse..."
 
-	Gui, 92: show, x165 y36 w350 h245 NoActivate
+	Gui, 92: show, x%tdX% y%tdY% w350 h245 NoActivate
 	;}
 
 	;{ Live Code
@@ -1202,60 +1207,17 @@ PreferencesGui(){
 	Gui, 91: add, Button, y+4 w75 vbrwUnicode64v1 gGuiHandler, % "&Browse..."
 	Gui, 91: add, Button, y+4 w75 vbrwUnicode32v2 gGuiHandler, % "&Browse..."
 	Gui, 91: add, Button, y+4 w75 vbrwUnicode64v2 gGuiHandler, % "&Browse..."
-	Gui, 91: show, x165 y36 w350 h245 NoActivate
+	Gui, 91: show, x%tdX% y%tdY% w350 h245 NoActivate
 	;}
 
-	;{ Live Code > Run Code With
-	; Gui, 90: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
-	; $hwnd90 := WinExist()
-	; Gui, 90: show, x165 y36 w350 h245 NoActivate
-	;}
-
-	;{ Live Code > Keywords Preferences
-	; Gui, 89: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
-	; $hwnd89 := WinExist()
-	; Gui, 89: show, x165 y36 w350 h245 NoActivate
-	;}
-
-	;{ Live Code > Syntax Styles Preferences
-	; Gui, 88: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
-	; $hwnd88 := WinExist()
-	; Gui, 88: show, x165 y36 w350 h245 NoActivate
-	;}
-
-	;{ Screen Tools
-	Gui, 87: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace  ; +Border -WS_POPUP +WS_CHILD
-	$hwnd87 := WinExist()
-	Gui, 87: show, x165 y36 w350 h245 NoActivate
-	Gui, 87: add, GroupBox, x3 y0 w345 h170, % "Info"
-	Gui, 87: add, Text, xp+10 yp+20 w330
-		, % "Screen Tools are there to allow you to take screenshots easily.`n`n"
-		. "The taken shot will be automatically uploaded to imgur and the`n"
-		. "link will be saved in the clipboard for easy sharing.`n`n"
-		. "Alt + Drag:   `tTakes a screenshot of selected area`n`n"
-		. "Alt + Click:  `tTakes a screenshot of active window`n`n"
-		. "Print Screen: `tIf enabled uploads a picture of the whole screen`n"
-		. "`t`tby pressing the 'Print Screen' button."
-
-	Gui, 87: add, Text, x0 y+20 w360 0x10
-	Gui, 87: add, GroupBox, x3 yp+10 w345 h50, % "General Preferences"
-
-	scrStat := options.selectSingleNode("//ScrTools/@altdrag").text
-	scrPrnt := options.selectSingleNode("//ScrTools/@prtscr").text
-	Gui, 87: add, CheckBox, xp+7 yp+20 HWND$scrStat Checked%scrStat% gGuiHandler vscrStat
-		, % "Enable Screen Tools"
-	Gui, 87: add, CheckBox, x+45 yp HWND$scrPrnt Checked%scrPrnt% gGuiHandler vscrPrnt
-		, % "Upload by Print Screen Hotkey"
-	;}
-
-	Gui, 06: add, Text, x165 y+8 w370 0x10                          ; y is 10 - 2px of the Picture control.
+	Gui, 06: add, Text, xs y+8 w370 0x10                          ; y is 10 - 2px of the Picture control.
 	Gui, 06: add, Button, xp+105 yp+10 w75 gGuiHandler, % "&OK"
 	Gui, 06: add, Button, x+10 w75 gGuiHandler, % "&Close"
 	Gui, 06: add, Button, x+10 w75 HWND$Apply Disabled gGuiHandler, % "&Apply"
 
 
 	Gui, 01: Default
-	Gui, 06: show, w520 h330 Hide, % "Preferences"
+	Gui, 06: show, w520 h330 %hide%, % "Preferences"
 	; pause
 	return
 }
@@ -4248,17 +4210,17 @@ prefControl(pref=0){
 		Gui, 95: hide
 
 	if (pref = $P1C2)
-		Gui, 93: show, x165 y36 w350 NoActivate
+		Gui, 93: show, NoActivate
 	else
 		Gui, 93: hide
 
 	if (pref = $C2C1)
-		Gui, 92: show, x165 y36 w350 NoActivate
+		Gui, 92: show, NoActivate
 	else
 		Gui, 92: hide
 
 	if (pref = $P1C3)
-		Gui, 91: show, x165 y36 w350 NoActivate
+		Gui, 91: show, NoActivate
 	else
 		Gui, 91: hide
 
