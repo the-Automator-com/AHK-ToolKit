@@ -4677,7 +4677,7 @@ lcRun(_gui=0){
 	if !InStr(live_code, "^Esc::ExitApp")
 		live_code .= "`n^Esc::ExitApp"
 
-	if (!fileExist(ahkpath) && !ahkpath := a_ahkpath && !FileExist(ahkpath := a_temp "\" RCBin ".bak"))
+	if (!fileExist(ahkpath) && !FileExist(ahkpath := a_temp "\" RCBin ".bak"))
 	{
 		switch RCBin
 		{
