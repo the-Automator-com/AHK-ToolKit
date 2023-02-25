@@ -404,8 +404,8 @@ return
 
 Exit:
 
-if FileExist(a_temp "\ahkl.bak")
-	FileDelete, %a_temp%\ahkl.bak
+if FileExist(a_temp "\*.bak")
+	FileDelete, %a_temp%\*.bak
 
 Process,Close, %hslPID%
 if (FileExist(a_temp "\*.code"))
