@@ -4645,7 +4645,7 @@ updateSB(window=""){
 lcRun(_gui=0){
 	global $RCbin
 
-	lcfPath := a_temp . "\" . rName(5, "code")        ; Random Live Code Path
+	hFile := FileOpen(lcfPath := a_temp "\livecode.ahk", "w-", "UTF-8")
 	GuiControlGet, RCBin,, %$RCbin%
 	ahkpath := options.selectSingleNode("//" RCBin).text
 
