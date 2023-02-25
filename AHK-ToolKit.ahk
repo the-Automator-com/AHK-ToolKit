@@ -1,4 +1,4 @@
-#SingleInstance Force
+﻿#SingleInstance Force
 #Requires Autohotkey v1.1.33+ 32-Bit
 ;--
 ;@Ahk2Exe-SetVersion     0.17.3
@@ -715,10 +715,20 @@ MainGui(){
 	Gui, add, Button, x+10 yp w75 HWND$hsClose gGuiHandler, % "&Close"
 
 	Gui, Tab, Live Code
-	options.selectSingleNode("//@snplib").text ? w:=640 : w:=790
-	sci[1] := new scintilla($hwnd1,5,25,w,320, "lib\LexAHKL.dll", "hidden")
 
-	Gui, add, Text, x650 y25 w145 h17 HWND$slTitle Center Border Hidden, % "Snippet Library"
+	sciPos := CalculateScaledPos()
+	sci[1] := new scintilla($hwnd1
+	                       ,sciPos.x
+	                       ,sciPos.y
+	                       ,sciPos.w
+	                       ,sciPos.h
+	                       ,"lib\LexAHKL.dll", "hidden")
+
+	origPos := CalculateScaledPos(true)
+	; ControlGetPos, sciX, sciY, sciW, sciH,, % "ahk_id" sci[1].hwnd
+
+	Gui, add, Text, % "x" origPos.w + (A_ScreenDPI = 96 ? 10 : 5) " y" origPos.y " w145 h17 HWND$slTitle Center Border Hidden"
+	              , % "Snippet Library"
 	Gui, add, DropDownList, xp y+5 w145 HWND$slDDL Hidden gGuiHandler Sort vslDDL
 	_current := options.selectSingleNode("//SnippetLib/@current").text
 	_cnt := options.selectSingleNode("//Group[@name='" _current "']/@count").text
@@ -755,6 +765,35 @@ MainGui(){
 	; hence the h422.
 	Gui, show, w799 h422 %hide%, % "AutoHotkey Toolkit [" (a_isunicode ? "W" : "A") "]"
 	return
+}
+CalculateScaledPos(orig := false){
+	x:=5
+	y:=25
+	w:=options.selectSingleNode("//@snplib").text ? 640 : 790
+	h:=320
+
+	if orig
+		return {x:x,y:y,w:w,h:h}
+	
+	switch A_ScreenDPI
+	{
+	case 120:
+		x+=8
+		y+=5
+		w+=142
+		h+=80
+	case 144:
+		x+=8
+		y+=13
+		w+=305
+		h+=158
+	case 168:
+		x+=10
+		y+=18
+		w+=460
+		h+=235
+	}
+	return {x:x,y:y,w:w,h:h}
 }
 AddHKGui(){
 	global
@@ -3435,14 +3474,12 @@ MenuHandler(stat=0){
 		if tog_sl := !tog_sl
 		{
 			ControlMove,,,, % _guiwidth - 160,, % "ahk_id " sci[1].hwnd
-			attach(sci[1].hwnd, "w h r2")
 			Loop, Parse, slControls, |
 				Control, show,,, ahk_id %a_loopfield%
 		}
 		else
 		{
 			ControlMove,,,, % _guiwidth - 10,, % "ahk_id " sci[1].hwnd
-			attach(sci[1].hwnd, "w h r2")
 			Loop, Parse, slControls, |
 				Control, hide,,, ahk_id %a_loopfield%
 		}
