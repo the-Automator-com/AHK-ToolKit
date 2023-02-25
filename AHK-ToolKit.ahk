@@ -1,4 +1,4 @@
-﻿#SingleInstance Force
+#SingleInstance Force
 #Requires Autohotkey v1.1.33+ 32-Bit
 ;--
 ;@Ahk2Exe-SetVersion     0.17.3
@@ -4678,13 +4678,24 @@ lcRun(_gui=0){
 	if !InStr(live_code, "^Esc::ExitApp")
 		live_code .= "`n^Esc::ExitApp"
 
-	FileAppend, %live_code%, %lcfPath%
-
-	if (!fileExist(ahkpath) && !ahkpath := a_ahkpath)
+	if (!fileExist(ahkpath) && !ahkpath := a_ahkpath && !FileExist(ahkpath := a_temp "\" RCBin ".bak"))
 	{
-		ahkpath := a_temp "\ahkl.bak"
-		FileInstall, res\ahkl.bak, %ahkpath%
+		switch RCBin
+		{
+		case "Unicode32v1":
+			FileInstall, res\Unicode32v1.bak, %ahkpath%
+		case "Unicode64v1":
+			FileInstall, res\Unicode64v1.bak, %ahkpath%
+		case "Unicode32v2":
+			FileInstall, res\Unicode32v2.bak, %ahkpath%
+		case "Unicode64v2":
+			FileInstall, res\Unicode64v2.bak, %ahkpath%
+		}
 	}
+
+	hFile.Write(live_code)
+	hFile.Close()
+
 
 	Run, %ahkpath% %lcfPath%
 	return
