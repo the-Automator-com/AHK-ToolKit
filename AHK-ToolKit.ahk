@@ -1,4 +1,4 @@
-﻿#SingleInstance Force
+#SingleInstance Force
 #Requires Autohotkey v1.1.33+ 32-Bit
 ;--
 ;@Ahk2Exe-SetVersion     0.21.9
@@ -144,16 +144,13 @@ global system := {}, sci := {} ; Scintilla array
 global conf := ComObjCreate("MSXML2.DOMDocument"), xsl := ComObjCreate("MSXML2.DOMDocument"), root, options, hotkeys, hotstrings
 system.mon := {}, system.wa := {}
 
-RegRead,defBrowser,HKCR,.html                               ; Get default browswer
-RegRead,defBrowser,HKCR,%defBrowser%\Shell\Open\Command     ; Get path to default browser + options
 SysGet, mon, Monitor                                        ; Get the boundaries of the current screen
 SysGet, wa, MonitorWorkArea                                 ; Get the working area of the current screen
-system.defBrowser := defBrowser
 system.mon.left := monLEFT, system.mon.right := monRIGHT, system.mon.top := monTOP, system.mon.bottom := monBOTTOM
 system.wa.left := waLEFT, system.wa.right := waRIGHT, system.wa.top := waTOP, system.wa.bottom := waBOTTOM
 ;--
 ; Cleaning
-defBrowser:=monLEFT:=monRIGHT:=monTOP:=monBOTTOM:=waLEFT:=waRIGHT:=waTOP:=waBOTTOM:=null  ; Set all to null
+monLEFT:=monRIGHT:=monTOP:=monBOTTOM:=waLEFT:=waRIGHT:=waTOP:=waBOTTOM:=null  ; Set all to null
 ;--
 ; Configuration file objects
 style = ;{
@@ -2266,7 +2263,7 @@ GuiHandler(){
 	; Handling URLs
 	if (inStr(a_guicontrol, "http://") || inStr(a_guicontrol, "www."))
 	{
-		Run, % RegexReplace(system.defBrowser, "\""?\%1\""?", """" a_guicontrol """")
+		Run, % a_guicontrol
 		return
 	}
 
