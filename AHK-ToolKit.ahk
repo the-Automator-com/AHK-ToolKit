@@ -1,7 +1,7 @@
 ﻿#SingleInstance Force
 #Requires Autohotkey v1.1.33+ 32-Bit
 ;--
-;@Ahk2Exe-SetVersion     0.17.3
+;@Ahk2Exe-SetVersion     0.21.9
 ;@Ahk2Exe-SetMainIcon    res\AHK-TK.ico
 ;@Ahk2Exe-SetProductName AutoHotkey ToolKit
 ;@Ahk2Exe-SetDescription Set of Autohotkey "tools" that i use regularly.
@@ -9,11 +9,11 @@
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * @Script Version   : 0.17.3
+ * @Script Version   : 0.21.9
  * @Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * @Creation Date    : July 11, 2010
- * @Modification Date: November 16, 2022
+ * @Modification Date: February 25, 2023
  *
  * @Description      :
  * -------------------
@@ -118,7 +118,7 @@ Gosub, Exit
 realexit := true
 global script := {base        : script
 	,name        : "AHK-ToolKit"
-	,version     : "0.17.3"
+	,version     : "0.21.9"
 	,author      : "RaptorX"
 	,email       : "graptorx@gmail.com"
 	,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
@@ -144,16 +144,13 @@ global system := {}, sci := {} ; Scintilla array
 global conf := ComObjCreate("MSXML2.DOMDocument"), xsl := ComObjCreate("MSXML2.DOMDocument"), root, options, hotkeys, hotstrings
 system.mon := {}, system.wa := {}
 
-RegRead,defBrowser,HKCR,.html                               ; Get default browswer
-RegRead,defBrowser,HKCR,%defBrowser%\Shell\Open\Command     ; Get path to default browser + options
 SysGet, mon, Monitor                                        ; Get the boundaries of the current screen
 SysGet, wa, MonitorWorkArea                                 ; Get the working area of the current screen
-system.defBrowser := defBrowser
 system.mon.left := monLEFT, system.mon.right := monRIGHT, system.mon.top := monTOP, system.mon.bottom := monBOTTOM
 system.wa.left := waLEFT, system.wa.right := waRIGHT, system.wa.top := waTOP, system.wa.bottom := waBOTTOM
 ;--
 ; Cleaning
-defBrowser:=monLEFT:=monRIGHT:=monTOP:=monBOTTOM:=waLEFT:=waRIGHT:=waTOP:=waBOTTOM:=null  ; Set all to null
+monLEFT:=monRIGHT:=monTOP:=monBOTTOM:=waLEFT:=waRIGHT:=waTOP:=waBOTTOM:=null  ; Set all to null
 ;--
 ; Configuration file objects
 style = ;{
@@ -180,7 +177,7 @@ style = ;{
 </xsl:template>
 </xsl:stylesheet>
 <!-- I have to keep the indentation here in this file as i want it to be on the XML file -->
-	)
+)
 ;}
 
 xsl.loadXML(style), style:=null
@@ -404,8 +401,8 @@ return
 
 Exit:
 
-if FileExist(a_temp "\ahkl.bak")
-	FileDelete, %a_temp%\ahkl.bak
+if FileExist(a_temp "\*.bak")
+	FileDelete, %a_temp%\*.bak
 
 Process,Close, %hslPID%
 if (FileExist(a_temp "\*.code"))
@@ -715,10 +712,20 @@ MainGui(){
 	Gui, add, Button, x+10 yp w75 HWND$hsClose gGuiHandler, % "&Close"
 
 	Gui, Tab, Live Code
-	options.selectSingleNode("//@snplib").text ? w:=640 : w:=790
-	sci[1] := new scintilla($hwnd1,5,25,w,320, "lib\LexAHKL.dll", "hidden")
 
-	Gui, add, Text, x650 y25 w145 h17 HWND$slTitle Center Border Hidden, % "Snippet Library"
+	sciPos := CalculateScaledPos()
+	sci[1] := new scintilla($hwnd1
+	                       ,sciPos.x
+	                       ,sciPos.y
+	                       ,sciPos.w
+	                       ,sciPos.h
+	                       ,"lib\LexAHKL.dll", "hidden")
+
+	origPos := CalculateScaledPos(true)
+	; ControlGetPos, sciX, sciY, sciW, sciH,, % "ahk_id" sci[1].hwnd
+
+	Gui, add, Text, % "x" origPos.w + origPos.m " y" origPos.y " w145 h17 HWND$slTitle Center Border Hidden"
+	              , % "Snippet Library"
 	Gui, add, DropDownList, xp y+5 w145 HWND$slDDL Hidden gGuiHandler Sort vslDDL
 	_current := options.selectSingleNode("//SnippetLib/@current").text
 	_cnt := options.selectSingleNode("//Group[@name='" _current "']/@count").text
@@ -755,6 +762,54 @@ MainGui(){
 	; hence the h422.
 	Gui, show, w799 h422 %hide%, % "AutoHotkey Toolkit [" (a_isunicode ? "W" : "A") "]"
 	return
+}
+CalculateScaledPos(orig := false){
+	global $hwnd1
+	static MONITOR_DEFAULTTONEAREST := 0x00000002
+	
+	x:=5
+	y:=25
+	w:=options.selectSingleNode("//@snplib").text ? 640 : 790
+	h:=320
+	m:=9
+
+	if orig
+		return {x:x,y:y,w:w,h:h,m:m}
+	
+	if !hMon := DllCall("MonitorFromWindow", "ptr", $hwnd1, "int", MONITOR_DEFAULTTONEAREST)
+		Throw, Exception("couldnt get the monitor handle", A_ThisFunc, $hwnd1)
+
+	DllCall("Shcore.dll\GetScaleFactorForMonitor"
+	       , "ptr", hMon     ; [in]  HMONITOR            hMon,
+	       , "ptr*", pScale) ; [out] DEVICE_SCALE_FACTOR *pScale
+
+	pScale /= 100.0
+
+	x *= pScale
+	y *= pScale
+	w *= pScale
+	h *= pScale
+	m *= pScale
+
+	; switch A_ScreenDPI
+	; {
+	; case 120:
+	; 	x+=8
+	; 	y+=5
+	; 	w+=142
+	; 	h+=80
+	; case 144:
+	; 	x+=8
+	; 	y+=13
+	; 	w+=305
+	; 	h+=158
+	; case 168:
+	; 	x+=10
+	; 	y+=18
+	; 	w+=460
+	; 	h+=235
+	; }
+	return {x:x,y:y,w:w,h:h,m:m}
 }
 AddHKGui(){
 	global
@@ -898,7 +953,7 @@ ExportGui(){
 PreferencesGui(){
 	global
 
-	Gui, 06: -MinimizeBox -MaximizeBox +LastFound +Owner1
+	Gui, 06: -MinimizeBox -MaximizeBox +LastFound +Owner1 +alwaysontop
 	Gui, 06: Default
 	$hwnd6 := WinExist()
 
@@ -922,8 +977,12 @@ PreferencesGui(){
 	Gui, 06: font, s16
 	Gui, 06: add, Text, x+5 y0 HWND$Title vTitle, % "General Preferences"
 	Gui, 06: font
-	Gui, 06: add, Text, x165 y+5 w370 0x10
-	Gui, 06: add, Picture, x165 y36 vAHKTK_UC Hidden, % "res\img\AHK-TK_UnderConstruction.png"
+	Gui, 06: add, Text, HWND$TopDivider y+5 w370 0x10 Section
+	
+	ControlGetPos, tdoX, tdoY, tdoW, tdoH,, ahk_id %$TopDivider%
+	tdX := tdoX -3, tdY := tdoY -20
+	
+	Gui, 06: add, Picture, xs ys+5 w-1 h245 Hidden vAHKTK_UC, % "res\img\AHK-TK_UnderConstruction.png"
 
 	;{ General Preferences GUI
 	Gui, 98: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
@@ -932,12 +991,13 @@ PreferencesGui(){
 	vars := "ssi|smm|sww|cfu"
 	Loop, Parse, vars, |
 		_%a_loopfield% := options.selectSingleNode("//@" a_loopfield).text
-
-	Gui, 98: add, GroupBox, x3 y0 w345 h70, % "Startup"
-	Gui, 98: add, CheckBox, xp+25 yp+20 Checked%_ssi% v_ssi gGuiHandler, % "Show splash image"
-	Gui, 98: add, CheckBox, x+70 Checked%_sww% v_sww gGuiHandler, % "Start with Windows"
-	Gui, 98: add, CheckBox, x28 y+10 Checked%_smm% v_smm gGuiHandler, % "Start minimized"
-	Gui, 98: add, CheckBox, x+91 Checked%_cfu% v_cfu gGuiHandler, % "Check for updates"
+	
+	Gui, 98: Margin, 3
+	Gui, 98: add, GroupBox, xm y0 w345 h70, % "Startup"
+	Gui, 98: add, CheckBox, xp+25 yp+20 Section Checked%_ssi% v_ssi gGuiHandler, % "Show splash image"
+	Gui, 98: add, CheckBox, xs Checked%_smm% v_smm gGuiHandler, % "Start minimized"
+	Gui, 98: add, CheckBox, x+65 ys Checked%_sww% v_sww gGuiHandler, % "Start with Windows"
+	Gui, 98: add, CheckBox, Checked%_cfu% v_cfu gGuiHandler, % "Check for updates"
 
 	_mhk := options.selectSingleNode("MainKey").text
 	vars := "ctrl|alt|shift|win"
@@ -945,7 +1005,7 @@ PreferencesGui(){
 		_%a_loopfield% := options.selectSingleNode("MainKey/@" a_loopfield).text
 	_mods:=(_ctrl ? "^" : null)(_alt ? "!" : null)(_shift ? "+" : null)(_win ? "#" : null)
 
-	Gui, 98: add, GroupBox, x3 y+20 w345 h55, % "Main GUI Hotkey"
+	Gui, 98: add, GroupBox, xm y+25 w345 h55, % "Main GUI Hotkey"
 	Gui, 98: add, CheckBox, xp+10 yp+23 Checked%_ctrl% HWND$_ctrl v_ctrl gGuiHandler, % "Ctrl"
 	Gui, 98: add, CheckBox, x+10 Checked%_alt% HWND$_alt v_alt gGuiHandler, % "Alt"
 	Gui, 98: add, CheckBox, x+10 Checked%_shift% HWND$_shift v_shift gGuiHandler, % "Shift"
@@ -956,13 +1016,13 @@ PreferencesGui(){
 	Control,ChooseString,%_mhk%,, ahk_id %$GP_DDL%
 	; SetHotkeys(lst,$GP_DDL, "Preferences")
 
-	Gui, 98: add, GroupBox, x3 y+26 w345 h100 Disabled, % "Suspend hotkeys on these windows"
+	Gui, 98: add, GroupBox, xm y+26 w345 h100 Disabled, % "Suspend hotkeys on these windows"
 	Gui, 98: add, Edit, xp+10 yp+20 w325 h70 HWND$GP_E1 v_swl gGuiHandler Disabled
 		, % options.selectSingleNode("SuspWndList").text
 
 	Hotkey, % _mods _mhk, GuiClose
 
-	Gui, 98: show, x165 y36 w350 h245 NoActivate
+	Gui, 98: show, x%tdX% y%tdY% w350 h245 NoActivate
 	;}
 
 	;{ Code Detection Preferences
@@ -992,7 +1052,7 @@ PreferencesGui(){
 		: ("Automatic Upload", options.selectSingleNode("//Codet/@mode").text := 2)
 	GuiControl, 97: , %selRadio%, 1
 
-	Gui, 97: show, x165 y36 w350 h245 NoActivate
+	Gui, 97: show, x%tdX% y%tdY% w350 h245 NoActivate
 	;}
 
 	;{ Code Detection > Keywords Preferences
@@ -1017,7 +1077,7 @@ PreferencesGui(){
 	Gui, 96: add, Edit, x+11 w201 HWND$QScod Center gGuiHandler vQScod, % "Quick Search"
 	Gui, 96: font
 
-	Gui, 96: show, x165 y36 w350 h245 NoActivate
+	Gui, 96: show, x%tdX% y%tdY% w350 h245 NoActivate
 	;}
 
 	;{ Code Detection > Pastebin Preferences
@@ -1064,7 +1124,7 @@ PreferencesGui(){
 
 	Control,ChooseString,%curr%,, ahk_id %$CP_DDL%
 
-	Gui, 95: show, x165 y36 w350 h245 NoActivate
+	Gui, 95: show, x%tdX% y%tdY% w350 h245 NoActivate
 	;}
 
 	;{ Command Helper
@@ -1089,7 +1149,7 @@ PreferencesGui(){
 		, % "Enable in Internal Editors"
 	Gui, 93: add, CheckBox, xp+180 HWND$_eft Checked%_eft% gGuiHandler v_eft, % "AHK Forum Tags"
 
-	Gui, 93: show, x165 y36 w350 h245 NoActivate
+	Gui, 93: show, x%tdX% y%tdY% w350 h245 NoActivate
 	;}
 
 	;{ Command Helper > Options
@@ -1112,7 +1172,7 @@ PreferencesGui(){
 	Gui, 92: add, CheckBox, x+10 HWND$_hfalt Checked%_hfalt% v_hfalt gGuiHandler, % "Alt"
 	Gui, 92: add, CheckBox, x+10 HWND$_hfshift Checked%_hfshift% v_hfshift gGuiHandler, % "Shift"
 	Gui, 92: add, CheckBox, x+10 HWND$_hfwin Checked%_hfwin% v_hfwin gGuiHandler, % "Win"
-	Gui, 92: add, DropDownList, x+10 yp-3 w140 HWND$HF_DDL v_hfddl gGuiHandler
+	Gui, 92: add, DropDownList, x+10 yp-3 w130 HWND$HF_DDL v_hfddl gGuiHandler
 		, % lst := "Default  " klist("all^", "mods msb")
 
 	Control,ChooseString,%_hfhk%,, ahk_id %$HF_DDL%
@@ -1129,7 +1189,7 @@ PreferencesGui(){
 	Gui, 92: add, CheckBox, x+10 HWND$_ftalt Checked%_ftalt% v_ftalt gGuiHandler, % "Alt"
 	Gui, 92: add, CheckBox, x+10 HWND$_ftshift Checked%_ftshift% v_ftshift gGuiHandler, % "Shift"
 	Gui, 92: add, CheckBox, x+10 HWND$_ftwin Checked%_ftwin% v_ftwin gGuiHandler, % "Win"
-	Gui, 92: add, DropDownList, x+10 yp-3 w140 HWND$FT_DDL v_ftddl gGuiHandler
+	Gui, 92: add, DropDownList, x+10 yp-3 w130 HWND$FT_DDL v_ftddl gGuiHandler
 		, % lst := "Default  " klist("all^", "mods msb")
 
 	Control,ChooseString,%_fthk%,, ahk_id %$FT_DDL%
@@ -1139,7 +1199,7 @@ PreferencesGui(){
 	Gui, 92: add, Edit, xp+10 yp+23 w240 r1 vhfPath, % options.selectSingleNode("CMDHelper/HelpPath").text
 	Gui, 92: add, Button, x+10 w75 gGuiHandler, % "&Browse..."
 
-	Gui, 92: show, x165 y36 w350 h245 NoActivate
+	Gui, 92: show, x%tdX% y%tdY% w350 h245 NoActivate
 	;}
 
 	;{ Live Code
@@ -1163,60 +1223,17 @@ PreferencesGui(){
 	Gui, 91: add, Button, y+4 w75 vbrwUnicode64v1 gGuiHandler, % "&Browse..."
 	Gui, 91: add, Button, y+4 w75 vbrwUnicode32v2 gGuiHandler, % "&Browse..."
 	Gui, 91: add, Button, y+4 w75 vbrwUnicode64v2 gGuiHandler, % "&Browse..."
-	Gui, 91: show, x165 y36 w350 h245 NoActivate
+	Gui, 91: show, x%tdX% y%tdY% w350 h245 NoActivate
 	;}
 
-	;{ Live Code > Run Code With
-	; Gui, 90: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
-	; $hwnd90 := WinExist()
-	; Gui, 90: show, x165 y36 w350 h245 NoActivate
-	;}
-
-	;{ Live Code > Keywords Preferences
-	; Gui, 89: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
-	; $hwnd89 := WinExist()
-	; Gui, 89: show, x165 y36 w350 h245 NoActivate
-	;}
-
-	;{ Live Code > Syntax Styles Preferences
-	; Gui, 88: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
-	; $hwnd88 := WinExist()
-	; Gui, 88: show, x165 y36 w350 h245 NoActivate
-	;}
-
-	;{ Screen Tools
-	Gui, 87: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace  ; +Border -WS_POPUP +WS_CHILD
-	$hwnd87 := WinExist()
-	Gui, 87: show, x165 y36 w350 h245 NoActivate
-	Gui, 87: add, GroupBox, x3 y0 w345 h170, % "Info"
-	Gui, 87: add, Text, xp+10 yp+20 w330
-		, % "Screen Tools are there to allow you to take screenshots easily.`n`n"
-		. "The taken shot will be automatically uploaded to imgur and the`n"
-		. "link will be saved in the clipboard for easy sharing.`n`n"
-		. "Alt + Drag:   `tTakes a screenshot of selected area`n`n"
-		. "Alt + Click:  `tTakes a screenshot of active window`n`n"
-		. "Print Screen: `tIf enabled uploads a picture of the whole screen`n"
-		. "`t`tby pressing the 'Print Screen' button."
-
-	Gui, 87: add, Text, x0 y+20 w360 0x10
-	Gui, 87: add, GroupBox, x3 yp+10 w345 h50, % "General Preferences"
-
-	scrStat := options.selectSingleNode("//ScrTools/@altdrag").text
-	scrPrnt := options.selectSingleNode("//ScrTools/@prtscr").text
-	Gui, 87: add, CheckBox, xp+7 yp+20 HWND$scrStat Checked%scrStat% gGuiHandler vscrStat
-		, % "Enable Screen Tools"
-	Gui, 87: add, CheckBox, x+45 yp HWND$scrPrnt Checked%scrPrnt% gGuiHandler vscrPrnt
-		, % "Upload by Print Screen Hotkey"
-	;}
-
-	Gui, 06: add, Text, x165 y+8 w370 0x10                          ; y is 10 - 2px of the Picture control.
+	Gui, 06: add, Text, xs y+8 w370 0x10                          ; y is 10 - 2px of the Picture control.
 	Gui, 06: add, Button, xp+105 yp+10 w75 gGuiHandler, % "&OK"
 	Gui, 06: add, Button, x+10 w75 gGuiHandler, % "&Close"
 	Gui, 06: add, Button, x+10 w75 HWND$Apply Disabled gGuiHandler, % "&Apply"
 
 
 	Gui, 01: Default
-	Gui, 06: show, w520 h330 Hide, % "Preferences"
+	Gui, 06: show, w520 h330 %hide%, % "Preferences"
 	; pause
 	return
 }
@@ -2265,7 +2282,7 @@ GuiHandler(){
 	; Handling URLs
 	if (inStr(a_guicontrol, "http://") || inStr(a_guicontrol, "www."))
 	{
-		Run, % RegexReplace(system.defBrowser, "\""?\%1\""?", """" a_guicontrol """")
+		Run, % a_guicontrol
 		return
 	}
 
@@ -3223,7 +3240,7 @@ MenuHandler(stat=0){
 		; Menu, MainMenu, %stat%, Edit
 		; Menu, MainMenu, %stat%, Search
 
-		Menu, View, %stat%, Snippet Library
+		; Menu, View, %stat%, Snippet Library
 		; Menu, View, %stat%, Show Symbols
 		; Menu, View, %stat%, Zoom
 		Menu, View, %stat%, Line Wrap
@@ -3435,19 +3452,17 @@ MenuHandler(stat=0){
 		if tog_sl := !tog_sl
 		{
 			ControlMove,,,, % _guiwidth - 160,, % "ahk_id " sci[1].hwnd
-			attach(sci[1].hwnd, "w h r2")
 			Loop, Parse, slControls, |
 				Control, show,,, ahk_id %a_loopfield%
 		}
 		else
 		{
 			ControlMove,,,, % _guiwidth - 10,, % "ahk_id " sci[1].hwnd
-			attach(sci[1].hwnd, "w h r2")
 			Loop, Parse, slControls, |
 				Control, hide,,, ahk_id %a_loopfield%
 		}
 
-		options.selectSingleNode("//@snplib").text := tog_sl
+		options.selectSingleNode("//@snplib").text := false
 		conf.transformNodeToObject(xsl, conf)
 		conf.save(script.conf), conf.load(script.conf)          ; Save and Load
 		return
@@ -4211,17 +4226,17 @@ prefControl(pref=0){
 		Gui, 95: hide
 
 	if (pref = $P1C2)
-		Gui, 93: show, x165 y36 w350 NoActivate
+		Gui, 93: show, NoActivate
 	else
 		Gui, 93: hide
 
 	if (pref = $C2C1)
-		Gui, 92: show, x165 y36 w350 NoActivate
+		Gui, 92: show, NoActivate
 	else
 		Gui, 92: hide
 
 	if (pref = $P1C3)
-		Gui, 91: show, x165 y36 w350 NoActivate
+		Gui, 91: show, NoActivate
 	else
 		Gui, 91: hide
 
@@ -4645,7 +4660,7 @@ updateSB(window=""){
 lcRun(_gui=0){
 	global $RCbin
 
-	lcfPath := a_temp . "\" . rName(5, "code")        ; Random Live Code Path
+	hFile := FileOpen(lcfPath := a_temp "\livecode.ahk", "w-", "UTF-8")
 	GuiControlGet, RCBin,, %$RCbin%
 	ahkpath := options.selectSingleNode("//" RCBin).text
 
@@ -4678,13 +4693,24 @@ lcRun(_gui=0){
 	if !InStr(live_code, "^Esc::ExitApp")
 		live_code .= "`n^Esc::ExitApp"
 
-	FileAppend, %live_code%, %lcfPath%
-
-	if (!fileExist(ahkpath) && !ahkpath := a_ahkpath)
+	if (!fileExist(ahkpath) && !FileExist(ahkpath := a_temp "\" RCBin ".bak"))
 	{
-		ahkpath := a_temp "\ahkl.bak"
-		FileInstall, res\ahkl.bak, %ahkpath%
+		switch RCBin
+		{
+		case "Unicode32v1":
+			FileInstall, res\Unicode32v1.bak, %ahkpath%
+		case "Unicode64v1":
+			FileInstall, res\Unicode64v1.bak, %ahkpath%
+		case "Unicode32v2":
+			FileInstall, res\Unicode32v2.bak, %ahkpath%
+		case "Unicode64v2":
+			FileInstall, res\Unicode64v2.bak, %ahkpath%
+		}
 	}
+
+	hFile.Write(live_code)
+	hFile.Close()
+
 
 	Run, %ahkpath% %lcfPath%
 	return
