@@ -1,4 +1,4 @@
-#SingleInstance Force
+﻿#SingleInstance Force
 #Requires Autohotkey v1.1.33+ 32-Bit
 ;--
 ;@Ahk2Exe-SetVersion     0.21.9
@@ -3240,7 +3240,7 @@ MenuHandler(stat=0){
 		; Menu, MainMenu, %stat%, Edit
 		; Menu, MainMenu, %stat%, Search
 
-		Menu, View, %stat%, Snippet Library
+		; Menu, View, %stat%, Snippet Library
 		; Menu, View, %stat%, Show Symbols
 		; Menu, View, %stat%, Zoom
 		Menu, View, %stat%, Line Wrap
@@ -3462,7 +3462,7 @@ MenuHandler(stat=0){
 				Control, hide,,, ahk_id %a_loopfield%
 		}
 
-		options.selectSingleNode("//@snplib").text := tog_sl
+		options.selectSingleNode("//@snplib").text := false
 		conf.transformNodeToObject(xsl, conf)
 		conf.save(script.conf), conf.load(script.conf)          ; Save and Load
 		return
