@@ -177,7 +177,7 @@ style = ;{
 </xsl:template>
 </xsl:stylesheet>
 <!-- I have to keep the indentation here in this file as i want it to be on the XML file -->
-	)
+)
 ;}
 
 xsl.loadXML(style), style:=null
@@ -724,7 +724,7 @@ MainGui(){
 	origPos := CalculateScaledPos(true)
 	; ControlGetPos, sciX, sciY, sciW, sciH,, % "ahk_id" sci[1].hwnd
 
-	Gui, add, Text, % "x" origPos.w + (A_ScreenDPI = 96 ? 10 : 5) " y" origPos.y " w145 h17 HWND$slTitle Center Border Hidden"
+	Gui, add, Text, % "x" origPos.w + origPos.m " y" origPos.y " w145 h17 HWND$slTitle Center Border Hidden"
 	              , % "Snippet Library"
 	Gui, add, DropDownList, xp y+5 w145 HWND$slDDL Hidden gGuiHandler Sort vslDDL
 	_current := options.selectSingleNode("//SnippetLib/@current").text
@@ -764,33 +764,52 @@ MainGui(){
 	return
 }
 CalculateScaledPos(orig := false){
+	global $hwnd1
+	static MONITOR_DEFAULTTONEAREST := 0x00000002
+	
 	x:=5
 	y:=25
 	w:=options.selectSingleNode("//@snplib").text ? 640 : 790
 	h:=320
+	m:=9
 
 	if orig
-		return {x:x,y:y,w:w,h:h}
+		return {x:x,y:y,w:w,h:h,m:m}
 	
-	switch A_ScreenDPI
-	{
-	case 120:
-		x+=8
-		y+=5
-		w+=142
-		h+=80
-	case 144:
-		x+=8
-		y+=13
-		w+=305
-		h+=158
-	case 168:
-		x+=10
-		y+=18
-		w+=460
-		h+=235
-	}
-	return {x:x,y:y,w:w,h:h}
+	if !hMon := DllCall("MonitorFromWindow", "ptr", $hwnd1, "int", MONITOR_DEFAULTTONEAREST)
+		Throw, Exception("couldnt get the monitor handle", A_ThisFunc, $hwnd1)
+
+	DllCall("Shcore.dll\GetScaleFactorForMonitor"
+	       , "ptr", hMon     ; [in]  HMONITOR            hMon,
+	       , "ptr*", pScale) ; [out] DEVICE_SCALE_FACTOR *pScale
+
+	pScale /= 100.0
+
+	x *= pScale
+	y *= pScale
+	w *= pScale
+	h *= pScale
+	m *= pScale
+
+	; switch A_ScreenDPI
+	; {
+	; case 120:
+	; 	x+=8
+	; 	y+=5
+	; 	w+=142
+	; 	h+=80
+	; case 144:
+	; 	x+=8
+	; 	y+=13
+	; 	w+=305
+	; 	h+=158
+	; case 168:
+	; 	x+=10
+	; 	y+=18
+	; 	w+=460
+	; 	h+=235
+	; }
+	return {x:x,y:y,w:w,h:h,m:m}
 }
 AddHKGui(){
 	global
