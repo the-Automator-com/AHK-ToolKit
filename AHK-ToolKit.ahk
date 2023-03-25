@@ -1,7 +1,7 @@
 ﻿#SingleInstance Force
 #Requires Autohotkey v1.1.33+ 32-Bit
 ;--
-;@Ahk2Exe-SetVersion     0.17.3
+;@Ahk2Exe-SetVersion     0.21.9
 ;@Ahk2Exe-SetMainIcon    res\AHK-TK.ico
 ;@Ahk2Exe-SetProductName AutoHotkey ToolKit
 ;@Ahk2Exe-SetDescription Set of Autohotkey "tools" that i use regularly.
@@ -9,11 +9,11 @@
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * @Script Version   : 0.17.3
+ * @Script Version   : 0.21.9
  * @Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * @Creation Date    : July 11, 2010
- * @Modification Date: November 16, 2022
+ * @Modification Date: February 25, 2023
  *
  * @Description      :
  * -------------------
@@ -118,7 +118,7 @@ Gosub, Exit
 realexit := true
 global script := {base        : script
 	,name        : "AHK-ToolKit"
-	,version     : "0.17.3"
+	,version     : "0.21.9"
 	,author      : "RaptorX"
 	,email       : "graptorx@gmail.com"
 	,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
@@ -144,16 +144,13 @@ global system := {}, sci := {} ; Scintilla array
 global conf := ComObjCreate("MSXML2.DOMDocument"), xsl := ComObjCreate("MSXML2.DOMDocument"), root, options, hotkeys, hotstrings
 system.mon := {}, system.wa := {}
 
-RegRead,defBrowser,HKCR,.html                               ; Get default browswer
-RegRead,defBrowser,HKCR,%defBrowser%\Shell\Open\Command     ; Get path to default browser + options
 SysGet, mon, Monitor                                        ; Get the boundaries of the current screen
 SysGet, wa, MonitorWorkArea                                 ; Get the working area of the current screen
-system.defBrowser := defBrowser
 system.mon.left := monLEFT, system.mon.right := monRIGHT, system.mon.top := monTOP, system.mon.bottom := monBOTTOM
 system.wa.left := waLEFT, system.wa.right := waRIGHT, system.wa.top := waTOP, system.wa.bottom := waBOTTOM
 ;--
 ; Cleaning
-defBrowser:=monLEFT:=monRIGHT:=monTOP:=monBOTTOM:=waLEFT:=waRIGHT:=waTOP:=waBOTTOM:=null  ; Set all to null
+monLEFT:=monRIGHT:=monTOP:=monBOTTOM:=waLEFT:=waRIGHT:=waTOP:=waBOTTOM:=null  ; Set all to null
 ;--
 ; Configuration file objects
 style = ;{
@@ -180,7 +177,7 @@ style = ;{
 </xsl:template>
 </xsl:stylesheet>
 <!-- I have to keep the indentation here in this file as i want it to be on the XML file -->
-	)
+)
 ;}
 
 xsl.loadXML(style), style:=null
@@ -727,7 +724,7 @@ MainGui(){
 	origPos := CalculateScaledPos(true)
 	; ControlGetPos, sciX, sciY, sciW, sciH,, % "ahk_id" sci[1].hwnd
 
-	Gui, add, Text, % "x" origPos.w + (A_ScreenDPI = 96 ? 10 : 5) " y" origPos.y " w145 h17 HWND$slTitle Center Border Hidden"
+	Gui, add, Text, % "x" origPos.w + origPos.m " y" origPos.y " w145 h17 HWND$slTitle Center Border Hidden"
 	              , % "Snippet Library"
 	Gui, add, DropDownList, xp y+5 w145 HWND$slDDL Hidden gGuiHandler Sort vslDDL
 	_current := options.selectSingleNode("//SnippetLib/@current").text
@@ -767,33 +764,52 @@ MainGui(){
 	return
 }
 CalculateScaledPos(orig := false){
+	global $hwnd1
+	static MONITOR_DEFAULTTONEAREST := 0x00000002
+	
 	x:=5
 	y:=25
 	w:=options.selectSingleNode("//@snplib").text ? 640 : 790
 	h:=320
+	m:=9
 
 	if orig
-		return {x:x,y:y,w:w,h:h}
+		return {x:x,y:y,w:w,h:h,m:m}
 	
-	switch A_ScreenDPI
-	{
-	case 120:
-		x+=8
-		y+=5
-		w+=142
-		h+=80
-	case 144:
-		x+=8
-		y+=13
-		w+=305
-		h+=158
-	case 168:
-		x+=10
-		y+=18
-		w+=460
-		h+=235
-	}
-	return {x:x,y:y,w:w,h:h}
+	if !hMon := DllCall("MonitorFromWindow", "ptr", $hwnd1, "int", MONITOR_DEFAULTTONEAREST)
+		Throw, Exception("couldnt get the monitor handle", A_ThisFunc, $hwnd1)
+
+	DllCall("Shcore.dll\GetScaleFactorForMonitor"
+	       , "ptr", hMon     ; [in]  HMONITOR            hMon,
+	       , "ptr*", pScale) ; [out] DEVICE_SCALE_FACTOR *pScale
+
+	pScale /= 100.0
+
+	x *= pScale
+	y *= pScale
+	w *= pScale
+	h *= pScale
+	m *= pScale
+
+	; switch A_ScreenDPI
+	; {
+	; case 120:
+	; 	x+=8
+	; 	y+=5
+	; 	w+=142
+	; 	h+=80
+	; case 144:
+	; 	x+=8
+	; 	y+=13
+	; 	w+=305
+	; 	h+=158
+	; case 168:
+	; 	x+=10
+	; 	y+=18
+	; 	w+=460
+	; 	h+=235
+	; }
+	return {x:x,y:y,w:w,h:h,m:m}
 }
 AddHKGui(){
 	global
@@ -2266,7 +2282,7 @@ GuiHandler(){
 	; Handling URLs
 	if (inStr(a_guicontrol, "http://") || inStr(a_guicontrol, "www."))
 	{
-		Run, % RegexReplace(system.defBrowser, "\""?\%1\""?", """" a_guicontrol """")
+		Run, % a_guicontrol
 		return
 	}
 
@@ -3224,7 +3240,7 @@ MenuHandler(stat=0){
 		; Menu, MainMenu, %stat%, Edit
 		; Menu, MainMenu, %stat%, Search
 
-		Menu, View, %stat%, Snippet Library
+		; Menu, View, %stat%, Snippet Library
 		; Menu, View, %stat%, Show Symbols
 		; Menu, View, %stat%, Zoom
 		Menu, View, %stat%, Line Wrap
@@ -3446,7 +3462,7 @@ MenuHandler(stat=0){
 				Control, hide,,, ahk_id %a_loopfield%
 		}
 
-		options.selectSingleNode("//@snplib").text := tog_sl
+		options.selectSingleNode("//@snplib").text := false
 		conf.transformNodeToObject(xsl, conf)
 		conf.save(script.conf), conf.load(script.conf)          ; Save and Load
 		return
