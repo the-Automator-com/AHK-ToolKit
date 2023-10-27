@@ -1,4 +1,4 @@
-#SingleInstance Force
+﻿#SingleInstance Force
 #Requires Autohotkey v1.1.33+ 32-Bit
 ;--
 ;@Ahk2Exe-SetVersion     0.21.9
@@ -1588,6 +1588,7 @@ Add(type){
 		sci[2].GetText(sci[2].GetLength()+1,_hkscript)
 		node := root.selectSingleNode("//Hotkeys")
 		hkey := RegexReplace(hkey, "\'", "&apos;")
+		oldkey := RegexReplace(oldkey, "\'", "&apos;")
 		if (editingHK)
 		{
 			editingHK := False
@@ -1600,8 +1601,9 @@ Add(type){
 				return
 			else
 			{
+				Hotkey, % oldkey, OFF
 				sci[2].GetText(sci[2].GetLength()+1,_hkscript)
-				currNode := node.selectSingleNode("//hk[@key='" RegexReplace(oldkey, "\'", "&apos;") "']")
+				currNode := node.selectSingleNode("//hk[@key='" oldKey "']")
 				currNode.attributes.getNamedItem("key").value := hkey
 				currNode.attributes.getNamedItem("type").value := hkType
 				currNode.selectSingleNode("name").text := hkName
