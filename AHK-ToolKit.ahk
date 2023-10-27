@@ -702,7 +702,7 @@ MainGui(){
 CalculateScaledPos(orig := false){
 	global $hwnd1
 	static MONITOR_DEFAULTTONEAREST := 0x00000002
-	
+
 	x:=5
 	y:=25
 	w:=options.selectSingleNode("//@snplib").text ? 640 : 790
@@ -711,7 +711,7 @@ CalculateScaledPos(orig := false){
 
 	if orig
 		return {x:x,y:y,w:w,h:h,m:m}
-	
+
 	if !hMon := DllCall("MonitorFromWindow", "ptr", $hwnd1, "int", MONITOR_DEFAULTTONEAREST)
 		Throw, Exception("couldnt get the monitor handle", A_ThisFunc, $hwnd1)
 
@@ -914,10 +914,10 @@ PreferencesGui(){
 	Gui, 06: add, Text, x+5 y0 HWND$Title vTitle, % "General Preferences"
 	Gui, 06: font
 	Gui, 06: add, Text, HWND$TopDivider y+5 w370 0x10 Section
-	
+
 	ControlGetPos, tdoX, tdoY, tdoW, tdoH,, ahk_id %$TopDivider%
 	tdX := tdoX -3, tdY := tdoY -20
-	
+
 	Gui, 06: add, Picture, xs ys+5 w-1 h245 Hidden vAHKTK_UC, % "res\img\AHK-TK_UnderConstruction.png"
 
 	;{ General Preferences GUI
@@ -927,7 +927,7 @@ PreferencesGui(){
 	vars := "ssi|smm|sww|cfu"
 	Loop, Parse, vars, |
 		_%a_loopfield% := options.selectSingleNode("//@" a_loopfield).text
-	
+
 	Gui, 98: Margin, 3
 	Gui, 98: add, GroupBox, xm y0 w345 h70, % "Startup"
 	Gui, 98: add, CheckBox, xp+25 yp+20 Section Checked%_ssi% v_ssi gGuiHandler, % "Show splash image"
@@ -1141,14 +1141,14 @@ PreferencesGui(){
 	;{ Live Code
 	Gui, 91: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
 	$hwnd91 := WinExist()
-	
+
 	Gui, 91: add, GroupBox, x3 y0 w345 r4.5 Section , % "Info"
 	Gui, 91: add, Text, xp+10 yp+20 w330
 		, % "The live code tab allows you to quickly test code without worrying about "
 		.   "having to save the script. It also allows you to quickly switch between "
 		.   "autohotkey versions.`n`nHere you can select where different versions of "
 		.   "autohotkey are located."
-	
+
 	Gui, 91: add, GroupBox, xs w345 r5.8, % "Autohotkey Paths"
 	Gui, 91: add, Edit, xp+10 yp+20 w245 r1 vUnicode32v1 Section, % options.selectSingleNode("//Unicode32v1").text
 	Gui, 91: add, Edit, w245 r1 vUnicode64v1, % options.selectSingleNode("//Unicode64v1").text
@@ -1647,14 +1647,14 @@ Add(type){
 			{
 				for each, winTitle in StrSplit(hkIfWin, ",")
 					GroupAdd, ActiveGroup, i)%winTitle%
-				
+
 				Hotkey, IfWinActive, ahk_group ActiveGroup
 			}
 			else if (hkIfWinN)
 			{
 				for each, winTitle in StrSplit(hkIfWinN, ",")
 					GroupAdd, NotActiveGroup, i)%winTitle%
-				
+
 				Hotkey, IfWinNotActive, ahk_group NotActiveGroup
 			}
 
@@ -1843,14 +1843,14 @@ Load(type){
 			{
 				for each, winTitle in StrSplit(ifWin, ",")
 					GroupAdd, ActiveGroup, i)%winTitle%
-				
+
 				Hotkey, IfWinActive, ahk_group ActiveGroup
 			}
 			else if (ifNotWin := currentNode.selectSingleNode("ifwinnotactive").text)
 			{
 				for each, winTitle in StrSplit(ifNotWin, ",")
 					GroupAdd, NotActiveGroup, i)%winTitle%
-				
+
 				Hotkey, IfWinNotActive, ahk_group NotActiveGroup
 			}
 
@@ -3684,7 +3684,7 @@ ListHandler(sParam=0){
 				{
 					for each, winTitle in StrSplit(ifWin, ",")
 						GroupAdd, ActiveGroup, i)%winTitle%
-					
+
 					Hotkey, IfWinActive, ahk_group ActiveGroup
 
 				}
@@ -3692,7 +3692,7 @@ ListHandler(sParam=0){
 				{
 					for each, winTitle in StrSplit(ifNotWin, ",")
 						GroupAdd, NotActiveGroup, i)%winTitle%
-						
+
 					Hotkey, IfWinNotActive, ahk_group NotActiveGroup
 				}
 
@@ -4157,7 +4157,7 @@ prefControl(pref=0){
 		Gui, 91: hide
 
 	; Temporal Code
-	w = 
+	w =
 	(Ltrim Join,
 	%$P1%
 	%$P1C2%
@@ -4580,37 +4580,17 @@ lcRun(_gui=0){
 	GuiControlGet, RCBin,, %$RCbin%
 	ahkpath := options.selectSingleNode("//" RCBin).text
 
+	_code := ""
 	if _gui = 01
 		sci[1].GetText(sci[1].GetLength()+1, _code)
-	else
+	else if Clipboard != 5 ; fix sci wrapper error that sets variable to 5 when calling GetText on blank buffer
 		_code := Clipboard
 
-	if (_code == 5)
-		_code := "" ; fix sci wrapper error that sets variable to 5 when calling GetText on blank buffer
-
-	if !InStr(ahkpath, "v2")
-	{
-		if !InStr(_code,"Gui")
-			_code .= "`nExitApp"
-		else if !InStr(_code,"GuiClose")
-		{
-			if !InStr(_code,"return")
-				_code .= "`nreturn"
-
-			_code .= "`n`nGuiClose:`nExitApp"
-		}
-	}
-
-	live_code =
-		(Ltrim
-		%_code%
-		)
-
-	if !InStr(live_code, "^Esc::ExitApp")
-		live_code .= "`n^Esc::ExitApp"
+	live_code := FixLiveCode(_code, ahkpath)
 
 	if (!fileExist(ahkpath) && !FileExist(ahkpath := a_temp "\" RCBin ".bak"))
 	{
+		; file install doesnt allow variables
 		switch RCBin
 		{
 		case "Unicode32v1":
@@ -4627,9 +4607,35 @@ lcRun(_gui=0){
 	hFile.Write(live_code)
 	hFile.Close()
 
-
 	Run, %ahkpath% %lcfPath%
 	return
+}
+FixLiveCode(code, ahkPath)
+{
+	scriptTemplate =
+	(Ltrim c
+		{1} ; Single Instance
+		{2} ; Requires and Single Instance
+		{3} ; Code
+		{4} ; missing return
+		{5} ; missing exit hotkey
+	)
+
+	isV2Script := ahkPath ~= "v2"
+
+	sinStr := code ~= "i)#SingleInstance" ? "" : "#SingleInstance " (isV2Script ? "" : "Force")
+	reqStr := code ~= "i)#Requires" ? "" : "#Requires Autohotkey " (isV2Script ? "v2.0+" : "v1.1.33+")
+	retStr := code ~= "i)return" ?  "" : "return"
+
+	; only add an exit hotkey if the script already contains hotkeys
+	; otherwise we would force the script to stay running in the background
+	; because of the exitapp hotkey itself
+	extStr := ""
+	if code ~= "::"
+		extStr := code ~= "i)::ExitApp" ?  "" : "^Esc::ExitApp" (isV2Script ? "()" : "")
+
+
+	return Trim(Format(scriptTemplate, sinStr, reqStr, code, retStr, extStr), "`n")
 }
 pasteUpload(mode=""){
 
@@ -4886,7 +4892,6 @@ WM(var){
 ^CtrlBreak::Reload
 
 #if options.selectSingleNode("//ScrTools/@altdrag").text && !WinActive("ahk_group ScreenTools") ;&& !WinActive("Store Manager")
-;} Added for correct folding in C++ Lexer (To be removed when finished)
 /*
 +!LButton::                                                              ;{ [Alt + LButton] Capture Active Window/Area
 CoordMode, Mouse, Screen
@@ -4941,7 +4946,6 @@ rect := True
 }
 */
 #if options.selectSingleNode("//ScrTools/@prtscr").text
-;} Added for correct folding in C++ Lexer (To be removed when finished)
 /*
 PrintScreen::
 if (!rect)
