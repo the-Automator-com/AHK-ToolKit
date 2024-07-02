@@ -1,15 +1,16 @@
 ﻿#SingleInstance Force
 #Requires Autohotkey v1.1.33+ 32-Bit
 ;--
-;@Ahk2Exe-SetVersion     0.21.9
+;@Ahk2Exe-SetVersion     0.21.10
 ;@Ahk2Exe-SetMainIcon    res\AHK-TK.ico
 ;@Ahk2Exe-SetProductName AutoHotkey ToolKit
 ;@Ahk2Exe-SetDescription Set of Autohotkey "tools" that i use regularly.
+
 /**
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * @Script Version   : 0.21.9
+ * @Script Version   : 0.21.10
  * @Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * @Creation Date    : July 11, 2010
@@ -68,14 +69,22 @@
  * =============================================================================================== *
  */
 
+
+;;TODO: -Allow LiveCode tab to be default.
+;;TODO: -(most importantly) Allow user to define default lines of code (for example #SingleInstance)
+
 if ((A_PtrSize = 8 || !a_isunicode) && !a_iscompiled)
 {
 	SplitPath, A_AhkPath,, ahkDir
 	ahkpath := ahkDir "\AutoHotkeyU32.exe"
 
-	if (!FileExist(ahkpath) && !ahkpath := a_ahkpath){
-		ahkpath := a_temp "\ahkl.bak"
-		FileInstall, res\ahkl.bak, %ahkpath%, true
+	if (!FileExist(ahkpath) && !ahkpath := a_ahkpath)
+	{
+		ahkpath := a_temp "\Unicode32v1.bak"
+		FileInstall, res\Unicode32v1.bak, %ahkpath%, true
+		FileInstall, res\Unicode32v2.bak, %ahkpath%, true
+		FileInstall, res\Unicode64v1.bak, %ahkpath%, true
+		FileInstall, res\Unicode64v2.bak, %ahkpath%, true
 	}
 
 	Run %ahkpath% "%A_ScriptFullPath%"
@@ -118,7 +127,7 @@ Gosub, Exit
 realexit := true
 global script := {base        : script
 	,name        : "AHK-ToolKit"
-	,version     : "0.21.9"
+	,version     : "0.21.10"
 	,author      : "RaptorX"
 	,email       : "graptorx@gmail.com"
 	,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
@@ -279,70 +288,6 @@ if a_gui = 4
 	LV_ModifyCol(5, "AutoHdr")
 }
 return
-;}
-
-; OnClipboardChange:  ;{
-;     Critical
-;     conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
-
-; 	; if options.selectSingleNode("//Codet/@status").text
-;     ; {
-;     ;     if (Clipboard = oldScript)
-;     ;         return
-;     ;     oldScript:=Clipboard, kword_cnt:=0
-;     ;     kwords := options.selectSingleNode("//Codet/Keywords").text     ; load every time because it might have
-;     ;                                                                     ; changed recently
-
-;     ;     Loop, Parse, kwords, %a_space%
-;     ;         if RegexMatch(Clipboard, "i)\b" a_loopfield "\b\(?")
-;     ;             kword_cnt++
-;     ;     if (kword_cnt >= options.selectSingleNode("//Codet/Keywords/@min").text)
-;     ;     {
-;     ;         kword_cnt:=0
-;     ;         if (options.selectSingleNode("//Codet/@mode").text = 2)
-;     ;             pasteUpload("auto")
-;     ;         else
-;     ;             pasteUpload("show")
-;     ;     }
-;     ; }
-;     SendMode, Event
-; 	if (instr(clipboard, "77CG") || instr(clipboard, "77CF"))
-; 	{
-; 		if WinActive("Mundo Carteras ~ Orders")
-; 			sendCapital()
-; 		return
-; 	}
-
-; 	if (WinActive("Google Maps") || WinActive("Mundo Carteras ~ Orders"))
-; 	{
-; 		if (regexmatch(clipboard, "(\w{4}\+\w{2})")){
-
-; 			if (regexmatch(clipboard, "(HV|HW|HX|GV|GW|GX|FV|FW|FX|CV|CW|CX)\w{2}\+"))
-; 				clipboard := "77CF" regexreplace(clipboard, "\s.*")
-; 			else
-; 				clipboard := "77CG" regexreplace(clipboard, "\s.*")
-; 			tooltip % clipboard, % a_screenwidth/2 - (strlen(clipboard)/2) , % a_screenheight/2
-; 			if WinActive("Google Maps")
-; 			{
-; 				setkeydelay, 300
-; 				Send !{tab}{shift down}{tab}{shift up}{enter}
-; 				sleep 500
-; 				SendInput {tab 8}
-; 				sendCapital()
-; 				SendInput ^{tab}
-; 				setkeydelay, 0
-; 			}
-; 			else
-; 				sendCapital()
-;             clipboard := ""
-; 		}
-; 	}
-
-;     ; msgbox done
-;     SendMode, Input
-; 	sleep 3*1000
-; 	tooltip
-; return
 ;}
 
 ; Special Labels
@@ -766,7 +711,7 @@ MainGui(){
 CalculateScaledPos(orig := false){
 	global $hwnd1
 	static MONITOR_DEFAULTTONEAREST := 0x00000002
-	
+
 	x:=5
 	y:=25
 	w:=options.selectSingleNode("//@snplib").text ? 640 : 790
@@ -775,7 +720,7 @@ CalculateScaledPos(orig := false){
 
 	if orig
 		return {x:x,y:y,w:w,h:h,m:m}
-	
+
 	if !hMon := DllCall("MonitorFromWindow", "ptr", $hwnd1, "int", MONITOR_DEFAULTTONEAREST)
 		Throw, Exception("couldnt get the monitor handle", A_ThisFunc, $hwnd1)
 
@@ -978,10 +923,10 @@ PreferencesGui(){
 	Gui, 06: add, Text, x+5 y0 HWND$Title vTitle, % "General Preferences"
 	Gui, 06: font
 	Gui, 06: add, Text, HWND$TopDivider y+5 w370 0x10 Section
-	
+
 	ControlGetPos, tdoX, tdoY, tdoW, tdoH,, ahk_id %$TopDivider%
 	tdX := tdoX -3, tdY := tdoY -20
-	
+
 	Gui, 06: add, Picture, xs ys+5 w-1 h245 Hidden vAHKTK_UC, % "res\img\AHK-TK_UnderConstruction.png"
 
 	;{ General Preferences GUI
@@ -991,7 +936,7 @@ PreferencesGui(){
 	vars := "ssi|smm|sww|cfu"
 	Loop, Parse, vars, |
 		_%a_loopfield% := options.selectSingleNode("//@" a_loopfield).text
-	
+
 	Gui, 98: Margin, 3
 	Gui, 98: add, GroupBox, xm y0 w345 h70, % "Startup"
 	Gui, 98: add, CheckBox, xp+25 yp+20 Section Checked%_ssi% v_ssi gGuiHandler, % "Show splash image"
@@ -1205,14 +1150,14 @@ PreferencesGui(){
 	;{ Live Code
 	Gui, 91: -Caption +LastFound +Owner6 -0x80000000 +0x40000000 +DelimiterSpace ; +Border -WS_POPUP +WS_CHILD
 	$hwnd91 := WinExist()
-	
+
 	Gui, 91: add, GroupBox, x3 y0 w345 r4.5 Section , % "Info"
 	Gui, 91: add, Text, xp+10 yp+20 w330
 		, % "The live code tab allows you to quickly test code without worrying about "
 		.   "having to save the script. It also allows you to quickly switch between "
 		.   "autohotkey versions.`n`nHere you can select where different versions of "
 		.   "autohotkey are located."
-	
+
 	Gui, 91: add, GroupBox, xs w345 r5.8, % "Autohotkey Paths"
 	Gui, 91: add, Edit, xp+10 yp+20 w245 r1 vUnicode32v1 Section, % options.selectSingleNode("//Unicode32v1").text
 	Gui, 91: add, Edit, w245 r1 vUnicode64v1, % options.selectSingleNode("//Unicode64v1").text
@@ -1652,6 +1597,7 @@ Add(type){
 		sci[2].GetText(sci[2].GetLength()+1,_hkscript)
 		node := root.selectSingleNode("//Hotkeys")
 		hkey := RegexReplace(hkey, "\'", "&apos;")
+		oldkey := RegexReplace(oldkey, "\'", "&apos;")
 		if (editingHK)
 		{
 			editingHK := False
@@ -1664,8 +1610,9 @@ Add(type){
 				return
 			else
 			{
+				Hotkey, % oldkey, OFF
 				sci[2].GetText(sci[2].GetLength()+1,_hkscript)
-				currNode := node.selectSingleNode("//hk[@key='" RegexReplace(oldkey, "\'", "&apos;") "']")
+				currNode := node.selectSingleNode("//hk[@key='" oldKey "']")
 				currNode.attributes.getNamedItem("key").value := hkey
 				currNode.attributes.getNamedItem("type").value := hkType
 				currNode.selectSingleNode("name").text := hkName
@@ -1711,14 +1658,14 @@ Add(type){
 			{
 				for each, winTitle in StrSplit(hkIfWin, ",")
 					GroupAdd, ActiveGroup, i)%winTitle%
-				
+
 				Hotkey, IfWinActive, ahk_group ActiveGroup
 			}
 			else if (hkIfWinN)
 			{
 				for each, winTitle in StrSplit(hkIfWinN, ",")
 					GroupAdd, NotActiveGroup, i)%winTitle%
-				
+
 				Hotkey, IfWinNotActive, ahk_group NotActiveGroup
 			}
 
@@ -1907,14 +1854,14 @@ Load(type){
 			{
 				for each, winTitle in StrSplit(ifWin, ",")
 					GroupAdd, ActiveGroup, i)%winTitle%
-				
+
 				Hotkey, IfWinActive, ahk_group ActiveGroup
 			}
 			else if (ifNotWin := currentNode.selectSingleNode("ifwinnotactive").text)
 			{
 				for each, winTitle in StrSplit(ifNotWin, ",")
 					GroupAdd, NotActiveGroup, i)%winTitle%
-				
+
 				Hotkey, IfWinNotActive, ahk_group NotActiveGroup
 			}
 
@@ -3748,7 +3695,7 @@ ListHandler(sParam=0){
 				{
 					for each, winTitle in StrSplit(ifWin, ",")
 						GroupAdd, ActiveGroup, i)%winTitle%
-					
+
 					Hotkey, IfWinActive, ahk_group ActiveGroup
 
 				}
@@ -3756,7 +3703,7 @@ ListHandler(sParam=0){
 				{
 					for each, winTitle in StrSplit(ifNotWin, ",")
 						GroupAdd, NotActiveGroup, i)%winTitle%
-						
+
 					Hotkey, IfWinNotActive, ahk_group NotActiveGroup
 				}
 
@@ -3890,6 +3837,14 @@ ListHandler(sParam=0){
 		LV_Modify(0,"-Focus")
 }
 HotkeyHandler(hk){
+	static ahkPath := ""
+
+	if !ahkPath
+	{
+		SetRegView, % A_Is64bitOS ? 64 : 32
+		RegRead, ahkPath, HKLM\Software\Autohotkey, InstallDir
+	}
+
 	conf.load(script.conf), root:=conf.documentElement, options:=root.firstChild
 
 	node := root.selectSingleNode("//Hotkeys")
@@ -3902,39 +3857,11 @@ HotkeyHandler(hk){
 	if (_type = "Script")
 	{
 		lcfPath := a_temp . "\" . rName(5, "code")        ; Random Live Code Path
-
-		if !InStr(ahkpath, "v2")
-		{
-			if !InStr(_script,"Gui")
-				_script .= "`n`nExitApp"
-			else if !InStr(_script,"GuiClose")
-			{
-				if !InStr(_script,"return")
-					_script .= "`nreturn"
-
-				_script .= "`n`nGuiClose:`nExitApp"
-			}
-		}
-
-		live_script =
-			(Ltrim
-			%_script%
-			)
-
-		if !InStr(live_script, "^Esc::ExitApp")
-			live_script .= "`n^Esc::ExitApp"
+		live_script := FixLiveCode(_script, ahkPath)
 
 		FileAppend, %live_script%, %lcfPath%
 
-		rcw := options.selectSingleNode("//RCPaths/@current").text
-		ahkpath := options.selectSingleNode("//RCPaths/" rcw).text
-		if !ahkpath
-		{
-			if !FileExist(ahkpath := a_temp "\ahkl.bak")
-				FileInstall, res\ahkl.bak, %ahkpath%
-		}
-
-		Run, %ahkpath% %lcfPath%
+		Run, %  """" ahkPath "\UX\AutoHotkeyUX.exe"" """ ahkPath "\UX\launcher.ahk"" /Launch """ lcfPath """ %*"
 		return
 	}
 	else if (fileExist(_path))
@@ -4241,7 +4168,7 @@ prefControl(pref=0){
 		Gui, 91: hide
 
 	; Temporal Code
-	w = 
+	w =
 	(Ltrim Join,
 	%$P1%
 	%$P1C2%
@@ -4664,37 +4591,17 @@ lcRun(_gui=0){
 	GuiControlGet, RCBin,, %$RCbin%
 	ahkpath := options.selectSingleNode("//" RCBin).text
 
+	_code := ""
 	if _gui = 01
 		sci[1].GetText(sci[1].GetLength()+1, _code)
-	else
+	else if Clipboard != 5 ; fix sci wrapper error that sets variable to 5 when calling GetText on blank buffer
 		_code := Clipboard
 
-	if (_code == 5)
-		_code := "" ; fix sci wrapper error that sets variable to 5 when calling GetText on blank buffer
-
-	if !InStr(ahkpath, "v2")
-	{
-		if !InStr(_code,"Gui")
-			_code .= "`nExitApp"
-		else if !InStr(_code,"GuiClose")
-		{
-			if !InStr(_code,"return")
-				_code .= "`nreturn"
-
-			_code .= "`n`nGuiClose:`nExitApp"
-		}
-	}
-
-	live_code =
-		(Ltrim
-		%_code%
-		)
-
-	if !InStr(live_code, "^Esc::ExitApp")
-		live_code .= "`n^Esc::ExitApp"
+	live_code := FixLiveCode(_code, ahkpath)
 
 	if (!fileExist(ahkpath) && !FileExist(ahkpath := a_temp "\" RCBin ".bak"))
 	{
+		; file install doesnt allow variables
 		switch RCBin
 		{
 		case "Unicode32v1":
@@ -4711,9 +4618,35 @@ lcRun(_gui=0){
 	hFile.Write(live_code)
 	hFile.Close()
 
-
 	Run, %ahkpath% %lcfPath%
 	return
+}
+FixLiveCode(code, ahkPath)
+{
+	scriptTemplate =
+	(Ltrim c
+		{1} ; Single Instance
+		{2} ; Requires and Single Instance
+		{3} ; Code
+		{4} ; missing return
+		{5} ; missing exit hotkey
+	)
+
+	isV2Script := ahkPath ~= "v2"
+
+	sinStr := code ~= "i)#SingleInstance" ? "" : "#SingleInstance " (isV2Script ? "" : "Force")
+	reqStr := code ~= "i)#Requires" ? "" : "#Requires Autohotkey " (isV2Script ? "v2.0+" : "v1.1.33+")
+	retStr := code ~= "i)return" ?  "" : "return"
+
+	; only add an exit hotkey if the script already contains hotkeys
+	; otherwise we would force the script to stay running in the background
+	; because of the exitapp hotkey itself
+	extStr := ""
+	; if code ~= "::"
+		extStr := code ~= "i)::ExitApp" ?  "" : "^Esc::ExitApp" (isV2Script ? "()" : "")
+
+
+	return Trim(Format(scriptTemplate, sinStr, reqStr, code, retStr, extStr), "`n")
 }
 pasteUpload(mode=""){
 
@@ -4970,7 +4903,6 @@ WM(var){
 ^CtrlBreak::Reload
 
 #if options.selectSingleNode("//ScrTools/@altdrag").text && !WinActive("ahk_group ScreenTools") ;&& !WinActive("Store Manager")
-;} Added for correct folding in C++ Lexer (To be removed when finished)
 /*
 +!LButton::                                                              ;{ [Alt + LButton] Capture Active Window/Area
 CoordMode, Mouse, Screen
@@ -5025,7 +4957,6 @@ rect := True
 }
 */
 #if options.selectSingleNode("//ScrTools/@prtscr").text
-;} Added for correct folding in C++ Lexer (To be removed when finished)
 /*
 PrintScreen::
 if (!rect)
