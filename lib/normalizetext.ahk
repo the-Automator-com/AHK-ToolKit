@@ -1,4 +1,5 @@
-﻿/*
+﻿#Requires Autohotkey v1.1.33+ 32-Bit
+/*
 function: normalizeText
 
 description:
