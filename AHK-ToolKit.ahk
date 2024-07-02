@@ -5,6 +5,7 @@
 ;@Ahk2Exe-SetMainIcon    res\AHK-TK.ico
 ;@Ahk2Exe-SetProductName AutoHotkey ToolKit
 ;@Ahk2Exe-SetDescription Set of Autohotkey "tools" that i use regularly.
+
 /**
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
@@ -68,14 +69,22 @@
  * =============================================================================================== *
  */
 
+
+;;TODO: -Allow LiveCode tab to be default.
+;;TODO: -(most importantly) Allow user to define default lines of code (for example #SingleInstance)
+
 if ((A_PtrSize = 8 || !a_isunicode) && !a_iscompiled)
 {
 	SplitPath, A_AhkPath,, ahkDir
 	ahkpath := ahkDir "\AutoHotkeyU32.exe"
 
-	if (!FileExist(ahkpath) && !ahkpath := a_ahkpath){
-		ahkpath := a_temp "\ahkl.bak"
-		FileInstall, res\ahkl.bak, %ahkpath%, true
+	if (!FileExist(ahkpath) && !ahkpath := a_ahkpath)
+	{
+		ahkpath := a_temp "\Unicode32v1.bak"
+		FileInstall, res\Unicode32v1.bak, %ahkpath%, true
+		FileInstall, res\Unicode32v2.bak, %ahkpath%, true
+		FileInstall, res\Unicode64v1.bak, %ahkpath%, true
+		FileInstall, res\Unicode64v2.bak, %ahkpath%, true
 	}
 
 	Run %ahkpath% "%A_ScriptFullPath%"
@@ -4633,7 +4642,7 @@ FixLiveCode(code, ahkPath)
 	; otherwise we would force the script to stay running in the background
 	; because of the exitapp hotkey itself
 	extStr := ""
-	if code ~= "::"
+	; if code ~= "::"
 		extStr := code ~= "i)::ExitApp" ?  "" : "^Esc::ExitApp" (isV2Script ? "()" : "")
 
 
