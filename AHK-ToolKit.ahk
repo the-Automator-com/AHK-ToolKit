@@ -1,7 +1,7 @@
 ﻿#SingleInstance Force
 #Requires Autohotkey v1.1.33+ 32-Bit
 ;--
-;@Ahk2Exe-SetVersion     0.21.10
+;@Ahk2Exe-SetVersion     0.23.0
 ;@Ahk2Exe-SetMainIcon    res\AHK-TK.ico
 ;@Ahk2Exe-SetProductName AutoHotkey ToolKit
 ;@Ahk2Exe-SetDescription Set of Autohotkey "tools" that i use regularly.
@@ -10,7 +10,7 @@
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * @Script Version   : 0.21.10
+ * @Script Version   : 0.23.0
  * @Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * @Creation Date    : July 11, 2010
@@ -72,23 +72,15 @@
 
 ;;TODO: -Allow LiveCode tab to be default.
 ;;TODO: -(most importantly) Allow user to define default lines of code (for example #SingleInstance)
-
-if ((A_PtrSize = 8 || !a_isunicode) && !a_iscompiled)
+ahkpath := A_AhkPath
+if (!ahkpath || !FileExist(ahkpath))
 {
-	SplitPath, A_AhkPath,, ahkDir
-	ahkpath := ahkDir "\AutoHotkeyU32.exe"
-
-	if (!FileExist(ahkpath) && !ahkpath := a_ahkpath)
-	{
-		ahkpath := a_temp "\Unicode32v1.bak"
-		FileInstall, res\Unicode32v1.bak, %ahkpath%, true
-		FileInstall, res\Unicode32v2.bak, %ahkpath%, true
-		FileInstall, res\Unicode64v1.bak, %ahkpath%, true
-		FileInstall, res\Unicode64v2.bak, %ahkpath%, true
-	}
-
-	Run %ahkpath% "%A_ScriptFullPath%"
-	ExitApp
+	FileCreateDir, res
+	FileInstall, res\Unicode32v1.bak, res\Unicode32v1.bak, true
+	FileInstall, res\Unicode32v2.bak, res\Unicode32v2.bak, true
+	FileInstall, res\Unicode64v1.bak, res\Unicode64v1.bak, true
+	FileInstall, res\Unicode64v2.bak, res\Unicode64v2.bak, true
+	ahkpath := "res\Unicode32v1.bak"
 }
 
 ;[Includes]{
@@ -127,7 +119,7 @@ Gosub, Exit
 realexit := true
 global script := {base        : script
 	,name        : "AHK-ToolKit"
-	,version     : "0.21.10"
+	,version     : "0.23.0"
 	,author      : "RaptorX"
 	,email       : "graptorx@gmail.com"
 	,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
@@ -592,7 +584,6 @@ CreateGui(){
 MainGui(){
 	global
 	OnMessage(WM("COMMAND"),"MsgHandler")
-
 	_aot := (root.attributes.item[1].text ? "+" : "-") "AlwaysOnTop"
 	Gui, 01:Default
 	Gui, +LastFound +Resize +MinSize650x300 %_aot%
@@ -667,9 +658,9 @@ MainGui(){
 	                       ,"lib\LexAHKL.dll", "hidden")
 
 	origPos := CalculateScaledPos(true)
-	; ControlGetPos, sciX, sciY, sciW, sciH,, % "ahk_id" sci[1].hwnd
+	ControlGetPos, sciX, sciY, sciW, sciH,, % "ahk_id" sci[1].hwnd
 
-	Gui, add, Text, % "x" origPos.w + origPos.m " y" origPos.y " w145 h17 HWND$slTitle Center Border Hidden"
+	Gui, add, Text, % "x" origPos.x + origPos.w + (origPos.m/2) " y" origPos.y " w145 h17 HWND$slTitle Center Border Hidden"
 	              , % "Snippet Library"
 	Gui, add, DropDownList, xp y+5 w145 HWND$slDDL Hidden gGuiHandler Sort vslDDL
 	_current := options.selectSingleNode("//SnippetLib/@current").text
@@ -708,54 +699,62 @@ MainGui(){
 	Gui, show, w799 h422 %hide%, % "AutoHotkey Toolkit [" (a_isunicode ? "W" : "A") "]"
 	return
 }
-CalculateScaledPos(orig := false){
-	global $hwnd1
+
+GetScale(hwnd)
+{
 	static MONITOR_DEFAULTTONEAREST := 0x00000002
-
-	x:=5
-	y:=25
-	w:=options.selectSingleNode("//@snplib").text ? 640 : 790
-	h:=320
-	m:=9
-
-	if orig
-		return {x:x,y:y,w:w,h:h,m:m}
-
-	if !hMon := DllCall("MonitorFromWindow", "ptr", $hwnd1, "int", MONITOR_DEFAULTTONEAREST)
+	if !hMon := DllCall("MonitorFromWindow", "ptr", hwnd, "int", MONITOR_DEFAULTTONEAREST)
 		Throw, Exception("couldnt get the monitor handle", A_ThisFunc, $hwnd1)
 
 	DllCall("Shcore.dll\GetScaleFactorForMonitor"
 	       , "ptr", hMon     ; [in]  HMONITOR            hMon,
 	       , "ptr*", pScale) ; [out] DEVICE_SCALE_FACTOR *pScale
 
-	pScale /= 100.0
+	return pScale /= 100.0
+}
 
-	x *= pScale
-	y *= pScale
-	w *= pScale
-	h *= pScale
-	m *= pScale
+ScaleRect(rect, scale)
+{
+	rect.x *= scale
+	rect.y *= scale
+	rect.w *= scale
+	rect.h *= scale
+	rect.m *= scale
 
-	; switch A_ScreenDPI
-	; {
-	; case 120:
-	; 	x+=8
-	; 	y+=5
-	; 	w+=142
-	; 	h+=80
-	; case 144:
-	; 	x+=8
-	; 	y+=13
-	; 	w+=305
-	; 	h+=158
-	; case 168:
-	; 	x+=10
-	; 	y+=18
-	; 	w+=460
-	; 	h+=235
-	; }
+	return rect
+}
+
+CalculateScaledPos(orig := false){
+	global $hwnd1, $slTitle
+
+	WinGetPos,,, winW,, ahk_id %$hwnd1%
+	ControlGetPos,,, ctrlW,,, ahk_id %$slTitle%
+	pScale := GetScale($hwnd1)
+	m := 9
+	x:=5
+	y:=25
+	if options.selectSingleNode("//@snplib").text
+		w := winW ? winW - ctrlW - m : 640
+	else
+		w := winW ? winW - 25*pScale : 790
+
+	h:=320
+
+	if orig
+		return {x:x,y:y,w:w,h:h,m:m}
+
+	if !winW
+	{
+		x *= pScale
+		y *= pScale
+		w *= pScale
+		h *= pScale
+		m *= pScale
+	}
+
 	return {x:x,y:y,w:w,h:h,m:m}
 }
+
 AddHKGui(){
 	global
 
@@ -794,8 +793,9 @@ AddHKGui(){
 	Gui, 02: add, Checkbox, vhkSend, % "Send key to active window"
 	Gui, 02: add, Checkbox, vhkHook, % "Install hook"
 	Gui, 02: add, Checkbox, vhkfRel, % "Fire when releasing key"
-
-	sci[2] := new scintilla($hwnd2,10,220,750,250,"lib\LexAHKL.dll")
+	
+	pos := ScaleRect({x:10,y:220,w:760,h:250}, GetScale($hwnd2))
+	sci[2] := new scintilla($hwnd2, pos.x, pos.y, pos.w, pos.h,"lib\LexAHKL.dll")
 
 	Gui, 02: add, Text, x0 y+280 w785 0x10 HWND$hk2Delim
 	Gui, 02: add, Button, x600 yp+10 w75 HWND$hk2Add Default gGuiHandler, % "&Add"
@@ -805,7 +805,7 @@ AddHKGui(){
 	WinGet, cList2, ControlList
 	WinGet, hList2, ControlListHWND
 
-	Gui, 02: show, w770 h520 Hide, % "Add Hotkey"
+	Gui, 02: show, w780 h520 Hide, % "Add Hotkey"
 	return
 }
 AddHSGui(){
@@ -834,7 +834,8 @@ AddHSGui(){
 	Gui, 03: font
 
 	Gui, 03: add, GroupBox, x10 w400 h300 HWND$hs2GBox, % "Expand to"
-	sci[3] := new scintilla($hwnd3,20,195,380,265,"lib\LexAHKL.dll")
+	pos := ScaleRect({x:20,y:195,w:380,h:265}, GetScale($hwnd3))
+	sci[3] := new scintilla($hwnd3, pos.x, pos.y, pos.w, pos.h,"lib\LexAHKL.dll")
 
 	Gui, 03: add, Text, x0 y+10 w440 0x10 HWND$hs2Delim
 	Gui, 03: add, Button, xp+250 yp+10 w75 Default HWND$hs2Add gGuiHandler, % "&Add"
@@ -1178,8 +1179,7 @@ PreferencesGui(){
 
 
 	Gui, 01: Default
-	Gui, 06: show, w520 h330 %hide%, % "Preferences"
-	; pause
+	Gui, 06: show, w520 h330 hide, % "Preferences"
 	return
 }
 SnippetGui(){
@@ -1933,10 +1933,8 @@ Load(type){
 		}
 		FileAppend, %_code%, % a_temp "\hslauncher.code"
 
-		If (a_ahkpath && FileExist(a_temp "\hslauncher.code"))
-			Run, % a_ahkpath " " a_temp "\hslauncher.code",,, hslPID
-		else
-			Run, % "res\ahkl.bak " a_temp "\hslauncher.code",,, hslPID
+		ahkpath := ahkpath ? ahkpath : "res\Unicode32v1.bak"
+		Run, % ahkpath " """ a_temp "\hslauncher.code""",,, hslPID
 
 		GuiControl, +Redraw, hsList
 		return
@@ -3187,7 +3185,7 @@ MenuHandler(stat=0){
 		; Menu, MainMenu, %stat%, Edit
 		; Menu, MainMenu, %stat%, Search
 
-		; Menu, View, %stat%, Snippet Library
+		Menu, View, %stat%, Snippet Library
 		; Menu, View, %stat%, Show Symbols
 		; Menu, View, %stat%, Zoom
 		Menu, View, %stat%, Line Wrap
@@ -3396,20 +3394,29 @@ MenuHandler(stat=0){
 		slControls:=$slTitle "|" $slDDL "|" $slList
 		Menu, View, ToggleCheck, %a_thismenuitem%
 
-		if tog_sl := !tog_sl
+		options.selectSingleNode("//@snplib").text := tog_sl := !tog_sl
+
+		Attach($hwnd1)
+		if tog_sl
 		{
-			ControlMove,,,, % _guiwidth - 160,, % "ahk_id " sci[1].hwnd
+			sciPos := CalculateScaledPos()
+			ControlMove,,,, % sciPos.w - sciPos.x - sciPos.m*2,, % "ahk_id " sci[1].hwnd
+			ControlGetPos, sciX, sciY, sciW, sciH,, % "ahk_id" sci[1].hwnd
 			Loop, Parse, slControls, |
+			{
+				ControlMove,,% sciX + sciW + sciPos.m/2,,,, ahk_id %a_loopfield%
 				Control, show,,, ahk_id %a_loopfield%
+			}
 		}
 		else
 		{
-			ControlMove,,,, % _guiwidth - 10,, % "ahk_id " sci[1].hwnd
+			sciPos := CalculateScaledPos()
+			ControlMove,,,, % sciPos.w,, % "ahk_id " sci[1].hwnd
 			Loop, Parse, slControls, |
 				Control, hide,,, ahk_id %a_loopfield%
 		}
 
-		options.selectSingleNode("//@snplib").text := false
+		GuiAttach(1)
 		conf.transformNodeToObject(xsl, conf)
 		conf.save(script.conf), conf.load(script.conf)          ; Save and Load
 		return

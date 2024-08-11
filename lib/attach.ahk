@@ -141,9 +141,10 @@ Attach_(hCtrl, aDef, Msg, hParent){
 		else if (aDef = "+")
 			if SubStr(%hCtrl%,1,1) != "-"
 				return
-		else %hCtrl% := SubStr(%hCtrl%, 2), enable := 1
-			else {
-				gosub Attach_GetPos
+			else 
+				%hCtrl% := SubStr(%hCtrl%, 2), enable := 1
+		else {
+			gosub Attach_GetPos
 			%hCtrl% := ""
 			loop, parse, aDef, %A_Space%
 			{
