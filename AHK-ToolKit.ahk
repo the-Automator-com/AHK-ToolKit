@@ -3196,7 +3196,7 @@ MenuHandler(stat=0){
 		; Menu, MainMenu, %stat%, Edit
 		; Menu, MainMenu, %stat%, Search
 
-		; Menu, View, %stat%, Snippet Library
+		Menu, View, %stat%, Snippet Library
 		; Menu, View, %stat%, Show Symbols
 		; Menu, View, %stat%, Zoom
 		Menu, View, %stat%, Line Wrap
@@ -3405,20 +3405,29 @@ MenuHandler(stat=0){
 		slControls:=$slTitle "|" $slDDL "|" $slList
 		Menu, View, ToggleCheck, %a_thismenuitem%
 
-		if tog_sl := !tog_sl
+		options.selectSingleNode("//@snplib").text := tog_sl := !tog_sl
+
+		Attach($hwnd1)
+		if tog_sl
 		{
-			ControlMove,,,, % _guiwidth - 160,, % "ahk_id " sci[1].hwnd
+			sciPos := CalculateScaledPos()
+			ControlMove,,,, % sciPos.w - sciPos.x - sciPos.m*2,, % "ahk_id " sci[1].hwnd
+			ControlGetPos, sciX, sciY, sciW, sciH,, % "ahk_id" sci[1].hwnd
 			Loop, Parse, slControls, |
+			{
+				ControlMove,,% sciX + sciW + sciPos.m/2,,,, ahk_id %a_loopfield%
 				Control, show,,, ahk_id %a_loopfield%
+			}
 		}
 		else
 		{
-			ControlMove,,,, % _guiwidth - 10,, % "ahk_id " sci[1].hwnd
+			sciPos := CalculateScaledPos()
+			ControlMove,,,, % sciPos.w,, % "ahk_id " sci[1].hwnd
 			Loop, Parse, slControls, |
 				Control, hide,,, ahk_id %a_loopfield%
 		}
 
-		options.selectSingleNode("//@snplib").text := false
+		GuiAttach(1)
 		conf.transformNodeToObject(xsl, conf)
 		conf.save(script.conf), conf.load(script.conf)          ; Save and Load
 		return
