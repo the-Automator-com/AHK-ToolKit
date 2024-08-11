@@ -1,4 +1,4 @@
-#SingleInstance Force
+﻿#SingleInstance Force
 #Requires Autohotkey v1.1.33+ 32-Bit
 ;--
 ;@Ahk2Exe-SetVersion     0.21.10
@@ -753,11 +753,11 @@ CalculateScaledPos(orig := false){
 
 	if !winW
 	{
-	x *= pScale
-	y *= pScale
-	w *= pScale
-	h *= pScale
-	m *= pScale
+		x *= pScale
+		y *= pScale
+		w *= pScale
+		h *= pScale
+		m *= pScale
 	}
 
 	return {x:x,y:y,w:w,h:h,m:m}
@@ -801,7 +801,7 @@ AddHKGui(){
 	Gui, 02: add, Checkbox, vhkSend, % "Send key to active window"
 	Gui, 02: add, Checkbox, vhkHook, % "Install hook"
 	Gui, 02: add, Checkbox, vhkfRel, % "Fire when releasing key"
-
+	
 	pos := ScaleRect({x:10,y:220,w:760,h:250}, GetScale($hwnd2))
 	sci[2] := new scintilla($hwnd2, pos.x, pos.y, pos.w, pos.h,"lib\LexAHKL.dll")
 
@@ -1941,10 +1941,8 @@ Load(type){
 		}
 		FileAppend, %_code%, % a_temp "\hslauncher.code"
 
-		If (a_ahkpath && FileExist(a_temp "\hslauncher.code"))
-			Run, % a_ahkpath " " a_temp "\hslauncher.code",,, hslPID
-		else
-			Run, % "res\ahkl.bak " a_temp "\hslauncher.code",,, hslPID
+		ahkpath := ahkpath ? ahkpath : "res\Unicode32v1.bak"
+		Run, % ahkpath " """ a_temp "\hslauncher.code""",,, hslPID
 
 		GuiControl, +Redraw, hsList
 		return
