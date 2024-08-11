@@ -72,23 +72,15 @@
 
 ;;TODO: -Allow LiveCode tab to be default.
 ;;TODO: -(most importantly) Allow user to define default lines of code (for example #SingleInstance)
-
-if ((A_PtrSize = 8 || !a_isunicode) && !a_iscompiled)
+ahkpath := A_AhkPath
+if (!ahkpath || !FileExist(ahkpath))
 {
-	SplitPath, A_AhkPath,, ahkDir
-	ahkpath := ahkDir "\AutoHotkeyU32.exe"
-
-	if (!FileExist(ahkpath) && !ahkpath := a_ahkpath)
-	{
-		ahkpath := "res\Unicode32v1.bak"
-		FileInstall, res\Unicode32v1.bak, %ahkpath%, true
-		FileInstall, res\Unicode32v2.bak, %ahkpath%, true
-		FileInstall, res\Unicode64v1.bak, %ahkpath%, true
-		FileInstall, res\Unicode64v2.bak, %ahkpath%, true
-	}
-
-	Run %ahkpath% "%A_ScriptFullPath%"
-	ExitApp
+	FileCreateDir, res
+	FileInstall, res\Unicode32v1.bak, res\Unicode32v1.bak, true
+	FileInstall, res\Unicode32v2.bak, res\Unicode32v2.bak, true
+	FileInstall, res\Unicode64v1.bak, res\Unicode64v1.bak, true
+	FileInstall, res\Unicode64v2.bak, res\Unicode64v2.bak, true
+	ahkpath := "res\Unicode32v1.bak"
 }
 
 ;[Includes]{
