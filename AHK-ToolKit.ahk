@@ -1,7 +1,7 @@
 ﻿#SingleInstance Force
 #Requires Autohotkey v1.1.33+ 32-Bit
 ;--
-;@Ahk2Exe-SetVersion     0.21.10
+;@Ahk2Exe-SetVersion     0.23.0
 ;@Ahk2Exe-SetMainIcon    res\AHK-TK.ico
 ;@Ahk2Exe-SetProductName AutoHotkey ToolKit
 ;@Ahk2Exe-SetDescription Set of Autohotkey "tools" that i use regularly.
@@ -10,7 +10,7 @@
  * =============================================================================================== *
  * @Author           : RaptorX <graptorx@gmail.com>
  * @Script Name      : AutoHotkey ToolKit (AHK-ToolKit)
- * @Script Version   : 0.21.10
+ * @Script Version   : 0.23.0
  * @Homepage         : http://www.autohotkey.com/forum/topic61379.html#376087
  *
  * @Creation Date    : July 11, 2010
@@ -119,7 +119,7 @@ Gosub, Exit
 realexit := true
 global script := {base        : script
 	,name        : "AHK-ToolKit"
-	,version     : "0.21.10"
+	,version     : "0.23.0"
 	,author      : "RaptorX"
 	,email       : "graptorx@gmail.com"
 	,homepage    : "http://www.autohotkey.com/forum/topic61379.html#376087"
