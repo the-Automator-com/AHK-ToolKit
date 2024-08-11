@@ -592,7 +592,6 @@ CreateGui(){
 MainGui(){
 	global
 	OnMessage(WM("COMMAND"),"MsgHandler")
-
 	_aot := (root.attributes.item[1].text ? "+" : "-") "AlwaysOnTop"
 	Gui, 01:Default
 	Gui, +LastFound +Resize +MinSize650x300 %_aot%
@@ -667,9 +666,9 @@ MainGui(){
 	                       ,"lib\LexAHKL.dll", "hidden")
 
 	origPos := CalculateScaledPos(true)
-	; ControlGetPos, sciX, sciY, sciW, sciH,, % "ahk_id" sci[1].hwnd
+	ControlGetPos, sciX, sciY, sciW, sciH,, % "ahk_id" sci[1].hwnd
 
-	Gui, add, Text, % "x" origPos.w + origPos.m " y" origPos.y " w145 h17 HWND$slTitle Center Border Hidden"
+	Gui, add, Text, % "x" origPos.x + origPos.w + (origPos.m/2) " y" origPos.y " w145 h17 HWND$slTitle Center Border Hidden"
 	              , % "Snippet Library"
 	Gui, add, DropDownList, xp y+5 w145 HWND$slDDL Hidden gGuiHandler Sort vslDDL
 	_current := options.selectSingleNode("//SnippetLib/@current").text
@@ -708,54 +707,62 @@ MainGui(){
 	Gui, show, w799 h422 %hide%, % "AutoHotkey Toolkit [" (a_isunicode ? "W" : "A") "]"
 	return
 }
-CalculateScaledPos(orig := false){
-	global $hwnd1
+
+GetScale(hwnd)
+{
 	static MONITOR_DEFAULTTONEAREST := 0x00000002
-
-	x:=5
-	y:=25
-	w:=options.selectSingleNode("//@snplib").text ? 640 : 790
-	h:=320
-	m:=9
-
-	if orig
-		return {x:x,y:y,w:w,h:h,m:m}
-
-	if !hMon := DllCall("MonitorFromWindow", "ptr", $hwnd1, "int", MONITOR_DEFAULTTONEAREST)
+	if !hMon := DllCall("MonitorFromWindow", "ptr", hwnd, "int", MONITOR_DEFAULTTONEAREST)
 		Throw, Exception("couldnt get the monitor handle", A_ThisFunc, $hwnd1)
 
 	DllCall("Shcore.dll\GetScaleFactorForMonitor"
 	       , "ptr", hMon     ; [in]  HMONITOR            hMon,
 	       , "ptr*", pScale) ; [out] DEVICE_SCALE_FACTOR *pScale
 
-	pScale /= 100.0
+	return pScale /= 100.0
+}
 
+ScaleRect(rect, scale)
+{
+	rect.x *= scale
+	rect.y *= scale
+	rect.w *= scale
+	rect.h *= scale
+	rect.m *= scale
+
+	return rect
+}
+
+CalculateScaledPos(orig := false){
+	global $hwnd1, $slTitle
+
+	WinGetPos,,, winW,, ahk_id %$hwnd1%
+	ControlGetPos,,, ctrlW,,, ahk_id %$slTitle%
+	pScale := GetScale($hwnd1)
+	m := 9
+	x:=5
+	y:=25
+	if options.selectSingleNode("//@snplib").text
+		w := winW ? winW - ctrlW - m : 640
+	else
+		w := winW ? winW - 25*pScale : 790
+
+	h:=320
+
+	if orig
+		return {x:x,y:y,w:w,h:h,m:m}
+
+	if !winW
+	{
 	x *= pScale
 	y *= pScale
 	w *= pScale
 	h *= pScale
 	m *= pScale
+	}
 
-	; switch A_ScreenDPI
-	; {
-	; case 120:
-	; 	x+=8
-	; 	y+=5
-	; 	w+=142
-	; 	h+=80
-	; case 144:
-	; 	x+=8
-	; 	y+=13
-	; 	w+=305
-	; 	h+=158
-	; case 168:
-	; 	x+=10
-	; 	y+=18
-	; 	w+=460
-	; 	h+=235
-	; }
 	return {x:x,y:y,w:w,h:h,m:m}
 }
+
 AddHKGui(){
 	global
 
@@ -795,7 +802,8 @@ AddHKGui(){
 	Gui, 02: add, Checkbox, vhkHook, % "Install hook"
 	Gui, 02: add, Checkbox, vhkfRel, % "Fire when releasing key"
 
-	sci[2] := new scintilla($hwnd2,10,220,750,250,"lib\LexAHKL.dll")
+	pos := ScaleRect({x:10,y:220,w:760,h:250}, GetScale($hwnd2))
+	sci[2] := new scintilla($hwnd2, pos.x, pos.y, pos.w, pos.h,"lib\LexAHKL.dll")
 
 	Gui, 02: add, Text, x0 y+280 w785 0x10 HWND$hk2Delim
 	Gui, 02: add, Button, x600 yp+10 w75 HWND$hk2Add Default gGuiHandler, % "&Add"
@@ -805,7 +813,7 @@ AddHKGui(){
 	WinGet, cList2, ControlList
 	WinGet, hList2, ControlListHWND
 
-	Gui, 02: show, w770 h520 Hide, % "Add Hotkey"
+	Gui, 02: show, w780 h520 Hide, % "Add Hotkey"
 	return
 }
 AddHSGui(){
@@ -834,7 +842,8 @@ AddHSGui(){
 	Gui, 03: font
 
 	Gui, 03: add, GroupBox, x10 w400 h300 HWND$hs2GBox, % "Expand to"
-	sci[3] := new scintilla($hwnd3,20,195,380,265,"lib\LexAHKL.dll")
+	pos := ScaleRect({x:20,y:195,w:380,h:265}, GetScale($hwnd3))
+	sci[3] := new scintilla($hwnd3, pos.x, pos.y, pos.w, pos.h,"lib\LexAHKL.dll")
 
 	Gui, 03: add, Text, x0 y+10 w440 0x10 HWND$hs2Delim
 	Gui, 03: add, Button, xp+250 yp+10 w75 Default HWND$hs2Add gGuiHandler, % "&Add"
