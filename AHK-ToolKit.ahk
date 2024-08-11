@@ -1,4 +1,4 @@
-﻿#SingleInstance Force
+#SingleInstance Force
 #Requires Autohotkey v1.1.33+ 32-Bit
 ;--
 ;@Ahk2Exe-SetVersion     0.21.10
@@ -80,7 +80,7 @@ if ((A_PtrSize = 8 || !a_isunicode) && !a_iscompiled)
 
 	if (!FileExist(ahkpath) && !ahkpath := a_ahkpath)
 	{
-		ahkpath := a_temp "\Unicode32v1.bak"
+		ahkpath := "res\Unicode32v1.bak"
 		FileInstall, res\Unicode32v1.bak, %ahkpath%, true
 		FileInstall, res\Unicode32v2.bak, %ahkpath%, true
 		FileInstall, res\Unicode64v1.bak, %ahkpath%, true
