@@ -1187,8 +1187,7 @@ PreferencesGui(){
 
 
 	Gui, 01: Default
-	Gui, 06: show, w520 h330 %hide%, % "Preferences"
-	; pause
+	Gui, 06: show, w520 h330 hide, % "Preferences"
 	return
 }
 SnippetGui(){
